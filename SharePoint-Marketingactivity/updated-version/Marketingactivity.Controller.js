@@ -60,9 +60,35 @@ var empEmail = '';
 
 /**
  *  List of Approval-Chain Approver's ID.
- * @type {Array<string>}
  */
-const approvalChainId = [];
+const approvalChainId = {
+    Approver1: undefined,
+    Approver2: undefined,
+    Approver3: undefined,
+    Approver4: undefined,
+    Approver5: undefined,
+    Approver6: undefined,
+    Approver7: undefined,
+    Approver8: undefined,
+};
+
+/**
+ * This is the map of the status to the approver.
+ * Change the statusToApproverMap to change the approval chain.
+ */
+const statusToApproverMap = {
+    'OPMApproved': approvalChainId.Approver1,
+    'APP1Approved': approvalChainId.Approver2,
+    'APP2Approved': approvalChainId.Approver3,
+    'APP3Approved': approvalChainId.Approver4,
+    'APP4Approved': approvalChainId.Approver5,
+    'APP5Approved': approvalChainId.Approver6,
+    'APP6Approved': approvalChainId.Approver7,
+    'APP7Approved': approvalChainId.Approver8,
+}
+
+let nextApprover = ""
+let workflowStatus = ""
 
 var spApp = angular
     .module("MarketingActivityApp", ['ngSanitize'])
@@ -141,7 +167,7 @@ var spApp = angular
                 ofcLocation = data.d.results[0].OfficeLocation;
                 mobile = data.d.results[0].Mobile;
                 employeeGrade = data.d.results[0].EmployeeGrade;
-                employeeId = data.d.results[0].EmployeeId; /* TODO: This there should be the OPM ID */
+                employeeId = data.d.results[0].EmployeeId;
                 employeeName = data.d.results[0].EmployeeName;
                 deptId = data.d.results[0].DeptID;
                 opmId = data.d.results[0].OptManagerEmail.ID;
@@ -172,7 +198,6 @@ var spApp = angular
                  */
                 const response = data.d.results;
 
-                approvalChainId.push(opmId) /* OPM is the first approver */
                 if (response.length > 0) {
                     for (var count = 0; count < response.length; count++) {
                         if (response[count].DeptID == deptId && response[count].Location == ofcLocation) {
@@ -187,17 +212,26 @@ var spApp = angular
                             accountsConcernName = response[count].AcInChrg.Title;
                             */
                             //#endregion
-
-                            //* Loop through the Approvers and add their IDs to the approvalChain array
+                            //* Loop through the Approvers and save to the approvalChainId array
                             for (let i = 1; i <= 8; i++) {
                                 const approverKey = `Approver${i}`;
                                 if (response[count][approverKey]) {
                                     const approverID = response[count][approverKey].ID
                                     if (typeof approverID === 'number') { /* this will skip the approval with no ID */
-                                        approvalChainId.push(approverID);
+                                        approvalChainId[approverKey] = approverID;
                                     }
                                 }
                             }
+                            if (getUniqueIdFromCurrentUrl() != null) {
+                                getApprovalListData(getUniqueIdFromCurrentUrl(),
+                                    (data) => { workflowStatus = data.Status }
+                                );
+                            }
+                            else {
+                                workflowStatus = '';
+                            }
+                            if (workflowStatus === '') nextApprover = opmId; /* status empty means submitting a new request */
+                            else nextApprover = statusToApproverMap[workflowStatus];
                         }
                         if (response[count].DeptID == "SM02" && response[count].Location == "Corporate") {
                             //gMMarketingId = response[count].HOD.ID;
@@ -2275,7 +2309,7 @@ var spApp = angular
                 $scope.uniqueID = data.d.results[0].GUID;
                 var generatedLink = _spPageContextInfo.webAbsoluteUrl + MarketingActivityURL + "?UniqueId=" + vm.uniqueId;
 
-                saveAtMyTask("MA-" + requestId, "MarketingActivity", initiator, "Submitted", employeeId, empEmail, approvalChainId, generatedLink);
+                saveAtMyTask(`MA-${requestId}`, "MarketingActivity", initiator, "Submitted", employeeId, empEmail, nextApprover, generatedLink);
                 console.log("This is the reqid:  " + requestId)
             }).error(function (data, status, headers, config) {
                 $scope.insertLog(MarketingActivityMaster + "7", "Error", "Fail");
@@ -2744,3 +2778,51 @@ function refreshFormDigestValue() {
     });
 }
 //X-request digest value refresh -- End
+
+/**
+ * Get approval List data based on the provided URL and unique ID.
+ * @param {string} uid - The unique ID.
+ * @param {Function}  successCallback - The callback function that handles success.
+ * @param {Function} errorCallback   - The callback function that handles errors.
+ * @returns {Array | CallableFunction}         - The approval data or an error object.
+ */
+function getApprovalListData(uid, successCallback, errorCallback) {
+    const apiUrl = `${_spPageContextInfo.webAbsoluteUrl}/_api/web/lists/getByTitle('PendingApproval')/items`;
+    const filter = `RequestLink eq 'https://portaldv.bergerbd.com/leaveauto/SitePages/MarketingActivity.aspx?UniqueId=${uid}'`;
+    const query = `?$top=1&$select=Id,Title,ProcessName,Status&$filter=${filter}`;
+
+    $.ajax({
+        async: true,
+        url: apiUrl + query,
+        method: "GET",
+        headers: {
+            "Accept": "application/json;odata=verbose",
+            "Content-Type": "application/json;odata=verbose"
+        },
+        success: function (data) {
+            if (typeof successCallback === 'function') {
+                successCallback(data.d.results[0]);
+            }
+        },
+        error: function (error) {
+            if (typeof errorCallback === 'function') {
+                errorCallback(error);
+            }
+        }
+    });
+}
+
+/**
+ * Get the UniqueId from the current URL in the browser's address bar.
+ *
+ * @returns {string|null} The UniqueId if found in the URL, or null if not found.
+ */
+function getUniqueIdFromCurrentUrl() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('UniqueId');
+    } catch (e) {
+        return null;
+    }
+}
+
