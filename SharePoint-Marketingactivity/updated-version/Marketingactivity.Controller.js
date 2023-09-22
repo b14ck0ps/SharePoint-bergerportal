@@ -164,7 +164,7 @@ var spApp = angular
                 empEmail = data.d.results[0].Email.EMail;
                 wm.getAllApproverInformation();
                 wm.getUniqueIdFromCurrentUrl();
-                wm.getApprovalListData(PendingApprovalUniqueId, (data) => { PendingApprovalStatus = data.Status, currentApprover = data.PendingWith.results[0].Id });
+                wm.getApprovalListData(PendingApprovalUniqueId, (data) => { PendingApprovalStatus = data?.Status || "", currentApprover = data?.PendingWith.results[0].Id || "" });
             }).error(function (data, status, headers, config) { });
         }
         //Function for getting requester's information -- End
@@ -272,12 +272,12 @@ var spApp = angular
 
         wm.setNextApprover = function () {
 
-            if (PendingApprovalStatus = '') {
+            if (PendingApprovalStatus == '') {
                 nextApprover = opmId;
-            } else if (PendingApprovalStatus = 'OPMApproved') {
+            } else if (PendingApprovalStatus == 'OPMApproved' || PendingApprovalStatus == 'Submitted') {
                 const keys = Object.keys(approvalChainId);
 
-                if (currentApprover !== "") {
+                if (currentApprover !== opmId) {
                     for (const key in approvalChainId) {
                         if (approvalChainId[key] === currentApprover) {
                             let currentIndex = keys.indexOf(key);
