@@ -1,0 +1,442 @@
+<link href="../../SiteAssets/MasterPage/bootstrap/css/bootstrap.css" rel="stylesheet" />
+<link href="../../Style Library/CSS/jquery-ui.css" rel="stylesheet" />
+<link href="../../Style Library/CSS/BergerPaintsWorkflow.css" rel="stylesheet" />
+<script type="text/javascript" src="../../Style Library/JS/jquery.min.js"></script>
+<script src="../../Style Library/JS/jquery-ui.js" type="text/javascript"></script>
+<script type="text/javascript" src="../../Style Library/JS/jquery.MultiFile.js"></script>
+<script type="text/javascript" src="../../Style Library/JS/angular.min.js"></script>
+<script type="text/javascript" src="../../Style Library/JS/angular-sanitize.js"></script>
+<script src="../../Style Library/JS/constants.js" type="text/javascript"></script>
+<script src="../../Style Library/JS/designationJSON.js" type="text/javascript"></script>
+<script type="text/javascript" src="../../Style Library/JS/Marketingactivity.Controller.js"></script>
+<style>
+   .textBoxBGColor {
+   background-color: aliceblue !important;
+   }
+
+   #ui-datepicker-div{
+      width: 21% !important;
+   }
+</style>
+<div id="wait" style="display: none; min-width: 100%; height: auto; min-height: 100%; position: fixed; z-index: 10000; top:0; left:0; background-image: url('../../Style Library/Images/TransparentBackground.png'); background-size: 100% 100%; background-repeat: no-repeat; ">
+   <a style="position: fixed; top: 47%; left: 50%;">Please wait</a><img src="../../Style Library/Images/wait_progress.gif" width="45" height="45" alt="Loading..." style="position: fixed; top: 50%; left: 50%;" />
+</div>
+<div ng-app="MarketingActivityApp" class="container BlockStockRequest">
+<h2>Marketing Activity</h2>
+<div ng-controller="getRequesterInfoController">
+   <div class="panel panel-default" id="divRequestorPanel">
+      <div class="panel-body">
+         <div ng-repeat="requester in requesters">
+            <div class="row">
+               <h4>Requestor Information</h4>
+            </div>
+            <div class="row">
+               <div class="col-sm-2 labelHeader">Employee Name:</div>
+               <div class="col-sm-2">
+                  <label id="lblEmployeeName">{{requester.EmployeeName}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Employee ID:</div>
+               <div class="col-sm-2">
+                  <label id="lblEmployeeId">{{requester.EmployeeId}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Position:</div>
+               <div class="col-sm-2">
+                  <label id="lblPosition">{{requester.Designation}}</label>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-sm-2 labelHeader">Department:</div>
+               <div class="col-sm-2">
+                  <label id="lblDepartment">{{requester.Department}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Location:</div>
+               <div class="col-sm-2">
+                  <label id="lblLocation">{{requester.OfficeLocation}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Mobile :</div>
+               <div class="col-sm-2">
+                  <label id="lblMobileNo">{{requester.Mobile}}</label>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-sm-2 labelHeader">Email:</div>
+               <div class="col-sm-2">
+                  <label id="lblEmail">{{requester.Email.EMail}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Job Grade:</div>
+               <div class="col-sm-2">
+                  <label ng-model="jobGrade" id="lblJobGrade">{{requester.EmployeeGrade}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Request Date:</div>
+               <div class="col-sm-2">
+                  <label id="lblRequestDate"> {{ today | date }}</label>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+<div ng-controller="marketingActivityController">
+   <div class='row' id="wpiToggleControlBtnDiv">
+      <div class='row col-md-4' ng-If="uniqueId == '' ">
+         <h6 style="color:white">(All fields marked
+            <label class='redStar'>*</label> are mandatory.)
+         </h6>
+      </div>
+      <div class='row col-md-4' ng-If="uniqueId != '' ">
+         <h3 style="color:white">Ref ID # {{requestCode}}</h3>
+      </div>
+      <!--<div ng-model="status" ng-bind-html="false" class="row col-md-4" id="wpiToggleControlBtn">
+         <h3 style="color:white">Proposal Info
+            <button type="button" value="A Show/Hide" id="toggleMessage" ng-click="toggle=!toggle" >					
+               {{toggle ? "Hide" : "Show"}}
+            </button>
+         </h3>
+         </div>-->
+   </div>
+   <!-- <div class="panel panel-default" id="divReimbursementPanel"> -->
+   <div class="panel panel-default">
+      <div class="panel-body">
+         <div id="divInput">
+            <div class="row" style="margin-left: -16px;">
+               <div class="col-sm-2 labelHeader">Project Name:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input type="text" ng-model="projectName" class="textBoxBGColor" id="projectName"/>
+               </div>
+         
+               <div class="col-sm-2 labelHeader">Service Name:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <select name="serviceName" id="selectService" ng-change="getActivityName()" class='fld_single float-label-parent float-label-select-parent textBoxBGColor' ng-model="serviceName" >
+                     <option value="">-- Select Service --&nbsp;</option>
+                     <option value="TV Media">TV Media&nbsp;</option>
+                     <option value="TV Production and TVC">TV Production and TVC&nbsp;</option>
+                     <option value="Redio Media">Redio Media&nbsp;</option>
+                     <option value="Social Media">Social Media&nbsp;</option>
+                     <option value="Sponsorship">Sponsorship&nbsp;</option>
+                     <option value="Press Ad">Press Ad&nbsp;</option>
+                     <option value="Outdoor Billboard, Wall and Shutter Painting">Outdoor Billboard, Wall and Shutter Painting&nbsp;</option>
+                     <option value="Shop Sign and Decoration">Shop Sign and Decoration&nbsp;</option>
+                     <option value="Software Development and Other">Software Development and Other&nbsp;</option>
+                     <option value="Corporate Marketting Service">Corporate Marketting Service&nbsp;</option>
+                     <option value="Market Research - Retail Audit">Market Research - Retail Audit&nbsp;</option>
+                     <option value="Market Research">Market Research&nbsp;</option>
+                     <option value="Scratch card, Mobile SMS, Recharge Service">Scratch card, Mobile SMS, Recharge Service&nbsp;</option>
+                     <option value="Dealer Shop Marchandising">Dealer Shop Marchandising&nbsp;</option>
+                     <option value="Event Management (Art, Competition, Awards, Daily Star Anniversary)">Event Management (Art, Competition, Awards, Daily Star Anniversary)&nbsp;</option>
+                  
+                     <option value="Consumer Promotion- Activation">Consumer Promotion- Activation&nbsp;</option>
+                     <option value="Fair and Exhibition">Fair and Exhibition&nbsp;</option>
+                     <option value="Pack Design & Creative">Pack Design & Creative&nbsp;</option>
+                     <option value="Franchise Expense-Experiance Zone">Franchise Expense-Experiance Zone&nbsp;</option>
+                     <option value="Umbrella - courier">Umbrella - courier&nbsp;</option>
+                     <option value="Shomporko Club scheme">Shomporko Club scheme&nbsp;</option>
+                     <option value="PTI service">PTI service&nbsp;</option>
+                  </select>
+                  <label></label>
+               </div>
+         
+            
+               <div class="col-sm-2 labelHeader">Activity Name:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <select ng-model="selectedActivity" ng-change="getCostHead()" class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
+                     <option value="">-- Select Activity --</option>
+                     <option ng-repeat="activity in activityNamesDropdown" value="{{activity}}">{{activity}}</option>
+               </select>
+               </div>
+               
+            </div>
+            <div class="row">
+               
+               <div class="col-sm-2 labelHeader">Cost Head:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <select ng-model="selectedCostHead" class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
+                     <option value="">-- Select Cost Head --</option>
+                     <option ng-repeat="costHead in costHeadsDropdown" value="{{costHead}}">{{costHead}}</option>
+                  </select>
+               </div>
+         
+               <div class="col-sm-2 labelHeader">Activity Type:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <select name="activityType" id="selectActivityType" ng-model="activityType" class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
+                     <option value="">-- Select Activity Type --&nbsp;</option>
+                     <option value="One Time">One Time&nbsp;</option>
+                     <option value="Monthly Recurring">Monthly Recurring&nbsp;</option>
+                  </select>
+                  <label></label>
+               </div>
+         
+               <div class="col-sm-2 labelHeader">Budget Type:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <select name="budgetType" id="selectBudgetType" ng-model="budgetType" class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
+                     <option value="">-- Select Budget Type --&nbsp;</option>
+                     <option value="Available Budget">Available Budget&nbsp;</option>
+                     <option value="Need to Transfer">Need to Transfer&nbsp;</option>
+                     <option value="Supplementary">Supplementary&nbsp;</option>
+                  </select>
+                  <label></label>
+               </div>
+            </div>
+         
+            <div class="row">
+               <div class="col-sm-2 labelHeader">Brand Description:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <select name="brandDescription" id="selectBrandDescription" ng-model="brandDescription" class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
+                     <option value="">-- Select Brand Description --&nbsp;</option>
+                     <option value="Adhesive -Power Bond">Adhesive -Power Bond&nbsp;</option>
+                     <option value="Adhesive -Tex Bond">Adhesive -Tex Bond&nbsp;</option>
+                     <option value="APE">APE&nbsp;</option>
+                     <option value="Auto Refinish">Auto Refinish&nbsp;</option>
+                     <option value="Berger Experience Zone (Decorative)">Berger Experience Zone (Decorative)&nbsp;</option>
+                     <option value="BREATHE EASY">BREATHE EASY&nbsp;</option>
+                     <option value="BREATHE EASY Ena">BREATHE EASY Ena&nbsp;</option>
+                     <option value="Color Bank">Color Bank&nbsp;</option>
+                     <option value="Corporate Brand">Corporate Brand&nbsp;</option>
+                     <option value="Damp Guard">Damp Guard&nbsp;</option>
+                     <option value="Decorative">Decorative&nbsp;</option>
+                     <option value="DUROCEM">DUROCEM&nbsp;</option>
+                     <option value="EASY CLEAN">EASY CLEAN&nbsp;</option>
+                     <option value="EP Tools (Express Painting)">EP Tools (Express Painting)&nbsp;</option>
+                     <option value="Express Painting Service">Express Painting Service&nbsp;</option>
+                     <option value="Home Décor Branding">Home Décor Branding&nbsp;</option>
+                     <option value="Industrial Paints">Industrial Paints&nbsp;</option>
+                     <option value="INNOVA">INNOVA&nbsp;</option>
+                     <option value="JHILIK">JHILIK&nbsp;</option>
+                     <option value="LS. Metallic Finish">LS. Metallic Finish&nbsp;</option>
+                     <option value="LSE">LSE&nbsp;</option>
+                     <option value="Marine Paints">Marine Paints&nbsp;</option>
+                     <option value="Mr.EXPERT DAMP GUARD">Mr.EXPERT DAMP GUARD&nbsp;</option>
+                     <option value="Painters App">Painters App&nbsp;</option>
+                     <option value="Powder Coating">Powder Coating&nbsp;</option>
+                     <option value="PRE TREATMENT CHEM">PRE TREATMENT CHEM&nbsp;</option>
+                     <option value="Printing Ink">Printing Ink&nbsp;</option>
+                     <option value="REX">REX&nbsp;</option>
+                     <option value="RIN">RIN&nbsp;</option>
+                     <option value="ROBB WALL PUTTY">ROBB WALL PUTTY&nbsp;</option>
+                     <option value="ROBB WATER SEALER">ROBB WATER SEALER&nbsp;</option>
+                     <option value="RSE">RSE&nbsp;</option>
+                     <option value="Salt Safe">APSalt SafeE&nbsp;</option>
+                     <option value="SPD">SPD&nbsp;</option>
+                     <option value="Touch putty (Decorative)">Touch putty (Decorative)&nbsp;</option>
+                     <option value="Value Club App, LMS, Happy Wallet, MR/VR">Value Club App, LMS, Happy Wallet, MR/VR&nbsp;</option>
+                     <option value="Vehicle Refinish">Vehicle Refinish&nbsp;</option>
+                     <option value="W/C ANTIDIRT">W/C ANTIDIRT&nbsp;</option>
+                     <option value="W/C ANTIDIRT LONGLIF">W/C ANTIDIRT LONGLIF&nbsp;</option>
+                     <option value="W/C ANTIDIRT LONGLIFE (F167)">W/C ANTIDIRT LONGLIFE (F167)&nbsp;</option>
+                     <option value="W/C Antidirt Supreme (F168)">W/C Antidirt Supreme (F168)&nbsp;</option>
+                     <option value="W/C EXTERIOR SEALER">W/C EXTERIOR SEALER&nbsp;</option>
+                     <option value="W/C SMOOTH">W/C SMOOTH&nbsp;</option>
+                     <option value="WC GLOW">WC GLOW&nbsp;</option>
+                     <option value="WEATHER COAT EXTERIOR SEALER">WEATHER COAT EXTERIOR SEALER&nbsp;</option>
+                     <option value="Wood Coating / Innova">Wood Coating / Innova&nbsp;</option>
+                     <option value="WOOD KEEPER">WOOD KEEPER&nbsp;</option>
+                     <option value="Xpress Sealer (Decorative)">Xpress Sealer (Decorative)&nbsp;</option>
+                  </select>
+                  <label></label>
+               </div>
+            
+               <div class="col-sm-2 labelHeader">Commitment Item Description:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <select name="commitmentItem" id="selectCommitmentItem" ng-model="commitmentItem" class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
+                     <option value="">-- Select Commitment Item --&nbsp;</option> 
+                     <option value="Con Pro_Campaign Actv Cost">Con Pro_Campaign Actv Cost&nbsp;</option>
+                     <option value="Corporate - Other">Corporate - Other&nbsp;</option>
+                     <option value="PTI Gift">PTI Gift&nbsp;</option>
+                     <option value="SC Production Cost">SC Production Cost&nbsp;</option>
+                     <option value="Shomporko Scheme_On invoice">Shomporko Scheme_On invoice&nbsp;</option>
+                     <option value="Mass Calendar Production">Mass Calendar Production&nbsp;</option>
+                     <option value="Exec. Diary Prod.">Exec. Diary Prod.&nbsp;</option>
+                     <option value="Small Diary Prod.">Small Diary Prod.&nbsp;</option>
+                     <option value="Shade Card Mgt">Shade Card Mgt&nbsp;</option>
+                     <option value="POSM Print">POSM Print&nbsp;</option>
+                  </select>
+                  <label></label>
+               </div>
+         
+               <div class="col-sm-2 labelHeader">Total Expected Expenses:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input type="text" ng-model="totalExpectedExpense" class="textBoxBGColor" valid-number title="Please Fill in with a numerical value only" ng-init="totalExpectedExpense='0'"  id="totalExpectedExpense"/>
+               </div>
+            </div>
+
+            <div class="row">
+               <div class="col-sm-2 labelHeader">Activity Start Date:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input type="text" datepicker ng-model="activityStartDate" readonly class="textBoxBGColor" id="activityStartDate"/>
+                  <label ng-model="activityStartDate"></label>
+               </div>
+         
+               <div class="col-sm-2 labelHeader">Expected Delivery Date:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input type="text" datepicker ng-model="expectedDeliveryDate" readonly class="textBoxBGColor" id="expectedDeliveryDate"/>
+                  <label ng-model="expectedDeliveryDate"></label>
+               </div>
+            </div>
+         
+            <div class="row">
+
+               <div class="col-sm-2 labelHeader">Service Receiving Date:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input type="text" datepicker ng-model="serviceReceivingDate" readonly class="textBoxBGColor" id="serviceReceivingDate"/>
+                  <label ng-model="serviceReceivingDate"></label>
+               </div>
+
+               <div class="col-sm-2 labelHeader">Number of vendor require for quotation:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <select name="requiredVendorQuotation" id="selectRequiredVendorQuotation" ng-model="requiredVendorQuotation" class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
+                     <option value="">-- Select Required Vendor Quotation --&nbsp;</option>
+                     <option value="Minimum 3 parties">Minimum 3 parties&nbsp;</option>
+                     <option value="Single Vendor">Single Vendor&nbsp;</option>
+                  </select>
+                  <label></label>
+               </div>
+         
+               <div class="col-sm-2 labelHeader">Justification for Single Vendor:
+                  <label class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input type="text" ng-model="singleVendorJustification" class="textBoxBGColor" id="singleVendorJustification"/>
+               </div>
+            </div>
+            
+            <div class="row panel-body" >
+               <h4 class="panel-body">Attachments/Receipts:</h4>
+            </div>
+            <div id="divChooseAttachmentFile" class="row panel-body" ng-show="status=='ReimbursementSOICToUser'" ng-hide="status=='GMMarketingToMarketingAccountant'||status=='ReimbursementGMMarketingToACConcern'||readMode == 'read'||status=='UserToSOIC' ||status=='UserToGMMarketing'|| status=='Submitted' ||status=='SOICtoGMMarketing' || status=='MarketingAccountantToAccountsConcern'|| status=='AccountsConcernToMarketingAccountant' ||status=='ReimbursementSubmitted' || status=='ReimbursementSOICtoGMMarketing' || status=='ReimbursementgMMarketingToACConcern' || status=='ReimbursementACConcernToMarketingAC' || status=='Completed' ">
+               <div class="col-sm-2 labelHeader" >
+                  <h6>Select All Attachments:</h6>
+               </div>
+               <div class="files col-sm-6 row" id="attachFilesContainer" ng-model="attachment1">
+                  <input id="infringementFiles" type="file" class="multi browsebtn textBoxBGColor" title="Any attachment name including any special charecter like ' & . will not be uploded"/>
+               </div>
+               <div class="col-sm-4" ng-show='vm.uniqueId !=""'>
+                  <span class='et-right et-style-night'>N.B. Any attachment name including any special charecter e.g.<label class='redStar'>" ', . @ ` ~ " </label>will not be uploded.</span>
+               </div>
+            </div>
+            <div id="divAttachmentDisplayTbl" class="row" style="padding-left: 15px; overflow:hidden;" ng-hide = 'uId == ""||status==""||hideAttachmentDiv = "true"' >
+               <div class="table-responsive panel-body" style="overflow-x:auto;" >
+                  <table id="tblReceipt" class="table css-serial" >
+                     <tbody>
+                        <tr>
+                           <th id="">SL#</th>
+                           <th id="thReceipt">View Attachment</th>
+                           <th id="thAttachted">Attached By</th>
+                           <th id="thDate">Attachment Date</th>
+                           <th id="thDelete" ng-hide="readMode == 'read' || status=='Completed'"></th>
+                        </tr>
+                     </tbody>
+                     <tbody>
+                        <tr ng-repeat="(i,receiptRow) in receiptRows">
+                           <td id="tdSlNo"></td>
+                           <td id="tdReceipt"><a href="{{receiptRow.AttachmentFiles.results[0].ServerRelativeUrl}}">{{receiptRow.AttachmentFiles.results[0].FileName}}</a></td>
+                           <td id="tdAttachted">{{receiptRow.Author.Title}}</td>
+                           <td id="tdDate">{{receiptRow.Created | date}}</td>
+                           <!-- <td id="tdDelete" ng-hide="readMode == 'read'|| status=='Completed' ||status=='Submitted' || status=='SOICtoGMMarketing' || status=='GMMarketingToAccountsConcern'||status=='AccountsConcernToMarketingAccountant'|| status=='ReimbursementSubmitted' || status=='ReimbursementSOICtoGMMarketing' || status=='ReimbursementgMMarketingToACConcern' || status=='ReimbursementACConcernToMarketingAC'"><img id='imgDelete' src='../../Style Library/Images/Delete.png' class='delete' title='Delete' ng-click="deleteReceiptRow(i,receiptRow)" /></td> -->
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+            <div id="divActionButtonPanel" class="panel panel-default" ng-hide='readMode == "read"'>
+               <div class="panel-body">
+                  <div class="row">
+                     <div class="col-sm-1 labelHeader comment">Comment:</div>
+                     <div class="col-sm-4 comment">
+                        <textarea rows="3" cols="32" id="txtComment" ng-model="actionComment"></textarea>
+                     </div>
+                     <div class="col-sm-7">
+                        <div class=" row">
+                           <div class="col-sm-2">
+                              <input type="button" id="btnsave" value="Save" ng-click="clickSaveOrSubmit('Saved')"/>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="button" id="btnsubmit" value="Submit" ng-click="clickSaveOrSubmit('Submitted')" />                     
+                        
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="button" id="btncancel" value="Cancel" ng-click="ApproverAction('Rejected')" ng-show="status=='OPMApproved' || status=='MDApproved' || status=='ReimbursementSaved' || status=='OPMToUser'" />
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-sm-2">
+                              <input type="button" id="btnApprove" value="Approve" ng-click="ApproverAction('Approved')" ng-show="status=='MarketingAccountantToAccountsConcern'||status=='GMMarketingToMarketingAccountant'||status=='ReimbursementGMMarketingToACConcern'||status=='UserToSOIC'||status=='UserToGMMarketing'|| status=='Submitted'|| status=='SOICtoGMMarketing' || (status=='GMMarketingToAccountsConcern' && readMode !='e')|| status=='AccountsConcernToMarketingAccountant' ||status=='ReimbursementSubmitted' || status=='ReimbursementSOICtoGMMarketing' || status=='ReimbursementACConcernToMarketingAC' || status=='ReimbursementUserToSOIC' || status=='ReimbursementUserToGMMarketing'" />
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="button" id="btnReject" value="Reject" ng-click="ApproverAction('Rejected')" ng-show="status=='UserToSOIC'||status=='Submitted' ||status=='ReimbursementSubmitted' || status=='SOICtoGMMarketing' || (status=='GMMarketingToAccountsConcern'&& readMode !='e')|| status=='AccountsConcernToMarketingAccountant'|| status=='ReimbursementUserToSOIC' || status=='ReimbursementUserToGMMarketing'" />
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="button" id="btnChange" value="Request Change" ng-click="ApproverAction('Changed')" ng-show="status=='Submitted' || status=='MarketingAccountantToAccountsConcern'|| status=='AccountsConcernToMarketingAccountant' || status=='ReimbursementSubmitted'||status=='ReimbursementSOICtoGMMarketing'|| status=='ReimbursementUserToSOIC' || status=='ReimbursementUserToGMMarketing'" ng-hide="status=='ReimbursementSOICtoGMMarketing'||status=='ReimbursementGMMarketingToACConcern'||uId==''||status==''||status=='SOICtoUser'||status=='MarketingAccountantToAccountsConcern' || status=='AccountsConcernToUser'||status=='ProposalApproved&ActualBillSubmissionRequest' ||status=='ReimbursementGMMarketingToUser' "/>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="panel panel-default" id="divErrorPanel" ng-show="showStatus">
+               <div class="panel-body">
+                  <div id="status" ng-style="{'font-weight': bold, 'color': textColor}" ng-bind="statusText">
+                  </div>
+               </div>
+            </div>
+            <div class="panel-body" id="divAuditPanel" ng-hide='status==""'>
+               <div class="row">
+                  <h4>Approval History</h4>
+               </div>
+               <div class="row">
+                  <div class="col-sm-2 labelHeader">Pending With:</div>
+                  <div class="col-sm-2">
+                     <label id="lblPendingWith">{{pendingWithName}}</label>
+                  </div>
+               </div>
+               <div class="table-responsive" style="overflow-x:auto;">
+                  <table id="tblAudit" class="table css-serial">
+                     <tbody>
+                        <tr>
+                           <th>SL#</th>
+                           <th>Approval Date</th>
+                           <th>Status</th>
+                           <th>Action By</th>
+                           <th>Comment</th>
+                        </tr>
+                     </tbody>
+                     <tbody>
+                        <tr ng-repeat="(i,audit) in auditHistory">
+                           <td></td>
+                           <td>{{audit.Created | date}}</td>
+                           <td>{{audit.Status}}</td>
+                           <td>{{audit.Author.Title}}</td>
+                           <td>{{audit.Comment}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
