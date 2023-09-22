@@ -57,7 +57,6 @@ var jsonResponse = processJSON(notificationReceiverJSON);
 var delegate = "";
 var empEmail = '';
 
-
 /**
  *  List of Approval-Chain Approver's ID.
  */
@@ -72,23 +71,10 @@ const approvalChainId = {
     Approver8: undefined,
 };
 
-/**
- * This is the map of the status to the approver.
- * Change the statusToApproverMap to change the approval chain.
- */
-const statusToApproverMap = {
-    'OPMApproved': approvalChainId.Approver1,
-    'APP1Approved': approvalChainId.Approver2,
-    'APP2Approved': approvalChainId.Approver3,
-    'APP3Approved': approvalChainId.Approver4,
-    'APP4Approved': approvalChainId.Approver5,
-    'APP5Approved': approvalChainId.Approver6,
-    'APP6Approved': approvalChainId.Approver7,
-    'APP7Approved': approvalChainId.Approver8,
-}
-
+let PendingApprovalUniqueId = ""
+let currentApprover = ""
 let nextApprover = ""
-let workflowStatus = ""
+let PendingApprovalStatus = ""
 
 var spApp = angular
     .module("MarketingActivityApp", ['ngSanitize'])
@@ -177,6 +163,8 @@ var spApp = angular
                 CostCentre = data.d.results[0].CostCenter;
                 empEmail = data.d.results[0].Email.EMail;
                 wm.getAllApproverInformation();
+                wm.getUniqueIdFromCurrentUrl();
+                wm.getApprovalListData(PendingApprovalUniqueId, (data) => { PendingApprovalStatus = data.Status, currentApprover = data.PendingWith.results[0].Id });
             }).error(function (data, status, headers, config) { });
         }
         //Function for getting requester's information -- End
@@ -222,16 +210,6 @@ var spApp = angular
                                     }
                                 }
                             }
-                            if (getUniqueIdFromCurrentUrl() != null) {
-                                getApprovalListData(getUniqueIdFromCurrentUrl(),
-                                    (data) => { workflowStatus = data.Status }
-                                );
-                            }
-                            else {
-                                workflowStatus = '';
-                            }
-                            if (workflowStatus === '') nextApprover = opmId; /* status empty means submitting a new request */
-                            else nextApprover = statusToApproverMap[workflowStatus];
                         }
                         if (response[count].DeptID == "SM02" && response[count].Location == "Corporate") {
                             //gMMarketingId = response[count].HOD.ID;
@@ -250,11 +228,92 @@ var spApp = angular
                             marketingSupportExeName = response[count].Approver7.Title;
                         }
                     }
-                    console.log("Approval Chain:", approvalChainId);
                 }
-            }).error(function (data, status, headers, config) { });
+                wm.setNextApprover();
+            }
+            ).error(function (data, status, headers, config) { });
         }
         //------------Get approver list -- End----------------
+
+        wm.getApprovalListData = function (uid, successCallback, errorCallback) {
+            const apiUrl = `${_spPageContextInfo.webAbsoluteUrl}/_api/web/lists/getByTitle('PendingApproval')/items`;
+            const filter = `RequestLink eq 'https://portaldv.bergerbd.com/leaveauto/SitePages/MarketingActivity.aspx?UniqueId=${uid}'`;
+            const query = `?$expand=PendingWith&$select=Title,ProcessName,Status,PendingWith/Id&$filter=${filter}`;
+
+            $.ajax({
+                async: false,
+                url: apiUrl + query,
+                method: "GET",
+                headers: {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "application/json;odata=verbose"
+                },
+                success: function (data) {
+                    if (typeof successCallback === 'function') {
+                        successCallback(data.d.results[0]);
+                    }
+                },
+                error: function (error) {
+                    if (typeof errorCallback === 'function') {
+                        errorCallback(error);
+                    }
+                }
+            });
+        }
+
+        wm.getUniqueIdFromCurrentUrl = function () {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                PendingApprovalUniqueId = urlParams.get('UniqueId');
+            } catch (e) {
+                PendingApprovalUniqueId = null;
+            }
+        }
+
+        wm.setNextApprover = function () {
+
+            if (PendingApprovalStatus = '') {
+                nextApprover = opmId;
+            } else if (PendingApprovalStatus = 'OPMApproved') {
+                const keys = Object.keys(approvalChainId);
+
+                if (currentApprover !== "") {
+                    for (const key in approvalChainId) {
+                        if (approvalChainId[key] === currentApprover) {
+                            let currentIndex = keys.indexOf(key);
+
+                            if (currentIndex !== -1 && currentIndex < keys.length - 1) {
+
+                                if (approvalChainId[keys[currentIndex + 1]] !== undefined) {
+                                    const nextApproverKey = keys[currentIndex + 1];
+                                    nextApprover = approvalChainId[nextApproverKey];
+                                    break;
+                                } else {
+                                    while (currentIndex < keys.length - 1) {
+                                        if (approvalChainId[keys[currentIndex]] !== currentApprover && approvalChainId[keys[currentIndex]] !== undefined) {
+                                            const nextApproverKey = keys[currentIndex];
+                                            nextApprover = approvalChainId[nextApproverKey];
+                                            break;
+                                        } else {
+                                            currentIndex++;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    for (let i = 1; i <= 8; i++) {
+                        const approverKey = `Approver${i}`;
+                        if (approvalChainId[approverKey] !== undefined) {
+                            nextApprover = approvalChainId[approverKey];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
 
         if (uId != "") {
@@ -2778,51 +2837,3 @@ function refreshFormDigestValue() {
     });
 }
 //X-request digest value refresh -- End
-
-/**
- * Get approval List data based on the provided URL and unique ID.
- * @param {string} uid - The unique ID.
- * @param {Function}  successCallback - The callback function that handles success.
- * @param {Function} errorCallback   - The callback function that handles errors.
- * @returns {Array | CallableFunction}         - The approval data or an error object.
- */
-function getApprovalListData(uid, successCallback, errorCallback) {
-    const apiUrl = `${_spPageContextInfo.webAbsoluteUrl}/_api/web/lists/getByTitle('PendingApproval')/items`;
-    const filter = `RequestLink eq 'https://portaldv.bergerbd.com/leaveauto/SitePages/MarketingActivity.aspx?UniqueId=${uid}'`;
-    const query = `?$top=1&$select=Id,Title,ProcessName,Status&$filter=${filter}`;
-
-    $.ajax({
-        async: true,
-        url: apiUrl + query,
-        method: "GET",
-        headers: {
-            "Accept": "application/json;odata=verbose",
-            "Content-Type": "application/json;odata=verbose"
-        },
-        success: function (data) {
-            if (typeof successCallback === 'function') {
-                successCallback(data.d.results[0]);
-            }
-        },
-        error: function (error) {
-            if (typeof errorCallback === 'function') {
-                errorCallback(error);
-            }
-        }
-    });
-}
-
-/**
- * Get the UniqueId from the current URL in the browser's address bar.
- *
- * @returns {string|null} The UniqueId if found in the URL, or null if not found.
- */
-function getUniqueIdFromCurrentUrl() {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('UniqueId');
-    } catch (e) {
-        return null;
-    }
-}
-
