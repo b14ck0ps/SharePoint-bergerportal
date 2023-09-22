@@ -57,6 +57,13 @@ var jsonResponse = processJSON(notificationReceiverJSON);
 var delegate = "";
 var empEmail = '';
 
+
+/**
+ *  List of Approval-Chain Approver's ID.
+ * @type {Array<string>}
+ */
+const approvalChainId = [];
+
 var spApp = angular
     .module("MarketingActivityApp", ['ngSanitize'])
     .config(function ($httpProvider) {
@@ -134,7 +141,7 @@ var spApp = angular
                 ofcLocation = data.d.results[0].OfficeLocation;
                 mobile = data.d.results[0].Mobile;
                 employeeGrade = data.d.results[0].EmployeeGrade;
-                employeeId = data.d.results[0].EmployeeId;
+                employeeId = data.d.results[0].EmployeeId; /* TODO: This there should be the OPM ID */
                 employeeName = data.d.results[0].EmployeeName;
                 deptId = data.d.results[0].DeptID;
                 opmId = data.d.results[0].OptManagerEmail.ID;
@@ -159,34 +166,57 @@ var spApp = angular
                     "accept": "application/json;odata=verbose"
                 }
             }).success(function (data, status, headers, config) {
-                if (data.d.results.length > 0) {
-                    for (var count = 0; count < data.d.results.length; count++) {
-                        if (data.d.results[count].DeptID == deptId && data.d.results[count].Location == ofcLocation) {
-                            soicId = data.d.results[count].BranchSalesM.ID;
-                            soicName = data.d.results[count].BranchSalesM.Title;
-                            //soicId = data.d.results[count].HOD.ID;
-                            //soicName = data.d.results[count].HOD.Title;
+                /**
+                 * Returns an array of list items from the Approval-Information-list.
+                 * @type {Array<Array<Array>>}
+                 */
+                const response = data.d.results;
 
-                            accountsConcernId = data.d.results[count].AcInChrg.ID;
-                            accountsConcernName = data.d.results[count].AcInChrg.Title;
+                approvalChainId.push(opmId) /* OPM is the first approver */
+                if (response.length > 0) {
+                    for (var count = 0; count < response.length; count++) {
+                        if (response[count].DeptID == deptId && response[count].Location == ofcLocation) {
+                            // #region (OLD CODE) This is the old code, which was used to populate the approval chain. This is not used anymore.
+                            /* soicId = response[count].BranchSalesM.ID; 
+                            soicName = response[count].BranchSalesM.Title;
+
+                            soicId = response[count].HOD.ID;
+                            soicName = response[count].HOD.Title;
+
+                            accountsConcernId = response[count].AcInChrg.ID;
+                            accountsConcernName = response[count].AcInChrg.Title;
+                            */
+                            //#endregion
+
+                            //* Loop through the Approvers and add their IDs to the approvalChain array
+                            for (let i = 1; i <= 8; i++) {
+                                const approverKey = `Approver${i}`;
+                                if (response[count][approverKey]) {
+                                    const approverID = response[count][approverKey].ID
+                                    if (typeof approverID === 'number') { /* this will skip the approval with no ID */
+                                        approvalChainId.push(approverID);
+                                    }
+                                }
+                            }
                         }
-                        if (data.d.results[count].DeptID == "SM02" && data.d.results[count].Location == "Corporate") {
-                            //gMMarketingId = data.d.results[count].HOD.ID;
-                            //gMMarketingName = data.d.results[count].HOD.Title;
-                            headChannelEngagementId = data.d.results[count].Approver3.ID;
-                            headChannelEngagementName = data.d.results[count].Approver3.Title;
+                        if (response[count].DeptID == "SM02" && response[count].Location == "Corporate") {
+                            //gMMarketingId = response[count].HOD.ID;
+                            //gMMarketingName = response[count].HOD.Title;
+                            headChannelEngagementId = response[count].Approver3.ID;
+                            headChannelEngagementName = response[count].Approver3.Title;
                         }
-                        if (data.d.results[count].DeptID == "SM03" && data.d.results[count].Location == "Corporate") {
-                            gMMarketingId = data.d.results[count].HOD.ID;
-                            gMMarketingName = data.d.results[count].HOD.Title;
+                        if (response[count].DeptID == "SM03" && response[count].Location == "Corporate") {
+                            gMMarketingId = response[count].HOD.ID;
+                            gMMarketingName = response[count].HOD.Title;
                         }
-                        if (data.d.results[count].DeptID == "SM01" && data.d.results[count].Location == "Corporate") {
-                            marketingAccountantId = data.d.results[count].InvInchrg.ID;
-                            marketingAccountantName = data.d.results[count].InvInchrg.Title;
-                            marketingSupportExeId = data.d.results[count].Approver7.ID;
-                            marketingSupportExeName = data.d.results[count].Approver7.Title;
+                        if (response[count].DeptID == "SM01" && response[count].Location == "Corporate") {
+                            marketingAccountantId = response[count].InvInchrg.ID;
+                            marketingAccountantName = response[count].InvInchrg.Title;
+                            marketingSupportExeId = response[count].Approver7.ID;
+                            marketingSupportExeName = response[count].Approver7.Title;
                         }
                     }
+                    console.log("Approval Chain:", approvalChainId);
                 }
             }).error(function (data, status, headers, config) { });
         }
@@ -2244,7 +2274,8 @@ var spApp = angular
                 vm.uniqueId = data.d.results[0].GUID;
                 $scope.uniqueID = data.d.results[0].GUID;
                 var generatedLink = _spPageContextInfo.webAbsoluteUrl + MarketingActivityURL + "?UniqueId=" + vm.uniqueId;
-                saveAtMyTask("MA-" + requestId, "MarketingActivity", initiator, "Submitted", employeeId, empEmail, soicId, generatedLink);
+
+                saveAtMyTask("MA-" + requestId, "MarketingActivity", initiator, "Submitted", employeeId, empEmail, approvalChainId, generatedLink);
                 console.log("This is the reqid:  " + requestId)
             }).error(function (data, status, headers, config) {
                 $scope.insertLog(MarketingActivityMaster + "7", "Error", "Fail");
