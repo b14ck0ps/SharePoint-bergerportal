@@ -76,6 +76,27 @@ let currentApprover = ""
 let nextApprover = ""
 let PendingApprovalStatus = ""
 
+let pageHasData = false;
+let pageData = {
+    ActivityName: "",
+    ActivityType: "",
+    BrandDescription: "",
+    BudgetType: "",
+    CommitmentItem: "",
+    CostHead: "",
+    ExpectedDeliveryDate: "",
+    ID: "",
+    ProjectName: "",
+    RequiredVendorQuotation: "",
+    ServiceName: "",
+    ServiceReceivingDate: "",
+    SingleVendorJustification: "",
+    Status: "",
+    Title: "",
+    TotalExpectedExpense: ""
+};
+
+
 var spApp = angular
     .module("MarketingActivityApp", ['ngSanitize'])
     .config(function ($httpProvider) {
@@ -164,6 +185,29 @@ var spApp = angular
                 empEmail = data.d.results[0].Email.EMail;
                 wm.getAllApproverInformation();
                 wm.getUniqueIdFromCurrentUrl();
+                wm.getMarketingActivityListData(50, (maData) => {
+                    pageHasData = true;
+                    pageData.ProjectName = maData.ProjectName;
+                    pageData.ActivityName = maData.ActivityName;
+                    pageData.ActivityType = maData.ActivityType;
+                    pageData.BrandDescription = maData.BrandDescription;
+                    pageData.BudgetType = maData.BudgetType;
+                    pageData.CommitmentItem = maData.CommitmentItem;
+                    pageData.CostHead = maData.CostHead;
+                    pageData.ExpectedDeliveryDate = maData.ExpectedDeliveryDate;
+                    pageData.ID = maData.ID;
+                    pageData.RequiredVendorQuotation = maData.RequiredVendorQuotation;
+                    pageData.ServiceName = maData.ServiceName;
+                    pageData.ServiceReceivingDate = maData.ServiceReceivingDate;
+                    pageData.SingleVendorJustification = maData.SingleVendorJustification;
+                    pageData.Status = maData.Status;
+                    pageData.Title = maData.Title;
+                    pageData.TotalExpectedExpense = maData.TotalExpectedExpense;
+                    console.log(pageData);
+                });
+                if (pageHasData) {
+                    wm.setPageData(pageData);
+                }
                 wm.getApprovalListData(PendingApprovalUniqueId, (data) => { PendingApprovalStatus = data?.Status || "", currentApprover = data?.PendingWith.results[0].Id || "" });
             }).error(function (data, status, headers, config) { });
         }
@@ -261,6 +305,17 @@ var spApp = angular
             });
         }
 
+        wm.setPageData = function (maData) {
+            $("#projectName").val(maData.ProjectName).prop("disabled", true);
+            $("#selectService").val(maData.ServiceName).prop("disabled", true);
+            $("#selectActivityType").val(maData.ActivityType).prop("disabled", true);
+            $("#selectBudgetType").val(maData.BudgetType).prop("disabled", true);
+            $("#selectBrandDescription").val(maData.BrandDescription).prop("disabled", true);
+            $("#selectCommitmentItem").val(maData.CommitmentItem).prop("disabled", true);
+            $("#totalExpectedExpense").val(maData.TotalExpectedExpense).prop("disabled", true);
+            $("#selectRequiredVendorQuotation").val(maData.RequiredVendorQuotation).prop("disabled", true);
+        }
+
         wm.getUniqueIdFromCurrentUrl = function () {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -314,6 +369,36 @@ var spApp = angular
                 }
             }
         }
+
+        wm.getMarketingActivityListData = function (MarketingActivityID, successCallback) {
+            const apiUrl = `${_spPageContextInfo.webAbsoluteUrl}/_api/web/lists/getByTitle('MarketingActivityMaster')/items`;
+
+            const selectFields = "ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,Title";
+
+            const filter = `Id eq ${MarketingActivityID}`;
+            const query = `?$select=${selectFields}&$filter=${filter}`;
+
+            $.ajax({
+                async: false,
+                url: apiUrl + query,
+                method: "GET",
+                headers: {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "application/json;odata=verbose"
+                },
+                success: function (data) {
+                    if (typeof successCallback === 'function') {
+                        successCallback(data.d.results[0]);
+                    }
+                },
+                error: function (error) {
+                    if (typeof errorCallback === 'function') {
+                        errorCallback(error);
+                    }
+                }
+            });
+        }
+
 
 
         if (uId != "") {
