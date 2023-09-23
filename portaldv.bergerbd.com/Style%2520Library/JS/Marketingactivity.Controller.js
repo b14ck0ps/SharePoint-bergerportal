@@ -75,6 +75,7 @@ let PendingApprovalUniqueId = ""
 let currentApprover = ""
 let nextApprover = ""
 let PendingApprovalStatus = ""
+let PendingApprovalTitle = ""
 
 let pageHasData = false;
 let pageData = {
@@ -185,7 +186,9 @@ var spApp = angular
                 empEmail = data.d.results[0].Email.EMail;
                 wm.getAllApproverInformation();
                 wm.getUniqueIdFromCurrentUrl();
-                wm.getMarketingActivityListData(50, (maData) => {
+                wm.getApprovalListData(PendingApprovalUniqueId, (data) => { PendingApprovalTitle = data?.Title, PendingApprovalStatus = data?.Status || "", currentApprover = data?.PendingWith.results[0].Id || "" });
+                const MarketingActivityID = wm.marketingAccountantId(PendingApprovalTitle);
+                wm.getMarketingActivityListData(MarketingActivityID, (maData) => {
                     pageHasData = true;
                     pageData.ProjectName = maData.ProjectName;
                     pageData.ActivityName = maData.ActivityName;
@@ -203,12 +206,10 @@ var spApp = angular
                     pageData.Status = maData.Status;
                     pageData.Title = maData.Title;
                     pageData.TotalExpectedExpense = maData.TotalExpectedExpense;
-                    console.log(pageData);
                 });
                 if (pageHasData) {
                     wm.setPageData(pageData);
                 }
-                wm.getApprovalListData(PendingApprovalUniqueId, (data) => { PendingApprovalStatus = data?.Status || "", currentApprover = data?.PendingWith.results[0].Id || "" });
             }).error(function (data, status, headers, config) { });
         }
         //Function for getting requester's information -- End
@@ -278,6 +279,17 @@ var spApp = angular
             ).error(function (data, status, headers, config) { });
         }
         //------------Get approver list -- End----------------
+
+        wm.marketingAccountantId = function (title) {
+            const match = title.match(/\d+/);
+
+            if (match) {
+                const numericPart = parseInt(match[0], 10);
+                return numericPart;
+            } else {
+                return NaN;
+            }
+        };
 
         wm.getApprovalListData = function (uid, successCallback, errorCallback) {
             const apiUrl = `${_spPageContextInfo.webAbsoluteUrl}/_api/web/lists/getByTitle('PendingApproval')/items`;
