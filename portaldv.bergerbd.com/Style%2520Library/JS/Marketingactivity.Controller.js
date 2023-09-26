@@ -308,6 +308,15 @@ var spApp = angular
         wm.setPageData = function (maData) {
             $("#projectName").val(maData.ProjectName).prop("disabled", true);
             $("#selectService").val(maData.ServiceName).prop("disabled", true);
+
+            setTimeout(function () {
+                $("#selectService").trigger("change");
+                $("#selectedActivity").prop("disabled", true);
+                    
+            }, 2000);
+            setTimeout(function () {
+                $("#selectedActivity").val(maData.ActivityName).prop("disabled", true);
+            }, 4000);
             $("#selectActivityType").val(maData.ActivityType).prop("disabled", true);
             $("#selectBudgetType").val(maData.BudgetType).prop("disabled", true);
             $("#selectBrandDescription").val(maData.BrandDescription).prop("disabled", true);
