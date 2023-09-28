@@ -108,7 +108,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input type="text" ng-model="projectName" class="textBoxBGColor" id="projectName" />
+                     <input type="text" ng-model="FormData.ProjectName" class="textBoxBGColor" id="projectName" />
                   </div>
 
                   <div class="col-sm-2 labelHeader">Service Name:
@@ -117,7 +117,7 @@
                   <div class="col-sm-2">
                      <select name="serviceName" id="selectService" ng-change="MapActivityName()"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'
-                        ng-model="serviceName">
+                        ng-model="FormData.ServiceName">
                         <option ng-repeat="service in services" value="{{service.value}}">{{service.label}}</option>
                      </select>
                   </div>
@@ -126,7 +126,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select id="activitySelect" ng-model="selectedActivity" ng-change="MapCostHead()"
+                     <select id="activitySelect" ng-model="FormData.ActivityName" ng-change="MapCostHead()"
                         ng-disabled="activityNamesDropdownList == undefined || activityNamesDropdownList.length == 0"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option value="">-- Select Activity --</option>
@@ -143,7 +143,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select id="selectedCostHead" ng-model="selectedCostHead"
+                     <select id="selectedCostHead" ng-model="FormData.CostHead"
                         ng-disabled="costHeadDropdownList == undefined || costHeadDropdownList.length == 0"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option value="">-- Select Cost Head --</option>
@@ -155,7 +155,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select id="activitySelect" ng-model="selectedActivityType"
+                     <select id="activitySelect" ng-model="FormData.ActivityType"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option ng-repeat="type in activityTypes" value="{{type.value}}">{{type.label}}</option>
                      </select>
@@ -167,7 +167,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select name="budgetType" id="selectBudgetType" ng-model="selectedBudgetType"
+                     <select name="budgetType" id="selectBudgetType" ng-model="FormData.BudgetType"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option ng-repeat="type in budgetTypes" value="{{type.value}}">{{type.label}}</option>
                      </select>
@@ -180,7 +180,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select name="brandDescription" id="selectBrandDescription" ng-model="brandDescription"
+                     <select name="brandDescription" id="BrandDescription" ng-model="FormData.BrandDescription"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option ng-repeat="brand in brands" value="{{brand.value}}">{{brand.label}}</option>
                      </select>
@@ -191,7 +191,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select name="commitmentItem" id="selectCommitmentItem" ng-model="commitmentItem"
+                     <select name="commitmentItem" id="selectCommitmentItem" ng-model="FormData.CommitmentItem"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option ng-repeat="item in commitmentItems" value="{{item.value}}">{{item.label}}</option>
                      </select>
@@ -202,7 +202,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input type="text" ng-model="totalExpectedExpense" class="textBoxBGColor" valid-number
+                     <input type="text" ng-model="FormData.TotalExpectedExpense" class="textBoxBGColor" valid-number
                         title="Please Fill in with a numerical value only" ng-init="totalExpectedExpense='0'"
                         id="totalExpectedExpense" />
                   </div>
@@ -213,18 +213,18 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input type="text" datepicker ng-model="activityStartDate" readonly class="textBoxBGColor"
+                     <input type="text" datepicker ng-model="FormData.ActivityStartDate" readonly class="textBoxBGColor"
                         id="activityStartDate" />
-                     <label ng-model="activityStartDate"></label>
+                     <label ng-model="FormData.ActivityStartDate"></label>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Expected Delivery Date:
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input type="text" datepicker ng-model="expectedDeliveryDate" readonly class="textBoxBGColor"
-                        id="expectedDeliveryDate" />
-                     <label ng-model="expectedDeliveryDate"></label>
+                     <input type="text" datepicker ng-model="FormData.ExpectedDeliveryDate" readonly
+                        class="textBoxBGColor" id="expectedDeliveryDate" />
+                     <label ng-model="FormData.ExpectedDeliveryDate"></label>
                   </div>
                </div>
 
@@ -234,9 +234,9 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input type="text" datepicker ng-model="serviceReceivingDate" readonly class="textBoxBGColor"
-                        id="serviceReceivingDate" />
-                     <label ng-model="serviceReceivingDate"></label>
+                     <input type="text" datepicker ng-model="FormData.ServiceReceivingDate" readonly
+                        class="textBoxBGColor" id="serviceReceivingDate" />
+                     <label ng-model="FormData.ServiceReceivingDate"></label>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Number of vendor require for quotation:
@@ -244,7 +244,7 @@
                   </div>
                   <div class="col-sm-2">
                      <select name="requiredVendorQuotation" id="selectRequiredVendorQuotation"
-                        ng-model="requiredVendorQuotation"
+                        ng-model="FormData.RequiredVendorQuotation"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option ng-repeat="vendor in vendorQuotations" value="{{vendor.value}}">{{vendor.label}}
                         </option>
@@ -256,7 +256,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input type="text" ng-model="singleVendorJustification" class="textBoxBGColor"
+                     <input type="text" ng-model="FormData.SingleVendorJustification" class="textBoxBGColor"
                         id="singleVendorJustification" />
                   </div>
                </div>

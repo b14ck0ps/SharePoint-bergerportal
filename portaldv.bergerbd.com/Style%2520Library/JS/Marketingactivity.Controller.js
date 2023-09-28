@@ -62,6 +62,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     $scope.MapActivityName = () => getActivityNames();
     $scope.MapCostHead = () => getCostHead();
 
+    $scope.clickSaveOrSubmit = (status) => { saveOrSubmit(status); }
+
     /**
      * Retrieves marketing activity names from a SharePoint list `MarketingActivityMapper` based on `$scope.services` and populates the `Activity Name` dropdown.
      * @returns {void}
@@ -69,7 +71,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     const getActivityNames = () => {
 
         const base = getApiEndpoint("MarketingActivityMapper");
-        const filter = `$filter=ServiceName eq '${$scope.serviceName}'`;
+        const filter = `$filter=ServiceName eq '${$scope.FormData.ServiceName}'`;
         const query = `$select=ActivityName`;
 
         $http({
@@ -89,7 +91,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     const getCostHead = () => {
 
         const base = getApiEndpoint("MarketingActivityMapper");
-        const filter = `$filter=ActivityName eq '${$scope.selectedActivity}'`;
+        const filter = `$filter=ActivityName eq '${$scope.FormData.ActivityName}'`;
         const query = `$select=CostHead`;
 
         $http({
@@ -101,6 +103,16 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .catch((e) => console.log("Error getting user information", e))
             .finally(() => $scope.IsLoading = false);
     }
+
+    /**
+     * Saves the form data to a SharePoint list `MarketingActivity`.
+     * @param {string} status Status of the form (Save or Submit)
+     * @returns {void}
+     */
+    const saveOrSubmit = (status) => {
+        console.log($scope.FormData, status);
+    }
+
 }]);
 
 /**
