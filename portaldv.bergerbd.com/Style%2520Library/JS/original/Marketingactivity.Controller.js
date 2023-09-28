@@ -433,7 +433,7 @@ var spApp = angular
                 wm.getRequesterInformation();
             }).error(function (data, status, headers, config) { });
         } else {
-            requesterId = userId;
+            requesterId = USER_EMAIL_ID;
             wm.getRequesterInformation();
         };
     })
@@ -447,7 +447,7 @@ var spApp = angular
         vm.readMode = "";
         vm.status = "";
         vm.entitlement = "";
-        vm.currentUser = userId;
+        vm.currentUser = USER_EMAIL_ID;
         vm.pendingWithId = "";
         vm.employeeName = "";
         vm.delegatee = "";
@@ -1337,7 +1337,7 @@ var spApp = angular
             }
             if ($scope.status == "Submitted" || $scope.status == "UserToSOIC") {
                 vm.checkDelegation(soicId);
-                if (userId == vm.pendingWithId || userId == vm.delegatee) {
+                if (USER_EMAIL_ID == vm.pendingWithId || USER_EMAIL_ID == vm.delegatee) {
                     if (action == "Approved") {
                         nextApproverID = gMMarketingId;
                         approverName = soicName;
@@ -1378,7 +1378,7 @@ var spApp = angular
             } else if ($scope.status == "SOICtoGMMarketing" || $scope.status == "UserToGMMarketing") {
                 vm.checkDelegation(gMMarketingId);
 
-                if (userId == vm.pendingWithId || userId == vm.delegatee) {
+                if (USER_EMAIL_ID == vm.pendingWithId || USER_EMAIL_ID == vm.delegatee) {
                     if (action == "Approved") {
                         nextApproverID = marketingAccountantId;
                         //nextApproverID = accountsConcernId;						
@@ -1421,7 +1421,7 @@ var spApp = angular
                 }
             } else if ($scope.status == "GMMarketingToMarketingAccountant" || $scope.status == "UserToMarketingAccountant") {
                 vm.checkDelegation(marketingAccountantId);
-                if (userId == vm.pendingWithId || userId == vm.delegatee) {
+                if (USER_EMAIL_ID == vm.pendingWithId || USER_EMAIL_ID == vm.delegatee) {
                     if (action == "Approved") {
                         $scope.updateGLCCIOInfo();
                         nextApproverID = $scope.requesterId;
@@ -1462,7 +1462,7 @@ var spApp = angular
                 }
             } else if ($scope.status == "MarketingAccountantToAccountsConcern" || $scope.status == "ReimbursementMarketingAccountantToAccountsConcern") {
                 vm.checkDelegation(accountsConcernId);
-                if (userId == vm.pendingWithId || userId == vm.delegatee) {
+                if (USER_EMAIL_ID == vm.pendingWithId || USER_EMAIL_ID == vm.delegatee) {
                     if (action == "Approved") {
                         nextApproverID = $scope.requesterId;
                         approverName = accountsConcernName;
@@ -1497,7 +1497,7 @@ var spApp = angular
                 }
             } else if ($scope.status == "GMMarketingToAccountsConcern" || $scope.status == "UserToAccountsConcern") {
                 vm.checkDelegation(accountsConcernId);
-                if (userId == vm.pendingWithId || userId == vm.delegatee) {
+                if (USER_EMAIL_ID == vm.pendingWithId || USER_EMAIL_ID == vm.delegatee) {
                     if (action == "Approved") {
                         nextApproverID = $scope.requesterId;
                         approverName = accountsConcernName;
@@ -1531,7 +1531,7 @@ var spApp = angular
                     return false;
                 }
             } else if ($scope.status == "AccountsConcernToUser") {
-                if (userId == vm.pendingWithId || userId == vm.delegatee) {
+                if (USER_EMAIL_ID == vm.pendingWithId || USER_EMAIL_ID == vm.delegatee) {
                     if (action == "Approved") {
                         nextApproverID = $scope.requesterId;
                         approverName = marketingAccountantName;
@@ -1557,7 +1557,7 @@ var spApp = angular
                 }
             } else if ($scope.status == "AccountsConcernToMarketingAccountant") {
                 vm.checkDelegation(marketingAccountantId);
-                if (userId == vm.pendingWithId || userId == vm.delegatee) {
+                if (USER_EMAIL_ID == vm.pendingWithId || USER_EMAIL_ID == vm.delegatee) {
                     if (action == "Approved") {
                         nextApproverID = $scope.requesterId;
                         approverName = marketingAccountantName;
@@ -1583,7 +1583,7 @@ var spApp = angular
                 }
             } else if ($scope.status == "ReimbursementSubmitted" || $scope.status == "ReimbursementUserToSOIC") {
                 vm.checkDelegation(soicId);
-                if (userId == vm.pendingWithId || userId == vm.delegatee) {
+                if (USER_EMAIL_ID == vm.pendingWithId || USER_EMAIL_ID == vm.delegatee) {
                     if (action == "Approved") {
                         nextApproverID = gMMarketingId;
                         approverName = soicName;
@@ -1623,7 +1623,7 @@ var spApp = angular
                 }
             } else if ($scope.status == "ReimbursementSOICtoGMMarketing" || $scope.status == "ReimbursementUserToGMMarketing") {
                 vm.checkDelegation(gMMarketingId);
-                if (userId == vm.pendingWithId || userId == vm.delegatee) {
+                if (USER_EMAIL_ID == vm.pendingWithId || USER_EMAIL_ID == vm.delegatee) {
                     if (action == "Approved") {
                         nextApproverID = 0;
                         approverName = gMMarketingName;
@@ -1663,7 +1663,7 @@ var spApp = angular
                 }
             } else if ($scope.status == "ReimbursementGMMarketingToACConcern") {
                 vm.checkDelegation(accountsConcernId);
-                if (userId == vm.pendingWithId || userId == vm.delegatee) {
+                if (USER_EMAIL_ID == vm.pendingWithId || USER_EMAIL_ID == vm.delegatee) {
                     if (action == "Approved") {
                         nextApproverID = marketingAccountantId;
                         approverName = accountsConcernName;
@@ -1697,7 +1697,7 @@ var spApp = angular
                 }
             } else if ($scope.status == "ReimbursementACConcernToMarketingAC") {
                 vm.checkDelegation(marketingAccountantId);
-                if (userId == vm.pendingWithId || userId == vm.delegatee) {
+                if (USER_EMAIL_ID == vm.pendingWithId || USER_EMAIL_ID == vm.delegatee) {
                     if (action == "Approved") {
                         nextApproverID = 0;
                         approverName = marketingAccountantName;
@@ -2298,7 +2298,7 @@ var spApp = angular
                 editLink = _spPageContextInfo.webAbsoluteUrl + MarketingActivityURL + "?UniqueId=" + vm.uniqueId + "&mode=e";
 
                 if (updatedata.Status == "Submitted") {
-                    $scope.readNotificationListTemplate(InitiatorRequesterTemplate, [userId], [], initiator, soicName, "WP-" + requestId, $scope.status, reviewLink, "", "Workshop Proposal Workflow");
+                    $scope.readNotificationListTemplate(InitiatorRequesterTemplate, [USER_EMAIL_ID], [], initiator, soicName, "WP-" + requestId, $scope.status, reviewLink, "", "Workshop Proposal Workflow");
                     $scope.readNotificationListTemplate(ApproverTemplate, [soicId], [], initiator, soicName, "WP-" + requestId, $scope.status, "", approvalLink, "Workshop Proposal Workflow");
                 } else if (updatedata.Status == "ReimbursementSubmitted") {
                     $scope.readNotificationListTemplate(ApproverTemplate, [soicId], [], initiator, soicName, "WP-" + requestId, $scope.status, "", approvalLink, "Workshop Proposal Workflow");
