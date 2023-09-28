@@ -16,6 +16,14 @@
    #ui-datepicker-div {
       width: 21% !important;
    }
+
+   input[type="date"] {
+      border: 1px solid #ccc;
+      background-color: #f2f2f2;
+      width: 100%;
+      height: 28px;
+      padding: 0px 5px;
+   }
 </style>
 <!-- APP MarketingActivityApp Start -->
 <div ng-app="MarketingActivityApp" class="container BlockStockRequest">
@@ -213,7 +221,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input type="text" datepicker ng-model="FormData.ActivityStartDate" readonly class="textBoxBGColor"
+                     <input type="date" ng-model="FormData.ActivityStartDate" class="textBoxBGColor"
                         id="activityStartDate" />
                      <label ng-model="FormData.ActivityStartDate"></label>
                   </div>
@@ -222,8 +230,8 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input type="text" datepicker ng-model="FormData.ExpectedDeliveryDate" readonly
-                        class="textBoxBGColor" id="expectedDeliveryDate" />
+                     <input type="date" ng-model="FormData.ExpectedDeliveryDate" class="textBoxBGColor"
+                        id="expectedDeliveryDate" />
                      <label ng-model="FormData.ExpectedDeliveryDate"></label>
                   </div>
                </div>
@@ -234,8 +242,8 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input type="text" datepicker ng-model="FormData.ServiceReceivingDate" readonly
-                        class="textBoxBGColor" id="serviceReceivingDate" />
+                     <input type="date" ng-model="FormData.ServiceReceivingDate" class="textBoxBGColor"
+                        id="serviceReceivingDate" />
                      <label ng-model="FormData.ServiceReceivingDate"></label>
                   </div>
 
