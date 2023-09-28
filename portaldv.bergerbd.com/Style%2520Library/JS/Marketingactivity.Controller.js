@@ -8,6 +8,11 @@ const API_POST_HEADERS = {
 
 const USER_EMAIL_ID = _spPageContextInfo.userId;
 const OPM_INFO = { id: 0, name: "" };
+const RequesterInfo = {
+    name: "",
+    email: "",
+    id: 0
+};
 
 
 /**
@@ -45,6 +50,10 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
         })
             .then(function (response) {
                 $scope.UserInfo = response.data.d.results[0];
+                RequesterInfo.name = $scope.UserInfo.EmployeeName;
+                RequesterInfo.email = $scope.UserInfo.Email.EMail;
+                RequesterInfo.id = $scope.UserInfo.Email.ID;
+
                 OPM_INFO.id = $scope.UserInfo.OptManagerEmail.ID;
                 OPM_INFO.name = $scope.UserInfo.OptManagerEmail.Title;
             })
@@ -116,7 +125,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      */
     const saveOrSubmit = (status) => {
         $scope.IsLoading = true;
-        console.log($scope.FormData, status);
         const url = getApiEndpoint("MarketingActivityMaster");
 
         /* Spreding the FormData and adding the metadata */
@@ -133,7 +141,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             url: url,
             data: marketingActivityMasterData,
         })
-            .then((data) => console.log(data))
+            .then((response) => {
+                /* Saving the data to PendingApproval List */
+                saveAtMyTask(`MA-${response.data.d.ID}`, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, `	https://portaldv.bergerbd.com/leaveauto/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`);
+            })
             .catch(function (message) {
                 console.log(`Error saving data: ${message}`)
             })
