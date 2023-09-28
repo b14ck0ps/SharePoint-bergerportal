@@ -1,6 +1,9 @@
-const USER_EMAIL_ID = _spPageContextInfo.userId;
 const ABS_URL = _spPageContextInfo.webAbsoluteUrl;
+const API_HEADERS = { "accept": "application/json;odata=verbose" };
+
+const USER_EMAIL_ID = _spPageContextInfo.userId;
 const OPM_INFO = { id: 0, name: "" };
+
 
 /**
  * Angular module for the Marketing Activity app.
@@ -11,7 +14,6 @@ const MarketingActivityModule = angular.module("MarketingActivityApp", []);
 MarketingActivityModule.controller('UserController', ['$scope', '$http', function ($scope, $http) {
     $scope.today = new Date();
     $scope.IsLoading = true;
-
     $scope.UserInfo = {};
 
     /* This function Run at First when the page loaded. Invoked on Template Page (Line:21)  */
@@ -27,31 +29,22 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
     const getUserByInfoEmailId = () => {
         $scope.IsLoading = true;
 
-        const base = `${ABS_URL}/_api/web/lists/getByTitle('bergerEmployeeInformation')/items`;
-
+        const base = getApiEndpoint("bergerEmployeeInformation");
         const filter = `$filter=Email/ID eq '${USER_EMAIL_ID}'`;
         const query = `$select=EmployeeName,Email/ID,Email/Title,Email/EMail,OptManagerEmail/ID,OptManagerEmail/Title,DeptID,EmployeeId,EmployeeGrade,Department,Designation,OfficeLocation,Mobile,CostCenter&$expand=Email/ID,OptManagerEmail/ID&$top=1`;
 
-        const url = `${base}?${filter}&${query}`;
-
         $http({
             method: "GET",
-            url: url,
-            headers: {
-                "accept": "application/json;odata=verbose"
-            }
-        }).then(function (response) {
-            $scope.UserInfo = response.data.d.results[0];
-
-            OPM_INFO.id = $scope.UserInfo.OptManagerEmail.ID;
-            OPM_INFO.name = $scope.UserInfo.OptManagerEmail.Title;
-        }
-        ).catch(function (err) {
-            console.log("Error getting user information", err);
+            url: `${base}?${filter}&${query}`,
+            headers: API_HEADERS
         })
-            .finally(function () {
-                $scope.IsLoading = false;
-            });
+            .then(function (response) {
+                $scope.UserInfo = response.data.d.results[0];
+                OPM_INFO.id = $scope.UserInfo.OptManagerEmail.ID;
+                OPM_INFO.name = $scope.UserInfo.OptManagerEmail.Title;
+            })
+            .catch((e) => console.log("Error getting user information", e))
+            .finally(() => $scope.IsLoading = false);
     }
 }]);
 
@@ -68,32 +61,18 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      */
     const getActivityNames = () => {
 
-        const selectedService = $scope.serviceName;
-        $scope.activityNamesDropdown = "";
-
-        const base = `${ABS_URL}/_api/lists/getbytitle('MarketingActivityMapper')/items`;
-        const filter = `$filter=ServiceName eq '${selectedService}'`;
+        const base = getApiEndpoint("MarketingActivityMapper");
+        const filter = `$filter=ServiceName eq '${$scope.serviceName}'`;
         const query = `$select=ActivityName`;
-
-        const url = `${base}?${filter}&${query}`;
 
         $http({
             method: "GET",
-            url: url,
-            headers: {
-                "accept": "application/json;odata=verbose"
-            }
-        }).then(function (response) {
-            const ActivityNameList = response.data.d.results;
-            $scope.activityNamesDropdownList = ActivityNameList.map((item) => item.ActivityName);
-
-        }
-        ).catch(function (err) {
-            console.log("Error getting user information", err);
+            url: `${base}?${filter}&${query}`,
+            headers: API_HEADERS
         })
-            .finally(function () {
-                $scope.IsLoading = false;
-            });
+            .then((response) => $scope.activityNamesDropdownList = response.data.d.results.map((item) => item.ActivityName))
+            .catch((e) => console.log("Error getting user information", e))
+            .finally(() => $scope.IsLoading = false);
     }
 
     /**
@@ -102,35 +81,28 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      */
     const getCostHead = () => {
 
-        const selectedActivity = $scope.selectedActivity;
-        $scope.selectedCostHead = "";
-
-
-        const base = `${ABS_URL}/_api/lists/getbytitle('MarketingActivityMapper')/items`;
-        const filter = `$filter=ActivityName eq '${selectedActivity}'`;
+        const base = getApiEndpoint("MarketingActivityMapper");
+        const filter = `$filter=ActivityName eq '${$scope.selectedActivity}'`;
         const query = `$select=CostHead`;
-
-        const url = `${base}?${filter}&${query}`;
 
         $http({
             method: "GET",
-            url: url,
-            headers: {
-                "accept": "application/json;odata=verbose"
-            }
-        }).then(function (response) {
-            const CostHeadList = response.data.d.results;
-            $scope.costHeadDropdownList = CostHeadList.map((item) => item.CostHead);
-        }
-        ).catch(function (err) {
-            console.log("Error getting user information", err);
+            url: `${base}?${filter}&${query}`,
+            headers: API_HEADERS
         })
-            .finally(function () {
-                $scope.IsLoading = false;
-            });
+            .then((response) => $scope.costHeadDropdownList = response.data.d.results.map((item) => item.CostHead))
+            .catch((e) => console.log("Error getting user information", e))
+            .finally(() => $scope.IsLoading = false);
     }
-
 }]);
+
+/**
+ * Retrieves the base URL for a SharePoint list.
+ * @param {string} ListName Name of the SharePoint list
+ * @example getApiEndpoint("MarketingActivityMapper")
+ * @returns {string} API base URL
+ */
+const getApiEndpoint = (ListName) => `${ABS_URL}/_api/web/lists/getByTitle('${ListName}')/items`;
 
 /**
  * List of services.
