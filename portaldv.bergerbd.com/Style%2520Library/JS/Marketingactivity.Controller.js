@@ -1,5 +1,10 @@
 const ABS_URL = _spPageContextInfo.webAbsoluteUrl;
-const API_HEADERS = { "accept": "application/json;odata=verbose" };
+const API_GET_HEADERS = { "accept": "application/json;odata=verbose" };
+const API_POST_HEADERS = {
+    "Accept": "application/json; odata=verbose",
+    "Content-Type": "application/json; odata=verbose",
+    "X-RequestDigest": $("#__REQUESTDIGEST").val()
+};
 
 const USER_EMAIL_ID = _spPageContextInfo.userId;
 const OPM_INFO = { id: 0, name: "" };
@@ -36,7 +41,7 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
         $http({
             method: "GET",
             url: `${base}?${filter}&${query}`,
-            headers: API_HEADERS
+            headers: API_GET_HEADERS
         })
             .then(function (response) {
                 $scope.UserInfo = response.data.d.results[0];
@@ -77,7 +82,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         $http({
             method: "GET",
             url: `${base}?${filter}&${query}`,
-            headers: API_HEADERS
+            headers: API_GET_HEADERS
         })
             .then((response) => $scope.activityNamesDropdownList = response.data.d.results.map((item) => item.ActivityName))
             .catch((e) => console.log("Error getting user information", e))
@@ -97,7 +102,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         $http({
             method: "GET",
             url: `${base}?${filter}&${query}`,
-            headers: API_HEADERS
+            headers: API_GET_HEADERS
         })
             .then((response) => $scope.costHeadDropdownList = response.data.d.results.map((item) => item.CostHead))
             .catch((e) => console.log("Error getting user information", e))
@@ -110,7 +115,28 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      * @returns {void}
      */
     const saveOrSubmit = (status) => {
+        $scope.IsLoading = true;
         console.log($scope.FormData, status);
+        const url = getApiEndpoint("MarketingActivityMaster");
+
+        /* Spreding the FormData and adding the metadata */
+        const marketingActivityMasterData = {
+            ...$scope.FormData, '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
+        };
+
+        $http({
+            headers: API_POST_HEADERS,
+            method: "POST",
+            url: url,
+            data: marketingActivityMasterData,
+        })
+            .then((data) => console.log(data))
+            .catch(function (message) {
+                console.log(`Error saving data: ${message}`)
+            })
+            .finally(() =>
+                $scope.IsLoading = false
+            );
     }
 
 }]);
@@ -231,4 +257,3 @@ const vendorQuotations = [
     { value: 'Minimum 3 parties', label: 'Minimum 3 parties' },
     { value: 'Single Vendor', label: 'Single Vendor' }
 ];
-
