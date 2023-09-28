@@ -134,9 +134,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .catch(function (message) {
                 console.log(`Error saving data: ${message}`)
             })
-            .finally(() =>
-                $scope.IsLoading = false
-            );
+            .finally(() => $scope.IsLoading = false);
     }
 
 }]);
