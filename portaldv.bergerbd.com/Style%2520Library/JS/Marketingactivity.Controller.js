@@ -121,7 +121,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
         /* Spreding the FormData and adding the metadata */
         const marketingActivityMasterData = {
-            ...$scope.FormData, '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
+            ...$scope.FormData,
+            'Status': status,
+            // 'PendingWith': { id: OPM_INFO.id },
+            '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
         };
 
         $http({
