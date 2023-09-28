@@ -127,6 +127,7 @@
                   </div>
                   <div class="col-sm-2">
                      <select id="activitySelect" ng-model="selectedActivity" ng-change="MapCostHead()"
+                        ng-disabled="activityNamesDropdownList == undefined || activityNamesDropdownList.length == 0"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option value="">-- Select Activity --</option>
                         <option ng-repeat="activity in activityNamesDropdownList" value="{{activity}}">
@@ -143,6 +144,7 @@
                   </div>
                   <div class="col-sm-2">
                      <select id="selectedCostHead" ng-model="selectedCostHead"
+                        ng-disabled="costHeadDropdownList == undefined || costHeadDropdownList.length == 0"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option value="">-- Select Cost Head --</option>
                         <option ng-repeat="costHead in costHeadDropdownList" value="{{costHead}}">{{costHead}}</option>
