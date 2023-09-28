@@ -60,9 +60,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
     $scope.services = services;
     $scope.MapActivityName = () => getActivityNames();
+    $scope.MapCostHead = () => getCostHead();
 
     /**
-     * Retrieves marketing activity names from a SharePoint list `MarketingActivityMapper` based on `$scope.services` and populates the dropdown.
+     * Retrieves marketing activity names from a SharePoint list `MarketingActivityMapper` based on `$scope.services` and populates the `Activity Name` dropdown.
      * @returns {void}
      */
     const getActivityNames = () => {
@@ -86,6 +87,40 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             const ActivityNameList = response.data.d.results;
             $scope.activityNamesDropdownList = ActivityNameList.map((item) => item.ActivityName);
 
+        }
+        ).catch(function (err) {
+            console.log("Error getting user information", err);
+        })
+            .finally(function () {
+                $scope.IsLoading = false;
+            });
+    }
+
+    /**
+     * Retrieves cost head from a SharePoint list `MarketingActivityMapper` based on `$scope.selectedActivity` and populates the `Cost Head` dropdown.
+     * @returns {void}
+     */
+    const getCostHead = () => {
+
+        const selectedActivity = $scope.selectedActivity;
+        $scope.selectedCostHead = "";
+
+
+        const base = `${ABS_URL}/_api/lists/getbytitle('MarketingActivityMapper')/items`;
+        const filter = `$filter=ActivityName eq '${selectedActivity}'`;
+        const query = `$select=CostHead`;
+
+        const url = `${base}?${filter}&${query}`;
+
+        $http({
+            method: "GET",
+            url: url,
+            headers: {
+                "accept": "application/json;odata=verbose"
+            }
+        }).then(function (response) {
+            const CostHeadList = response.data.d.results;
+            $scope.costHeadDropdownList = CostHeadList.map((item) => item.CostHead);
         }
         ).catch(function (err) {
             console.log("Error getting user information", err);

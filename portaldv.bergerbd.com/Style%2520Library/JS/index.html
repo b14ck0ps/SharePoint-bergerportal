@@ -126,7 +126,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select id="activitySelect" ng-model="selectedActivity"
+                     <select id="activitySelect" ng-model="selectedActivity" ng-change="MapCostHead()"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option value="">-- Select Activity --</option>
                         <option ng-repeat="activity in activityNamesDropdownList" value="{{activity}}">
@@ -145,7 +145,7 @@
                      <select id="selectedCostHead" ng-model="selectedCostHead"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option value="">-- Select Cost Head --</option>
-                        <option ng-repeat="costHead in costHeadsDropdown" value="{{costHead}}">{{costHead}}</option>
+                        <option ng-repeat="costHead in costHeadDropdownList" value="{{costHead}}">{{costHead}}</option>
                      </select>
                   </div>
 
