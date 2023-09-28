@@ -17,6 +17,7 @@
       width: 21% !important;
    }
 </style>
+<!-- APP MarketingActivityApp Start -->
 <div ng-app="MarketingActivityApp" class="container BlockStockRequest">
    <div ng-controller="UserController" ng-init="InitPage()">
       <div ng-show="IsLoading" id="wait"
@@ -76,6 +77,10 @@
          </div>
       </div>
    </div>
+   <!-- APP MarketingActivityApp End -->
+
+
+   <!-- APP FormController Start -->
    <div ng-controller="FormController">
       <div class='row' id="wpiToggleControlBtnDiv">
          <div class='row col-md-4' ng-If="uniqueId == '' ">
@@ -110,7 +115,7 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select name="serviceName" id="selectService" ng-change="getActivityName()"
+                     <select name="serviceName" id="selectService" ng-change="MapActivityName()"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'
                         ng-model="serviceName">
                         <option ng-repeat="service in services" value="{{service.value}}">{{service.label}}</option>
@@ -121,12 +126,14 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select id="selectedActivity" ng-model="selectedActivity" ng-change="getCostHead()"
+                     <select id="activitySelect" ng-model="selectedActivity"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option value="">-- Select Activity --</option>
-                        <option ng-repeat="activity in activityNamesDropdown" value="{{activity}}">{{activity}}</option>
+                        <option ng-repeat="activity in activityNamesDropdownList" value="{{activity}}">
+                           {{activity}}</option>
                      </select>
                   </div>
+
 
                </div>
                <div class="row">
@@ -145,11 +152,12 @@
                   <div class="col-sm-2 labelHeader">Activity Type:
                      <label class='redStar'>*</label>
                   </div>
-                  <div class="col-sm-2" <select name="activityType" id="selectActivityType" ng-model="activityType"
-                     class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
-                     <option value="">-- Select Activity Type --&nbsp;</option>
-                     <option value="One Time">One Time&nbsp;</option>
-                     <option value="Monthly Recurring">Monthly Recurring&nbsp;</option>
+                  <div class="col-sm-2">
+                     <select name="activityType" id="selectActivityType" ng-model="activityType"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
+                        <option value="">-- Select Activity Type --&nbsp;</option>
+                        <option value="One Time">One Time&nbsp;</option>
+                        <option value="Monthly Recurring">Monthly Recurring&nbsp;</option>
                      </select>
                      <label></label>
                   </div>
@@ -447,4 +455,6 @@
             </div>
          </div>
       </div>
+      <!-- APP FormController end -->
    </div>
+</div>

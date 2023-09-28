@@ -59,7 +59,41 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
 MarketingActivityModule.controller('FormController', ['$scope', '$http', function ($scope, $http) {
 
     $scope.services = services;
-    $scope.selectedService = '';
+    $scope.MapActivityName = () => getActivityNames();
+
+    /**
+     * Retrieves marketing activity names from a SharePoint list `MarketingActivityMapper` based on `$scope.services` and populates the dropdown.
+     * @returns {void}
+     */
+    const getActivityNames = () => {
+
+        const selectedService = $scope.serviceName;
+        $scope.activityNamesDropdown = "";
+
+        const base = `${ABS_URL}/_api/lists/getbytitle('MarketingActivityMapper')/items`;
+        const filter = `$filter=ServiceName eq '${selectedService}'`;
+        const query = `$select=ActivityName`;
+
+        const url = `${base}?${filter}&${query}`;
+
+        $http({
+            method: "GET",
+            url: url,
+            headers: {
+                "accept": "application/json;odata=verbose"
+            }
+        }).then(function (response) {
+            const ActivityNameList = response.data.d.results;
+            $scope.activityNamesDropdownList = ActivityNameList.map((item) => item.ActivityName);
+
+        }
+        ).catch(function (err) {
+            console.log("Error getting user information", err);
+        })
+            .finally(function () {
+                $scope.IsLoading = false;
+            });
+    }
 
 }]);
 
