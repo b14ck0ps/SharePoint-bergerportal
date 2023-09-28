@@ -153,25 +153,21 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select name="activityType" id="selectActivityType" ng-model="activityType"
+                     <select id="activitySelect" ng-model="selectedActivityType"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
-                        <option value="">-- Select Activity Type --&nbsp;</option>
-                        <option value="One Time">One Time&nbsp;</option>
-                        <option value="Monthly Recurring">Monthly Recurring&nbsp;</option>
+                        <option ng-repeat="type in activityTypes" value="{{type.value}}">{{type.label}}</option>
                      </select>
                      <label></label>
                   </div>
+
 
                   <div class="col-sm-2 labelHeader">Budget Type:
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select name="budgetType" id="selectBudgetType" ng-model="budgetType"
+                     <select name="budgetType" id="selectBudgetType" ng-model="selectedBudgetType"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
-                        <option value="">-- Select Budget Type --&nbsp;</option>
-                        <option value="Available Budget">Available Budget&nbsp;</option>
-                        <option value="Need to Transfer">Need to Transfer&nbsp;</option>
-                        <option value="Supplementary">Supplementary&nbsp;</option>
+                        <option ng-repeat="type in budgetTypes" value="{{type.value}}">{{type.label}}</option>
                      </select>
                      <label></label>
                   </div>
@@ -184,57 +180,7 @@
                   <div class="col-sm-2">
                      <select name="brandDescription" id="selectBrandDescription" ng-model="brandDescription"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
-                        <option value="">-- Select Brand Description --&nbsp;</option>
-                        <option value="Adhesive -Power Bond">Adhesive -Power Bond&nbsp;</option>
-                        <option value="Adhesive -Tex Bond">Adhesive -Tex Bond&nbsp;</option>
-                        <option value="APE">APE&nbsp;</option>
-                        <option value="Auto Refinish">Auto Refinish&nbsp;</option>
-                        <option value="Berger Experience Zone (Decorative)">Berger Experience Zone (Decorative)&nbsp;
-                        </option>
-                        <option value="BREATHE EASY">BREATHE EASY&nbsp;</option>
-                        <option value="BREATHE EASY Ena">BREATHE EASY Ena&nbsp;</option>
-                        <option value="Color Bank">Color Bank&nbsp;</option>
-                        <option value="Corporate Brand">Corporate Brand&nbsp;</option>
-                        <option value="Damp Guard">Damp Guard&nbsp;</option>
-                        <option value="Decorative">Decorative&nbsp;</option>
-                        <option value="DUROCEM">DUROCEM&nbsp;</option>
-                        <option value="EASY CLEAN">EASY CLEAN&nbsp;</option>
-                        <option value="EP Tools (Express Painting)">EP Tools (Express Painting)&nbsp;</option>
-                        <option value="Express Painting Service">Express Painting Service&nbsp;</option>
-                        <option value="Home Décor Branding">Home Décor Branding&nbsp;</option>
-                        <option value="Industrial Paints">Industrial Paints&nbsp;</option>
-                        <option value="INNOVA">INNOVA&nbsp;</option>
-                        <option value="JHILIK">JHILIK&nbsp;</option>
-                        <option value="LS. Metallic Finish">LS. Metallic Finish&nbsp;</option>
-                        <option value="LSE">LSE&nbsp;</option>
-                        <option value="Marine Paints">Marine Paints&nbsp;</option>
-                        <option value="Mr.EXPERT DAMP GUARD">Mr.EXPERT DAMP GUARD&nbsp;</option>
-                        <option value="Painters App">Painters App&nbsp;</option>
-                        <option value="Powder Coating">Powder Coating&nbsp;</option>
-                        <option value="PRE TREATMENT CHEM">PRE TREATMENT CHEM&nbsp;</option>
-                        <option value="Printing Ink">Printing Ink&nbsp;</option>
-                        <option value="REX">REX&nbsp;</option>
-                        <option value="RIN">RIN&nbsp;</option>
-                        <option value="ROBB WALL PUTTY">ROBB WALL PUTTY&nbsp;</option>
-                        <option value="ROBB WATER SEALER">ROBB WATER SEALER&nbsp;</option>
-                        <option value="RSE">RSE&nbsp;</option>
-                        <option value="Salt Safe">APSalt SafeE&nbsp;</option>
-                        <option value="SPD">SPD&nbsp;</option>
-                        <option value="Touch putty (Decorative)">Touch putty (Decorative)&nbsp;</option>
-                        <option value="Value Club App, LMS, Happy Wallet, MR/VR">Value Club App, LMS, Happy Wallet,
-                           MR/VR&nbsp;</option>
-                        <option value="Vehicle Refinish">Vehicle Refinish&nbsp;</option>
-                        <option value="W/C ANTIDIRT">W/C ANTIDIRT&nbsp;</option>
-                        <option value="W/C ANTIDIRT LONGLIF">W/C ANTIDIRT LONGLIF&nbsp;</option>
-                        <option value="W/C ANTIDIRT LONGLIFE (F167)">W/C ANTIDIRT LONGLIFE (F167)&nbsp;</option>
-                        <option value="W/C Antidirt Supreme (F168)">W/C Antidirt Supreme (F168)&nbsp;</option>
-                        <option value="W/C EXTERIOR SEALER">W/C EXTERIOR SEALER&nbsp;</option>
-                        <option value="W/C SMOOTH">W/C SMOOTH&nbsp;</option>
-                        <option value="WC GLOW">WC GLOW&nbsp;</option>
-                        <option value="WEATHER COAT EXTERIOR SEALER">WEATHER COAT EXTERIOR SEALER&nbsp;</option>
-                        <option value="Wood Coating / Innova">Wood Coating / Innova&nbsp;</option>
-                        <option value="WOOD KEEPER">WOOD KEEPER&nbsp;</option>
-                        <option value="Xpress Sealer (Decorative)">Xpress Sealer (Decorative)&nbsp;</option>
+                        <option ng-repeat="brand in brands" value="{{brand.value}}">{{brand.label}}</option>
                      </select>
                      <label></label>
                   </div>
@@ -245,17 +191,7 @@
                   <div class="col-sm-2">
                      <select name="commitmentItem" id="selectCommitmentItem" ng-model="commitmentItem"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
-                        <option value="">-- Select Commitment Item --&nbsp;</option>
-                        <option value="Con Pro_Campaign Actv Cost">Con Pro_Campaign Actv Cost&nbsp;</option>
-                        <option value="Corporate - Other">Corporate - Other&nbsp;</option>
-                        <option value="PTI Gift">PTI Gift&nbsp;</option>
-                        <option value="SC Production Cost">SC Production Cost&nbsp;</option>
-                        <option value="Shomporko Scheme_On invoice">Shomporko Scheme_On invoice&nbsp;</option>
-                        <option value="Mass Calendar Production">Mass Calendar Production&nbsp;</option>
-                        <option value="Exec. Diary Prod.">Exec. Diary Prod.&nbsp;</option>
-                        <option value="Small Diary Prod.">Small Diary Prod.&nbsp;</option>
-                        <option value="Shade Card Mgt">Shade Card Mgt&nbsp;</option>
-                        <option value="POSM Print">POSM Print&nbsp;</option>
+                        <option ng-repeat="item in commitmentItems" value="{{item.value}}">{{item.label}}</option>
                      </select>
                      <label></label>
                   </div>
@@ -308,9 +244,8 @@
                      <select name="requiredVendorQuotation" id="selectRequiredVendorQuotation"
                         ng-model="requiredVendorQuotation"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
-                        <option value="">-- Select Required Vendor Quotation --&nbsp;</option>
-                        <option value="Minimum 3 parties">Minimum 3 parties&nbsp;</option>
-                        <option value="Single Vendor">Single Vendor&nbsp;</option>
+                        <option ng-repeat="vendor in vendorQuotations" value="{{vendor.value}}">{{vendor.label}}
+                        </option>
                      </select>
                      <label></label>
                   </div>
