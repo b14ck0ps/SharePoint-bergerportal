@@ -54,3 +54,40 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
             });
     }
 }]);
+
+
+MarketingActivityModule.controller('FormController', ['$scope', '$http', function ($scope, $http) {
+
+    $scope.services = services;
+    $scope.selectedService = '';
+
+}]);
+
+/**
+ * List of services.
+ */
+const services = [
+    { value: '', label: '-- Select Service --' },
+    { value: 'TV Media', label: 'TV Media' },
+    { value: 'TV Production and TVC', label: 'TV Production and TVC' },
+    { value: 'Redio Media', label: 'Redio Media' },
+    { value: 'Social Media', label: 'Social Media' },
+    { value: 'Sponsorship', label: 'Sponsorship' },
+    { value: 'Press Ad', label: 'Press Ad' },
+    { value: 'Outdoor Billboard, Wall and Shutter Painting', label: 'Outdoor Billboard, Wall and Shutter Painting' },
+    { value: 'Shop Sign and Decoration', label: 'Shop Sign and Decoration' },
+    { value: 'Software Development and Other', label: 'Software Development and Other' },
+    { value: 'Corporate Marketing Service', label: 'Corporate Marketing Service' },
+    { value: 'Market Research - Retail Audit', label: 'Market Research - Retail Audit' },
+    { value: 'Market Research', label: 'Market Research' },
+    { value: 'Scratch card, Mobile SMS, Recharge Service', label: 'Scratch card, Mobile SMS, Recharge Service' },
+    { value: 'Dealer Shop Merchandising', label: 'Dealer Shop Merchandising' },
+    { value: 'Event Management (Art, Competition, Awards, Daily Star Anniversary)', label: 'Event Management (Art, Competition, Awards, Daily Star Anniversary)' },
+    { value: 'Consumer Promotion- Activation', label: 'Consumer Promotion- Activation' },
+    { value: 'Fair and Exhibition', label: 'Fair and Exhibition' },
+    { value: 'Pack Design & Creative', label: 'Pack Design & Creative' },
+    { value: 'Franchise Expense-Experience Zone', label: 'Franchise Expense-Experience Zone' },
+    { value: 'Umbrella - courier', label: 'Umbrella - courier' },
+    { value: 'Shomporko Club scheme', label: 'Shomporko Club scheme' },
+    { value: 'PTI service', label: 'PTI service' }
+];

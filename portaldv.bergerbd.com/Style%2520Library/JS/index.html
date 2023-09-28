@@ -76,7 +76,7 @@
          </div>
       </div>
    </div>
-   <div ng-controller="marketingActivityController">
+   <div ng-controller="FormController">
       <div class='row' id="wpiToggleControlBtnDiv">
          <div class='row col-md-4' ng-If="uniqueId == '' ">
             <h6 style="color:white">(All fields marked
@@ -113,38 +113,9 @@
                      <select name="serviceName" id="selectService" ng-change="getActivityName()"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'
                         ng-model="serviceName">
-                        <option value="">-- Select Service --&nbsp;</option>
-                        <option value="TV Media">TV Media&nbsp;</option>
-                        <option value="TV Production and TVC">TV Production and TVC&nbsp;</option>
-                        <option value="Redio Media">Redio Media&nbsp;</option>
-                        <option value="Social Media">Social Media&nbsp;</option>
-                        <option value="Sponsorship">Sponsorship&nbsp;</option>
-                        <option value="Press Ad">Press Ad&nbsp;</option>
-                        <option value="Outdoor Billboard, Wall and Shutter Painting">Outdoor Billboard, Wall and Shutter
-                           Painting&nbsp;</option>
-                        <option value="Shop Sign and Decoration">Shop Sign and Decoration&nbsp;</option>
-                        <option value="Software Development and Other">Software Development and Other&nbsp;</option>
-                        <option value="Corporate Marketting Service">Corporate Marketting Service&nbsp;</option>
-                        <option value="Market Research - Retail Audit">Market Research - Retail Audit&nbsp;</option>
-                        <option value="Market Research">Market Research&nbsp;</option>
-                        <option value="Scratch card, Mobile SMS, Recharge Service">Scratch card, Mobile SMS, Recharge
-                           Service&nbsp;</option>
-                        <option value="Dealer Shop Marchandising">Dealer Shop Marchandising&nbsp;</option>
-                        <option value="Event Management (Art, Competition, Awards, Daily Star Anniversary)">Event
-                           Management (Art, Competition, Awards, Daily Star Anniversary)&nbsp;</option>
-
-                        <option value="Consumer Promotion- Activation">Consumer Promotion- Activation&nbsp;</option>
-                        <option value="Fair and Exhibition">Fair and Exhibition&nbsp;</option>
-                        <option value="Pack Design & Creative">Pack Design & Creative&nbsp;</option>
-                        <option value="Franchise Expense-Experiance Zone">Franchise Expense-Experiance Zone&nbsp;
-                        </option>
-                        <option value="Umbrella - courier">Umbrella - courier&nbsp;</option>
-                        <option value="Shomporko Club scheme">Shomporko Club scheme&nbsp;</option>
-                        <option value="PTI service">PTI service&nbsp;</option>
+                        <option ng-repeat="service in services" value="{{service.value}}">{{service.label}}</option>
                      </select>
-                     <label></label>
                   </div>
-
 
                   <div class="col-sm-2 labelHeader">Activity Name:
                      <label class='redStar'>*</label>
