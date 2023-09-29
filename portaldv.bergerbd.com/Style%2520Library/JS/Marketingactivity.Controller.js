@@ -7,7 +7,7 @@ const API_POST_HEADERS = {
 };
 
 const PendingApprovalUniqueId = new URLSearchParams(window.location.search).get('UniqueId');
-const USER_EMAIL_ID = _spPageContextInfo.userId;
+const USER_ID = _spPageContextInfo.userId;
 const OPM_INFO = { id: 0, name: "" };
 const RequesterInfo = {
     name: "",
@@ -30,7 +30,7 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
     $scope.UserInfo = {};
 
     const base = getApiEndpoint("bergerEmployeeInformation");
-    const filter = `$filter=Email/ID eq '${USER_EMAIL_ID}'`;
+    const filter = `$filter=Email/ID eq '${USER_ID}'`;
     const query = `$select=EmployeeName,Email/ID,Email/Title,Email/EMail,OptManagerEmail/ID,OptManagerEmail/Title,DeptID,EmployeeId,EmployeeGrade,Department,Designation,OfficeLocation,Mobile,CostCenter&$expand=Email/ID,OptManagerEmail/ID&$top=1`;
 
     $scope.IsLoading = true;
@@ -71,12 +71,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
     if (!PendingApprovalUniqueId) {
         $scope.showSaveOrSubmitBtn = true;
-    } else { /* If Some one click on a link from `Pending Approval` list */
-        $scope.showApproveBtn = true;
-        $scope.showChangeBtn = true;
-        $scope.showRejectBtn = true;
-        $scope.IsDataReadOnly = true;
-
+    } else {
+        /* If Some one click on a link from `Pending Approval` list */
         const base = getApiEndpoint("PendingApproval");
         const filter = `$filter=substringof('${PendingApprovalUniqueId}',RequestLink)`;
         const query = `$expand=PendingWith&$select=Title,ProcessName,Status,PendingWith/Id`;
@@ -115,10 +111,17 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         const Row = response.data.d.results[0];
                         $scope.requestCode = `MA-${Row.ID}`;
                         $scope.FormData = { ...Row };
+                        $scope.IsDataReadOnly = true; /* Hide all the input fields & Shows `MarketingActivityMaster` list data */
                     })
                     .catch((e) => console.log("Error getting user information", e))
                     .finally(() => $scope.IsLoading = false);
 
+                /* Approve, Reject, Change buttons configuration */
+                if (USER_ID === CurrentPendingWith) {
+                    $scope.showApproveBtn = true;
+                    $scope.showChangeBtn = true;
+                    $scope.showRejectBtn = true;
+                }
             });
 
     }
