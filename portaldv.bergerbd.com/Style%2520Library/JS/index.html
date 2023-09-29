@@ -128,7 +128,7 @@
       <div class='row' id="wpiToggleControlBtnDiv">
          <div class='row col-md-4' ng-If="uniqueId == '' ">
             <h6 style="color:white">(All fields marked
-               <label class='redStar'>*</label> are mandatory.)
+               <label ng-hide="IsDataReadOnly" class='redStar'>*</label> are mandatory.)
             </h6>
          </div>
          <div class='row col-md-4' ng-If="uniqueId != '' ">
@@ -151,7 +151,7 @@
             <div id="divInput">
                <div class="row" style="margin-left: -16px;">
                   <div class="col-sm-2 labelHeader">Project Name:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <input ng-hide="IsDataReadOnly" type="text" ng-model="FormData.ProjectName" class="textBoxBGColor"
@@ -160,7 +160,7 @@
                   </div>
 
                   <div class="col-sm-2 labelHeader">Service Name:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <select ng-hide="IsDataReadOnly" name="serviceName" id="selectService"
@@ -173,7 +173,7 @@
                   </div>
 
                   <div class="col-sm-2 labelHeader">Activity Name:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <select ng-hide="IsDataReadOnly" id="activitySelect" ng-model="FormData.ActivityName"
@@ -192,7 +192,7 @@
                <div class="row">
 
                   <div class="col-sm-2 labelHeader">Cost Head:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <select ng-hide="IsDataReadOnly" id="selectedCostHead" ng-model="FormData.CostHead"
@@ -205,7 +205,7 @@
                   </div>
 
                   <div class="col-sm-2 labelHeader">Activity Type:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <select ng-hide="IsDataReadOnly" id="activitySelect" ng-model="FormData.ActivityType"
@@ -217,7 +217,7 @@
 
 
                   <div class="col-sm-2 labelHeader">Budget Type:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <select ng-hide="IsDataReadOnly" name="budgetType" id="selectBudgetType"
@@ -231,7 +231,7 @@
 
                <div class="row">
                   <div class="col-sm-2 labelHeader">Brand Description:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <select ng-hide="IsDataReadOnly" name="brandDescription" id="BrandDescription"
@@ -243,7 +243,7 @@
                   </div>
 
                   <div class="col-sm-2 labelHeader">Commitment Item Description:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <select ng-hide="IsDataReadOnly" name="commitmentItem" id="selectCommitmentItem"
@@ -255,7 +255,7 @@
                   </div>
 
                   <div class="col-sm-2 labelHeader">Total Expected Expenses:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <input ng-hide="IsDataReadOnly" type="text" ng-model="FormData.TotalExpectedExpense"
@@ -267,7 +267,7 @@
 
                <div class="row">
                   <div class="col-sm-2 labelHeader">Activity Start Date:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <input ng-hide="IsDataReadOnly" type="date" ng-model="FormData.ActivityStartDate"
@@ -276,7 +276,7 @@
                   </div>
 
                   <div class="col-sm-2 labelHeader">Expected Delivery Date:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <input ng-hide="IsDataReadOnly" type="date" ng-model="FormData.ExpectedDeliveryDate"
@@ -288,7 +288,7 @@
                <div class="row">
 
                   <div class="col-sm-2 labelHeader">Service Receiving Date:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <input ng-hide="IsDataReadOnly" type="date" ng-model="FormData.ServiceReceivingDate"
@@ -297,7 +297,7 @@
                   </div>
 
                   <div class="col-sm-2 labelHeader">Number of vendor require for quotation:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <select ng-hide="IsDataReadOnly" name="requiredVendorQuotation" id="selectRequiredVendorQuotation"
@@ -310,7 +310,7 @@
                   </div>
 
                   <div class="col-sm-2 labelHeader">Justification for Single Vendor:
-                     <label class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <input ng-hide="IsDataReadOnly" type="text" ng-model="FormData.SingleVendorJustification"
