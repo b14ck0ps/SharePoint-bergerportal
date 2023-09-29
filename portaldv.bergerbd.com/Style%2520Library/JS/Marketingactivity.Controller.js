@@ -6,6 +6,7 @@ const API_POST_HEADERS = {
     "X-RequestDigest": $("#__REQUESTDIGEST").val()
 };
 
+const PendingApprovalUniqueId = new URLSearchParams(window.location.search).get('UniqueId');
 const USER_EMAIL_ID = _spPageContextInfo.userId;
 const OPM_INFO = { id: 0, name: "" };
 const RequesterInfo = {
@@ -14,8 +15,6 @@ const RequesterInfo = {
     id: 0
 };
 
-
-let PendingApprovalUniqueId = null;
 let CurrentPendingWith = null;
 
 
@@ -30,41 +29,27 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
     $scope.today = new Date();
     $scope.UserInfo = {};
 
-    /* This function Run at First when the page loaded. Invoked on Template Page (Line:21)  */
-    $scope.InitPage = () => {
-        getUserByInfoEmailId();
-        PendingApprovalUniqueId = getUniqueIdFromCurrentUrl();
-    }
+    const base = getApiEndpoint("bergerEmployeeInformation");
+    const filter = `$filter=Email/ID eq '${USER_EMAIL_ID}'`;
+    const query = `$select=EmployeeName,Email/ID,Email/Title,Email/EMail,OptManagerEmail/ID,OptManagerEmail/Title,DeptID,EmployeeId,EmployeeGrade,Department,Designation,OfficeLocation,Mobile,CostCenter&$expand=Email/ID,OptManagerEmail/ID&$top=1`;
 
+    $scope.IsLoading = true;
+    $http({
+        method: "GET",
+        url: `${base}?${filter}&${query}`,
+        headers: API_GET_HEADERS
+    })
+        .then(function (response) {
+            $scope.UserInfo = response.data.d.results[0];
+            RequesterInfo.name = $scope.UserInfo.EmployeeName;
+            RequesterInfo.email = $scope.UserInfo.Email.EMail;
+            RequesterInfo.id = $scope.UserInfo.Email.ID;
 
-    /**
-     * Retrieves user information from a SharePoint list `bergerEmployeeInformation` based on their email ID.
-     * @returns {void}
-     */
-    const getUserByInfoEmailId = () => {
-
-        const base = getApiEndpoint("bergerEmployeeInformation");
-        const filter = `$filter=Email/ID eq '${USER_EMAIL_ID}'`;
-        const query = `$select=EmployeeName,Email/ID,Email/Title,Email/EMail,OptManagerEmail/ID,OptManagerEmail/Title,DeptID,EmployeeId,EmployeeGrade,Department,Designation,OfficeLocation,Mobile,CostCenter&$expand=Email/ID,OptManagerEmail/ID&$top=1`;
-
-        $scope.IsLoading = true;
-        $http({
-            method: "GET",
-            url: `${base}?${filter}&${query}`,
-            headers: API_GET_HEADERS
+            OPM_INFO.id = $scope.UserInfo.OptManagerEmail.ID;
+            OPM_INFO.name = $scope.UserInfo.OptManagerEmail.Title;
         })
-            .then(function (response) {
-                $scope.UserInfo = response.data.d.results[0];
-                RequesterInfo.name = $scope.UserInfo.EmployeeName;
-                RequesterInfo.email = $scope.UserInfo.Email.EMail;
-                RequesterInfo.id = $scope.UserInfo.Email.ID;
-
-                OPM_INFO.id = $scope.UserInfo.OptManagerEmail.ID;
-                OPM_INFO.name = $scope.UserInfo.OptManagerEmail.Title;
-            })
-            .catch((e) => console.log("Error getting user information", e))
-            .finally(() => $scope.IsLoading = false);
-    }
+        .catch((e) => console.log("Error getting user information", e))
+        .finally(() => $scope.IsLoading = false);
 }]);
 
 
@@ -86,7 +71,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
     if (!PendingApprovalUniqueId) {
         $scope.showSaveOrSubmitBtn = true;
-    } else {
+    } else { /* If Some one click on a link from `Pending Approval` list */
         $scope.showApproveBtn = true;
         $scope.showChangeBtn = true;
         $scope.showRejectBtn = true;
@@ -97,6 +82,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         const query = `$expand=PendingWith&$select=Title,ProcessName,Status,PendingWith/Id`;
 
         $scope.IsLoading = true;
+        /* Getting the request id, status and pendingwith from `PendingApproval` list */
         $http({
             method: "GET",
             url: `${base}?${filter}&${query}`,
@@ -104,7 +90,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         })
             .then((response) => {
                 const Row = response.data.d.results[0];
-                RequestId = parseInt(Row.Title.replace(/\D/g, ''), 10);
+                RequestId = parseInt(Row.Title.replace(/\D/g, ''), 10); /* convert `MA-1` to `1` */
                 Status = Row.Status;
                 CurrentPendingWith = Row.PendingWith.results[0].Id;
             })
@@ -119,6 +105,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 const filter = `$filter=ID eq '${RequestId}'`;
                 const query = `$select=ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,AuthorId`;
 
+                /* Getting the request data from `MarketingActivityMaster` list */
                 $http({
                     method: "GET",
                     url: `${base}?${filter}&${query}`,
@@ -145,7 +132,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         const base = getApiEndpoint("MarketingActivityMapper");
         const filter = `$filter=ServiceName eq '${$scope.FormData.ServiceName}'`;
         const query = `$select=ActivityName`;
-
+        $scope.IsLoading = true;
         $http({
             method: "GET",
             url: `${base}?${filter}&${query}`,
@@ -166,6 +153,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         const filter = `$filter=ActivityName eq '${$scope.FormData.ActivityName}'`;
         const query = `$select=CostHead`;
 
+        $scope.IsLoading = true;
         $http({
             method: "GET",
             url: `${base}?${filter}&${query}`,
@@ -189,7 +177,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         const marketingActivityMasterData = {
             ...$scope.FormData,
             'Status': status,
-            // 'PendingWith': { id: OPM_INFO.id },
+
+            // 'PendingWith': { id: OPM_INFO.id }, TODO: Fix this
             '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
         };
 
@@ -200,7 +189,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             data: marketingActivityMasterData,
         })
             .then((response) => {
-                /* Saving the data to PendingApproval List */
+                /**
+                 * Saves the request to a SharePoint list `PendingApproval`.
+                 * @file constants.js
+                 */
                 saveAtMyTask(`MA-${response.data.d.ID}`, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, `	https://portaldv.bergerbd.com/leaveauto/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`);
             })
             .catch(function (message) {
@@ -218,18 +210,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
  * @returns {string} API base URL
  */
 const getApiEndpoint = (ListName) => `${ABS_URL}/_api/web/lists/getByTitle('${ListName}')/items`;
-
-/**
- * Set the unique ID from the current URL and sets it to `$scope.PendingApprovalUniqueId`.
- * @returns {string | null} Unique ID from the current URL if it exists, otherwise `null`
- */
-const getUniqueIdFromCurrentUrl = () => {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('UniqueId');
-    }
-    catch (e) { return null; }
-}
 
 const services = [
     { value: '', label: '-- Select Service --' },
