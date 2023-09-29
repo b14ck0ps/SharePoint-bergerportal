@@ -64,8 +64,8 @@
    }
 </style>
 <!--#region APP MarketingActivityApp Start -->
-<div ng-app="MarketingActivityApp" class="container BlockStockRequest">
-   <div ng-controller="UserController" ng-init="InitPage()">
+<main ng-app="MarketingActivityApp" class="container BlockStockRequest">
+   <section ng-controller="UserController" ng-init="InitPage()">
       <div ng-show="IsLoading" class="spinner-container">
          <div class="spinner"></div>
       </div>
@@ -119,12 +119,12 @@
             </div>
          </div>
       </div>
-   </div>
+   </section>
    <!--#endregion APP MarketingActivityApp End -->
 
 
    <!-- #region APP FormController Start -->
-   <div ng-controller="FormController">
+   <section ng-controller="FormController">
       <div class='row' id="wpiToggleControlBtnDiv">
          <div class='row col-md-4' ng-If="uniqueId == '' ">
             <h6 style="color:white">(All fields marked
@@ -447,5 +447,5 @@
          </div>
       </div>
       <!-- #endregion APP FormController end -->
-   </div>
-</div>
+   </section>
+</main>

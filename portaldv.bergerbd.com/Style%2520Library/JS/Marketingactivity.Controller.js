@@ -28,7 +28,6 @@ const MarketingActivityModule = angular.module("MarketingActivityApp", []);
 
 MarketingActivityModule.controller('UserController', ['$scope', '$http', function ($scope, $http) {
     $scope.today = new Date();
-    $scope.IsLoading = true;
     $scope.UserInfo = {};
 
     /* This function Run at First when the page loaded. Invoked on Template Page (Line:21)  */
@@ -43,12 +42,12 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
      * @returns {void}
      */
     const getUserByInfoEmailId = () => {
-        $scope.IsLoading = true;
 
         const base = getApiEndpoint("bergerEmployeeInformation");
         const filter = `$filter=Email/ID eq '${USER_EMAIL_ID}'`;
         const query = `$select=EmployeeName,Email/ID,Email/Title,Email/EMail,OptManagerEmail/ID,OptManagerEmail/Title,DeptID,EmployeeId,EmployeeGrade,Department,Designation,OfficeLocation,Mobile,CostCenter&$expand=Email/ID,OptManagerEmail/ID&$top=1`;
 
+        $scope.IsLoading = true;
         $http({
             method: "GET",
             url: `${base}?${filter}&${query}`,
@@ -74,8 +73,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     var RequestId = null;
     var Status = null;
 
-    $scope.IsLoading = false;
-
     $scope.services = services;
     $scope.activityTypes = activityTypes;
     $scope.budgetTypes = budgetTypes;
@@ -90,7 +87,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     if (!PendingApprovalUniqueId) {
         $scope.showSaveOrSubmitBtn = true;
     } else {
-        $scope.IsLoading = true;
         $scope.showApproveBtn = true;
         $scope.showChangeBtn = true;
         $scope.showRejectBtn = true;
@@ -100,6 +96,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         const filter = `$filter=substringof('${PendingApprovalUniqueId}',RequestLink)`;
         const query = `$expand=PendingWith&$select=Title,ProcessName,Status,PendingWith/Id`;
 
+        $scope.IsLoading = true;
         $http({
             method: "GET",
             url: `${base}?${filter}&${query}`,
