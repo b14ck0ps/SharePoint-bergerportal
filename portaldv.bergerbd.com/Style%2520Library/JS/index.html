@@ -157,7 +157,9 @@
                      <label class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input type="text" ng-model="FormData.ProjectName" class="textBoxBGColor" id="projectName" />
+                     <input ng-hide="IsDataReadOnly" type="text" ng-model="FormData.ProjectName" class="textBoxBGColor"
+                        id="projectName" />
+                     <span ng-show="IsDataReadOnly">{{FormData.ProjectName}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Service Name:

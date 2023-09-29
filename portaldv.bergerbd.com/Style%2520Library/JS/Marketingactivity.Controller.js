@@ -16,7 +16,7 @@ const RequesterInfo = {
 
 
 let PendingApprovalUniqueId = null;
-
+let CurrentPendingWith = null;
 
 
 
@@ -71,6 +71,11 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
 
 MarketingActivityModule.controller('FormController', ['$scope', '$http', function ($scope, $http) {
 
+    var RequestId = null;
+    var Status = null;
+
+    $scope.IsLoading = false;
+
     $scope.services = services;
     $scope.activityTypes = activityTypes;
     $scope.budgetTypes = budgetTypes;
@@ -78,12 +83,33 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     $scope.commitmentItems = commitmentItems;
     $scope.vendorQuotations = vendorQuotations;
 
-    if (PendingApprovalUniqueId) {
+    if (!PendingApprovalUniqueId) {
+        $scope.showSaveOrSubmitBtn = true;
+    } else {
         $scope.showApproveBtn = true;
         $scope.showChangeBtn = true;
         $scope.showRejectBtn = true;
-    } else {
-        $scope.showSaveOrSubmitBtn = true;
+        $scope.IsDataReadOnly = true;
+
+        const base = getApiEndpoint("PendingApproval");
+        const filter = `$filter=substringof('${PendingApprovalUniqueId}',RequestLink)`;
+        const query = `$expand=PendingWith&$select=Title,ProcessName,Status,PendingWith/Id`;
+
+        $http({
+            method: "GET",
+            url: `${base}?${filter}&${query}`,
+            headers: API_GET_HEADERS
+        })
+            .then((response) => {
+                const Row = response.data.d.results[0];
+                RequestId = parseInt(Row.Title.replace(/\D/g, ''), 10);
+                Status = Row.Status;
+                CurrentPendingWith = Row.PendingWith.results[0].Id;
+                console.log(RequestId, Status, CurrentPendingWith);
+            })
+            .catch((e) => console.log("Error getting user information", e))
+            .finally(() => $scope.IsLoading = false);
+
     }
 
     $scope.MapActivityName = () => getActivityNames();
