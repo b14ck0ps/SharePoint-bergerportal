@@ -83,9 +83,14 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     $scope.commitmentItems = commitmentItems;
     $scope.vendorQuotations = vendorQuotations;
 
+    $scope.MapActivityName = () => getActivityNames();
+    $scope.MapCostHead = () => getCostHead();
+    $scope.clickSaveOrSubmit = (status) => { saveOrSubmit(status); }
+
     if (!PendingApprovalUniqueId) {
         $scope.showSaveOrSubmitBtn = true;
     } else {
+        $scope.IsLoading = true;
         $scope.showApproveBtn = true;
         $scope.showChangeBtn = true;
         $scope.showRejectBtn = true;
@@ -105,17 +110,34 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 RequestId = parseInt(Row.Title.replace(/\D/g, ''), 10);
                 Status = Row.Status;
                 CurrentPendingWith = Row.PendingWith.results[0].Id;
-                console.log(RequestId, Status, CurrentPendingWith);
             })
             .catch((e) => console.log("Error getting user information", e))
-            .finally(() => $scope.IsLoading = false);
+            .finally(() => {
+                if (!RequestId) {
+                    $scope.IsLoading = false;
+                    return;
+                }
+
+                const base = getApiEndpoint("MarketingActivityMaster");
+                const filter = `$filter=ID eq '${RequestId}'`;
+                const query = `$select=ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,AuthorId`;
+
+                $http({
+                    method: "GET",
+                    url: `${base}?${filter}&${query}`,
+                    headers: API_GET_HEADERS
+                })
+                    .then((response) => {
+                        const Row = response.data.d.results[0];
+                        $scope.requestCode = `MA-${Row.ID}`;
+                        $scope.FormData = { ...Row };
+                    })
+                    .catch((e) => console.log("Error getting user information", e))
+                    .finally(() => $scope.IsLoading = false);
+
+            });
 
     }
-
-    $scope.MapActivityName = () => getActivityNames();
-    $scope.MapCostHead = () => getCostHead();
-
-    $scope.clickSaveOrSubmit = (status) => { saveOrSubmit(status); }
 
     /**
      * Retrieves marketing activity names from a SharePoint list `MarketingActivityMapper` based on `$scope.services` and populates the `Activity Name` dropdown.
