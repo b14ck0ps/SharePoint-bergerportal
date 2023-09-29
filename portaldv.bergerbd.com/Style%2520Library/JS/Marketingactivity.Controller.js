@@ -15,6 +15,11 @@ const RequesterInfo = {
 };
 
 
+let PendingApprovalUniqueId = null;
+
+
+
+
 /**
  * Angular module for the Marketing Activity app.
  * @module MarketingActivityApp
@@ -29,6 +34,7 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
     /* This function Run at First when the page loaded. Invoked on Template Page (Line:21)  */
     $scope.InitPage = () => {
         getUserByInfoEmailId();
+        PendingApprovalUniqueId = getUniqueIdFromCurrentUrl();
     }
 
 
@@ -72,6 +78,13 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     $scope.commitmentItems = commitmentItems;
     $scope.vendorQuotations = vendorQuotations;
 
+    if (PendingApprovalUniqueId) {
+        $scope.showApproveBtn = true;
+        $scope.showChangeBtn = true;
+        $scope.showRejectBtn = true;
+    } else {
+        $scope.showSaveOrSubmitBtn = true;
+    }
 
     $scope.MapActivityName = () => getActivityNames();
     $scope.MapCostHead = () => getCostHead();
@@ -160,6 +173,18 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
  * @returns {string} API base URL
  */
 const getApiEndpoint = (ListName) => `${ABS_URL}/_api/web/lists/getByTitle('${ListName}')/items`;
+
+/**
+ * Set the unique ID from the current URL and sets it to `$scope.PendingApprovalUniqueId`.
+ * @returns {string | null} Unique ID from the current URL if it exists, otherwise `null`
+ */
+const getUniqueIdFromCurrentUrl = () => {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('UniqueId');
+    }
+    catch (e) { return null; }
+}
 
 const services = [
     { value: '', label: '-- Select Service --' },

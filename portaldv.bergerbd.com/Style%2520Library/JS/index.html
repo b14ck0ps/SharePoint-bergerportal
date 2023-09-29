@@ -364,35 +364,31 @@
                         <div class="col-sm-7">
                            <div class=" row">
                               <div class="col-sm-2">
-                                 <input type="button" id="btnsave" value="Save" ng-click="clickSaveOrSubmit('Saved')" />
+                                 <input type="button" id="btnsave" ng-show="showSaveOrSubmitBtn" value="Save"
+                                    ng-click="clickSaveOrSubmit('Saved')" />
                               </div>
                               <div class="col-sm-2">
-                                 <input type="button" id="btnsubmit" value="Submit"
+                                 <input type="button" id="btnsubmit" value="Submit" ng-show="showSaveOrSubmitBtn"
                                     ng-click="clickSaveOrSubmit('Submitted')" />
 
                               </div>
                               <div class="col-sm-2">
                                  <input type="button" id="btncancel" value="Cancel"
-                                    ng-click="ApproverAction('Rejected')"
-                                    ng-show="status=='OPMApproved' || status=='MDApproved' || status=='ReimbursementSaved' || status=='OPMToUser'" />
+                                    ng-click="ApproverAction('Rejected')" ng-show="showCancelBtn" />
                               </div>
                            </div>
                            <div class="row">
                               <div class="col-sm-2">
                                  <input type="button" id="btnApprove" value="Approve"
-                                    ng-click="ApproverAction('Approved')"
-                                    ng-show="status=='MarketingAccountantToAccountsConcern'||status=='GMMarketingToMarketingAccountant'||status=='ReimbursementGMMarketingToACConcern'||status=='UserToSOIC'||status=='UserToGMMarketing'|| status=='Submitted'|| status=='SOICtoGMMarketing' || (status=='GMMarketingToAccountsConcern' && readMode !='e')|| status=='AccountsConcernToMarketingAccountant' ||status=='ReimbursementSubmitted' || status=='ReimbursementSOICtoGMMarketing' || status=='ReimbursementACConcernToMarketingAC' || status=='ReimbursementUserToSOIC' || status=='ReimbursementUserToGMMarketing'" />
+                                    ng-click="ApproverAction('Approved')" ng-show="showApproveBtn" />
                               </div>
                               <div class="col-sm-2">
-                                 <input type="button" id="btnReject" value="Reject"
-                                    ng-click="ApproverAction('Rejected')"
-                                    ng-show="status=='UserToSOIC'||status=='Submitted' ||status=='ReimbursementSubmitted' || status=='SOICtoGMMarketing' || (status=='GMMarketingToAccountsConcern'&& readMode !='e')|| status=='AccountsConcernToMarketingAccountant'|| status=='ReimbursementUserToSOIC' || status=='ReimbursementUserToGMMarketing'" />
+                                 <input type="button" id="btnReject" value="Reject" ng-click="showRejectBtn" /
+                                    ng-show="showRejectBtn">
                               </div>
                               <div class="col-sm-2">
                                  <input type="button" id="btnChange" value="Request Change"
-                                    ng-click="ApproverAction('Changed')"
-                                    ng-show="status=='Submitted' || status=='MarketingAccountantToAccountsConcern'|| status=='AccountsConcernToMarketingAccountant' || status=='ReimbursementSubmitted'||status=='ReimbursementSOICtoGMMarketing'|| status=='ReimbursementUserToSOIC' || status=='ReimbursementUserToGMMarketing'"
-                                    ng-hide="status=='ReimbursementSOICtoGMMarketing'||status=='ReimbursementGMMarketingToACConcern'||uId==''||status==''||status=='SOICtoUser'||status=='MarketingAccountantToAccountsConcern' || status=='AccountsConcernToUser'||status=='ProposalApproved&ActualBillSubmissionRequest' ||status=='ReimbursementGMMarketingToUser' " />
+                                    ng-click="ApproverAction('Changed')" ng-show="showChangeBtn" />
                               </div>
                            </div>
                         </div>
