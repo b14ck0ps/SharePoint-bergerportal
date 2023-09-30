@@ -140,7 +140,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
                 const base = getApiEndpoint("MarketingActivityMaster");
                 const filter = `$filter=ID eq '${RequestId}'`;
-                const query = `$select=ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,AuthorId`;
+                const query = `$select=ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,AuthorId&$top=1`;
 
                 /* Getting the request data from `MarketingActivityMaster` list */
                 $http({
