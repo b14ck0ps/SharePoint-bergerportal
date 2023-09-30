@@ -1,11 +1,11 @@
 const ABS_URL = _spPageContextInfo.webAbsoluteUrl;
-const API_GET_HEADERS = { "accept": "application/json;odata=verbose" };
+const API_GET_HEADERS = { "Accept": "application/json;odata=verbose" };
 const API_POST_HEADERS = {
-    "Accept": "application/json; odata=verbose",
+    ...API_GET_HEADERS,
     "Content-Type": "application/json; odata=verbose",
     "X-RequestDigest": $("#__REQUESTDIGEST").val()
 };
-
+const API_UPDATE_HEADERS = { ...API_POST_HEADERS, "IF-MATCH": "*", "X-HTTP-Method": "MERGE" };
 /**
  * Flag indicating whether the current environment is a development environment.
  * Any URL containing `portaldv` is considered a development environment.
@@ -57,6 +57,21 @@ let NextPendingWith = null;
  * When Approver Click a button, This status will be set on the `PendingApproval` list and `MarketingActivityMaster` list.
  */
 let StatusOnApprove = null;
+/**
+ * This is the Current status of the `PendingApproval` list.
+ * @type {string}
+ **/
+let CurrentStatus = null;
+/**
+ * This is the PK of the `PendingApproval` list. This is used to Update the `PendingApproval` list.
+ * @type {number}
+*/
+let PendingApprovalId = null;
+/**
+ * This is the PK of the `MarketingActivityMaster` list. This is used to Update the `MarketingActivityMaster` list.
+* @type {number}
+* */
+let RequestId = null;
 
 
 
@@ -128,9 +143,6 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
 
 MarketingActivityModule.controller('FormController', ['$scope', '$http', function ($scope, $http) {
 
-    var RequestId = null;
-    var Status = null;
-
     $scope.services = services;
     $scope.activityTypes = activityTypes;
     $scope.budgetTypes = budgetTypes;
@@ -141,6 +153,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     $scope.MapActivityName = () => getActivityNames();
     $scope.MapCostHead = () => getCostHead();
     $scope.clickSaveOrSubmit = (status) => { saveOrSubmit(status); }
+    $scope.ApproverAction = (Action) => { UpdateApproveStatus(Action); }
 
     if (!PendingApprovalUniqueId) {
         $scope.showSaveOrSubmitBtn = true;
@@ -148,7 +161,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         /* If Some one click on a link from `Pending Approval` list */
         const base = getApiEndpoint("PendingApproval");
         const filter = `$filter=substringof('${PendingApprovalUniqueId}',RequestLink)`;
-        const query = `$expand=PendingWith&$select=Title,ProcessName,Status,PendingWith/Id`;
+        const query = `$expand=PendingWith&$select=ID,Title,ProcessName,Status,PendingWith/Id`;
 
         $scope.IsLoading = true;
         /* Getting the request id, status and pendingwith from `PendingApproval` list */
@@ -160,8 +173,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .then((response) => {
                 const Row = response.data.d.results[0];
                 RequestId = parseInt(Row.Title.replace(/\D/g, ''), 10); /* convert `MA-1` to `1` */
-                Status = Row.Status;
+                CurrentStatus = Row.Status;
                 CurrentPendingWith = Row.PendingWith.results[0].Id;
+                PendingApprovalId = Row.ID;
             })
             .catch((e) => devlog("Error getting user information", e))
             .finally(() => {
@@ -193,49 +207,33 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                          */
                         const TotalExpectedExpense = $scope.FormData.TotalExpectedExpense;
 
-                        /* Setting the next pending with based on the `Status` and `TotalExpectedExpense` expense */
-                        switch (Status) {
-                            case ApprovalStatus.Submitted:
-                                NextPendingWith = TotalExpectedExpense > ThreeLakh ? ApprovalChain.COO : ApprovalChain.CMO;
-                                break;
-                            case ApprovalStatus.COOApproved:
-                                NextPendingWith = ApprovalChain.CMO;
-                                break;
-                            case ApprovalStatus.CMOApproved:
-                                NextPendingWith = ApprovalChain.FinalApprovar;
-                                break;
-                            case ApprovalStatus.FinalApproved:
-                                NextPendingWith = USER_ID;
-                                break;
-                            default:
-                                devlog('Status not found. Current Status: ' + Status)
-                                break;
-                        }
-
-                        /* Setting the `StatusOnApprove` based on the `CurrentPendingWith` */
-                        switch (CurrentPendingWith) {
-                            case ApprovalChain.COO:
-                                StatusOnApprove = ApprovalStatus.COOApproved;
-                                break;
-                            case ApprovalChain.CMO:
-                                StatusOnApprove = ApprovalStatus.CMOApproved;
-                                break;
-                            case ApprovalChain.FinalApprovar:
-                                StatusOnApprove = ApprovalStatus.FinalApproved;
-                                break;
-                            default:
-                                StatusOnApprove = ApprovalStatus.OPMApproved;
-                                break;
+                        /* Setting the `NextPendingWith` and `StatusOnApprove` based on the `Status` and `TotalExpectedExpense` */
+                        if (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM) {
+                            NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.CMO;
+                            StatusOnApprove = ApprovalStatus.OPMApproved;
+                        } else if (CurrentStatus === ApprovalStatus.OPMApproved && CurrentPendingWith === ApprovalChain.COO) {
+                            NextPendingWith = ApprovalChain.CMO;
+                            StatusOnApprove = ApprovalStatus.COOApproved;
+                        } else if (CurrentStatus === ApprovalStatus.COOApproved || ApprovalStatus.OPMApproved && CurrentPendingWith === ApprovalChain.CMO) {
+                            NextPendingWith = ApprovalChain.FinalApprovar;
+                            StatusOnApprove = ApprovalStatus.CMOApproved;
+                        } else if (CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) {
+                            NextPendingWith = USER_ID;
+                            StatusOnApprove = ApprovalStatus.FinalApproved;
                         }
 
                         /* Approve, Reject, Change buttons configuration */
                         if (USER_ID === CurrentPendingWith || DEV_ENV) {
-                            $scope.showApproveBtn = true;
-                            $scope.showChangeBtn = true;
-                            $scope.showRejectBtn = true;
+                            if (CurrentStatus !== ApprovalStatus.Rejected
+                                && CurrentStatus !== ApprovalStatus.ChangeRequested
+                                && CurrentStatus !== ApprovalStatus.FinalApproved) {
+                                $scope.showApproveBtn = true;
+                                $scope.showChangeBtn = true;
+                                $scope.showRejectBtn = true;
+                            }
                         }
                         $scope.IsLoading = false
-                        devlog(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${Status}, StatusOnApprove: ${StatusOnApprove}`);
+                        devlog(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
                     });
             });
     }
@@ -315,6 +313,70 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .catch(function (message) {
                 devlog(`Error saving data: ${message}`);
             })
+            .finally(() => $scope.IsLoading = false);
+    }
+
+    /**
+     * Updates the approval status of a pending approval item in SharePoint.
+     * @param {string} Action - The action to take on the pending approval item.
+     */
+    const UpdateApproveStatus = (Action) => {
+        var data = {};
+        devlog(`Action: ${Action}`);
+        devlog(`StatusOnApprove: ${StatusOnApprove}, NextPendingWith: ${NextPendingWith}, CurrentPendingWith: ${CurrentPendingWith}, Status: ${CurrentStatus}`);
+        devlog(`PendingApprovalId: ${PendingApprovalId}`);
+
+        switch (Action) {
+            case "Approved":
+                data = {
+                    'Status': StatusOnApprove,
+                    'PendingWithId': { 'results': [NextPendingWith] }
+                };
+                break;
+            case "Rejected":
+                data = {
+                    'Status': ApprovalStatus.Rejected,
+                    'PendingWithId': { 'results': [USER_ID] }
+                };
+                break;
+            case "Changed":
+                data = {
+                    'Status': ApprovalStatus.ChangeRequested,
+                    'PendingWithId': { 'results': [USER_ID] }
+                };
+                break;
+            default:
+                devlog(`Invalid action: ${Action}`);
+                return;
+        }
+
+        $scope.IsLoading = true;
+        $http({
+            headers: API_UPDATE_HEADERS,
+            method: "POST",
+            url: `${getApiEndpoint("PendingApproval")}(${PendingApprovalId})`,
+            data: {
+                ...data,
+                '__metadata': { "type": "SP.Data.PendingApprovalListItem" }
+            }
+        })
+            .then((res) => {
+                devlog(res)
+                delete data["PendingWithId"]; // !Sending This casuse error // TODO: Fix this 
+
+                /* Updating the `MarketingActivityMaster` list */
+                $http({
+                    headers: API_UPDATE_HEADERS,
+                    method: "POST",
+                    url: `${getApiEndpoint("MarketingActivityMaster")}(${RequestId})`,
+                    data: {
+                        ...data,
+                        '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
+                    }
+                }).then((res) => { devlog(res) }).catch((e) => { devlog(e) });
+
+            })
+            .catch((e) => { devlog("Error getting user information", e) })
             .finally(() => $scope.IsLoading = false);
     }
 
@@ -440,4 +502,9 @@ const vendorQuotations = [
     { value: 'Minimum 3 parties', label: 'Minimum 3 parties' },
     { value: 'Single Vendor', label: 'Single Vendor' }
 ];
-const ThreeLakh = 300000;
+/**
+ * Default Expense Limit for `OPM` and `CMO` approval.
+ * @constant 3,00,000 (3 Lakh)
+ * @type {number}
+ */
+const DefaultExpenseLimit = 300000;
