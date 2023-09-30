@@ -22,9 +22,41 @@ const RequesterInfo = {
     name: "",
     email: "",
 };
-const ApprovalChain = {};
+const ApprovalStatus = {
+    Saved: "Saved",
+    Submitted: "Submitted",
+    ChangeRequested: "ChangeRequested",
+    OPMApproved: "OPMApproved",
+    CMOApproved: "CMOApproved",
+    COOApproved: "COOApproved",
+    FinalApproved: "FinalApproved",
+    Rejected: "Rejected",
+}
+/**
+ * Approval chain for `Approver Info` list Filtered by `DeptID`, `Location` and `Department`.
+ */
+const ApprovalChain = {
+    "OPM": null,
+    "CMO": null,
+    "COO": null,
+    "FinalApprovar": null
+}
+/**
+ * Assigned in when getting the request data from `PendingApproval` list.
+ * @type {number}
+*/
 let CurrentPendingWith = null;
+/**
+ * Sets the `NextPendingWith` based on the `Status` and `TotalExpectedExpense`.
+ * If the `Status` is `Submitted` and `TotalExpectedExpense` is greater than `3,00,000` then `NextPendingWith` is `COO`. Then `NextPendingWith` is `CMO`.
+ * Otherwise `NextPendingWith` direcly to  `CMO`.
+ *@type {number}
+ */
 let NextPendingWith = null;
+/**
+ * When Approver Click a button, This status will be set on the `PendingApproval` list and `MarketingActivityMaster` list.
+ */
+let StatusOnApprove = null;
 
 
 
@@ -155,16 +187,57 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         $scope.IsDataReadOnly = true; /* Hide all the input fields & Shows `MarketingActivityMaster` list data */
                     })
                     .catch((e) => devlog("Error getting user information", e))
-                    .finally(() => $scope.IsLoading = false);
+                    .finally(() => {
+                        /**
+                         * @type {number}
+                         */
+                        const TotalExpectedExpense = $scope.FormData.TotalExpectedExpense;
 
-                /* Approve, Reject, Change buttons configuration */
-                if (USER_ID === CurrentPendingWith) {
-                    $scope.showApproveBtn = true;
-                    $scope.showChangeBtn = true;
-                    $scope.showRejectBtn = true;
-                }
+                        /* Setting the next pending with based on the `Status` and `TotalExpectedExpense` expense */
+                        switch (Status) {
+                            case ApprovalStatus.Submitted:
+                                NextPendingWith = TotalExpectedExpense > ThreeLakh ? ApprovalChain.COO : ApprovalChain.CMO;
+                                break;
+                            case ApprovalStatus.COOApproved:
+                                NextPendingWith = ApprovalChain.CMO;
+                                break;
+                            case ApprovalStatus.CMOApproved:
+                                NextPendingWith = ApprovalChain.FinalApprovar;
+                                break;
+                            case ApprovalStatus.FinalApproved:
+                                NextPendingWith = USER_ID;
+                                break;
+                            default:
+                                devlog('Status not found. Current Status: ' + Status)
+                                break;
+                        }
+
+                        /* Setting the `StatusOnApprove` based on the `CurrentPendingWith` */
+                        switch (CurrentPendingWith) {
+                            case ApprovalChain.COO:
+                                StatusOnApprove = ApprovalStatus.COOApproved;
+                                break;
+                            case ApprovalChain.CMO:
+                                StatusOnApprove = ApprovalStatus.CMOApproved;
+                                break;
+                            case ApprovalChain.FinalApprovar:
+                                StatusOnApprove = ApprovalStatus.FinalApproved;
+                                break;
+                            default:
+                                StatusOnApprove = ApprovalStatus.OPMApproved;
+                                break;
+                        }
+
+                        /* Approve, Reject, Change buttons configuration */
+                        if (USER_ID === CurrentPendingWith || DEV_ENV) {
+                            $scope.showApproveBtn = true;
+                            $scope.showChangeBtn = true;
+                            $scope.showRejectBtn = true;
+                        }
+                        $scope.IsLoading = false
+                        devlog(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${Status}, StatusOnApprove: ${StatusOnApprove}`);
+                    });
             });
-
     }
 
     /**
@@ -367,3 +440,4 @@ const vendorQuotations = [
     { value: 'Minimum 3 parties', label: 'Minimum 3 parties' },
     { value: 'Single Vendor', label: 'Single Vendor' }
 ];
+const ThreeLakh = 300000;
