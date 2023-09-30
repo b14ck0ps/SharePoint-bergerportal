@@ -161,7 +161,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         /* If Some one click on a link from `Pending Approval` list */
         const base = getApiEndpoint("PendingApproval");
         const filter = `$filter=substringof('${PendingApprovalUniqueId}',RequestLink)`;
-        const query = `$expand=PendingWith&$select=ID,Title,ProcessName,Status,PendingWith/Id`;
+        const query = `$expand=PendingWith&$select=ID,Title,ProcessName,Status,PendingWith/Id,PendingWith/Title`;
 
         $scope.IsLoading = true;
         /* Getting the request id, status and pendingwith from `PendingApproval` list */
@@ -176,6 +176,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 CurrentStatus = Row.Status;
                 CurrentPendingWith = Row.PendingWith.results[0].Id;
                 PendingApprovalId = Row.ID;
+                $scope.pendingWithName = Row.PendingWith.results[0].Title;
             })
             .catch((e) => devlog("Error getting user information", e))
             .finally(() => {
