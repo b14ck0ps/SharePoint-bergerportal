@@ -6,16 +6,25 @@ const API_POST_HEADERS = {
     "X-RequestDigest": $("#__REQUESTDIGEST").val()
 };
 
+/**
+ * Flag indicating whether the current environment is a development environment.
+ * Any URL containing `portaldv` is considered a development environment.
+ * This is used to prevent any logs or console messages from appearing in production.
+ * @example DEV_ENV ? console.table(SomeTestVariable) : null;
+ * @type {boolean}
+ */
+const DEV_ENV = ABS_URL.includes("portaldv");
 const PendingApprovalUniqueId = new URLSearchParams(window.location.search).get('UniqueId');
 const USER_ID = _spPageContextInfo.userId;
 const OPM_INFO = { id: 0, name: "" };
 const RequesterInfo = {
+    id: 0,
     name: "",
     email: "",
-    id: 0
 };
-
+const ApprovalChain = {};
 let CurrentPendingWith = null;
+let NextPendingWith = null;
 
 
 
@@ -48,9 +57,40 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
 
             OPM_INFO.id = $scope.UserInfo.OptManagerEmail.ID;
             OPM_INFO.name = $scope.UserInfo.OptManagerEmail.Title;
+            ApprovalChain["OPM"] = OPM_INFO.id;
         })
-        .catch((e) => console.log("Error getting user information", e))
-        .finally(() => $scope.IsLoading = false);
+        .catch((e) => devlog("Error getting user information", e))
+        .finally(() => {
+            /*getting Approvar information*/
+            const base = getApiEndpoint("Approver Info");
+            const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver4Id`;
+            const filter = `$filter=DeptID eq '${$scope.UserInfo.DeptID}' and Location eq '${$scope.UserInfo.OfficeLocation}' and Department eq '${$scope.UserInfo.Department}'`;
+
+            $http({
+                method: "GET",
+                url: `${base}?${query}&${filter}`,
+            }).then(function (response) {
+                const approverInfoResponse = response.data.value[0];
+
+                const keyMapping = {
+                    "Approver2Id": "CMO",
+                    "Approver3Id": "COO",
+                    "Approver4Id": "FinalApprovar",
+                };
+
+                for (const key in keyMapping) {
+                    const value = approverInfoResponse[key];
+                    if (value !== null) {
+                        const renamedKey = keyMapping[key];
+                        ApprovalChain[renamedKey] = value;
+                    }
+                }
+                devlog(ApprovalChain);
+            })
+                .catch((e) => devlog("Error getting user information", e))
+
+            $scope.IsLoading = false
+        });
 }]);
 
 
@@ -91,7 +131,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 Status = Row.Status;
                 CurrentPendingWith = Row.PendingWith.results[0].Id;
             })
-            .catch((e) => console.log("Error getting user information", e))
+            .catch((e) => devlog("Error getting user information", e))
             .finally(() => {
                 if (!RequestId) {
                     $scope.IsLoading = false;
@@ -114,7 +154,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         $scope.FormData = { ...Row };
                         $scope.IsDataReadOnly = true; /* Hide all the input fields & Shows `MarketingActivityMaster` list data */
                     })
-                    .catch((e) => console.log("Error getting user information", e))
+                    .catch((e) => devlog("Error getting user information", e))
                     .finally(() => $scope.IsLoading = false);
 
                 /* Approve, Reject, Change buttons configuration */
@@ -143,7 +183,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             headers: API_GET_HEADERS
         })
             .then((response) => $scope.activityNamesDropdownList = response.data.d.results.map((item) => item.ActivityName))
-            .catch((e) => console.log("Error getting user information", e))
+            .catch((e) => devlog("Error getting user information", e))
             .finally(() => $scope.IsLoading = false);
     }
 
@@ -164,7 +204,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             headers: API_GET_HEADERS
         })
             .then((response) => $scope.costHeadDropdownList = response.data.d.results.map((item) => item.CostHead))
-            .catch((e) => console.log("Error getting user information", e))
+            .catch((e) => devlog("Error getting user information", e))
             .finally(() => $scope.IsLoading = false);
     }
 
@@ -200,7 +240,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 saveAtMyTask(`MA-${response.data.d.ID}`, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, `${ABS_URL}/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`);
             })
             .catch(function (message) {
-                console.log(`Error saving data: ${message}`)
+                devlog(`Error saving data: ${message}`);
             })
             .finally(() => $scope.IsLoading = false);
     }
@@ -214,7 +254,11 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
  * @returns {string} API base URL
  */
 const getApiEndpoint = (ListName) => `${ABS_URL}/_api/web/lists/getByTitle('${ListName}')/items`;
-
+/**
+ * Logs a message to the console if the `DEV_ENV` flag is set to true.
+ * @param {string} message - The message to log to the console.
+ */
+const devlog = (message) => DEV_ENV ? console.log(message) : null;
 const services = [
     { value: '', label: '-- Select Service --' },
     { value: 'TV Media', label: 'TV Media' },
