@@ -79,7 +79,7 @@ let RequestId = null;
  * Angular module for the Marketing Activity app.
  * @module MarketingActivityApp
  */
-const MarketingActivityModule = angular.module("MarketingActivityApp", []);
+const MarketingActivityModule = angular.module("MarketingActivityApp", ['ngSanitize']);
 MarketingActivityModule.run(($rootScope) => $rootScope.spinnerActive = true); /* Active spinner on page load only if `MarketingActivityModule` is loaded */
 
 MarketingActivityModule.controller('UserController', ['$scope', '$http', function ($scope, $http) {
@@ -232,8 +232,25 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 $scope.showRejectBtn = true;
                             }
                         }
-                        $scope.IsLoading = false
                         devlog(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
+
+                        /* Get The logs from `MarketingActivityLog` list */
+                        const base = getApiEndpoint("MarketingActivityLog");
+                        const filter = `$filter=MarketingActivityID eq '${RequestId}'`;
+                        const query = `$select=ID,Title,Status,Comment,Created,Author/Id,Author/Title,Author/EMail&$expand=Author&$orderby=Created asc`;
+
+                        $http({
+                            method: "GET",
+                            url: `${base}?${filter}&${query}`,
+                            headers: API_GET_HEADERS
+                        })
+                            .then((response) => {
+                                devlog(response.data.d.results);
+                                $scope.auditHistory = response.data.d.results;
+                            })
+                            .catch((e) => devlog("Error getting user information", e))
+
+                        $scope.IsLoading = false
                     });
             });
     }
@@ -304,11 +321,14 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             data: marketingActivityMasterData,
         })
             .then((response) => {
-                /**
-                 * Saves the request to a SharePoint list `PendingApproval`.
-                 * @file constants.js
-                 */
-                saveAtMyTask(`MA-${response.data.d.ID}`, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, `${ABS_URL}/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`);
+                /**  This is the ID of the newly created item @type {number} */
+                const MarketingActivityID = response.data.d.ID;
+
+                /** Saves the request to a SharePoint list `PendingApproval`. @file constants.js */
+                saveAtMyTask(`MA-${MarketingActivityID}`, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, `${ABS_URL}/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`);
+
+                /** Add a log to `MarketingActivityLog` list*/
+                AddToLog(`MA-${MarketingActivityID}`, status, $scope.actionComment, MarketingActivityID);
             })
             .catch(function (message) {
                 devlog(`Error saving data: ${message}`);
@@ -373,13 +393,46 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         ...data,
                         '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
                     }
-                }).then((res) => { devlog(res) }).catch((e) => { devlog(e) });
+                }).then((res) => {
+                    devlog(res)
+                    /* Add a log to `MarketingActivityLog` list*/
+                    AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
+                }).catch((e) => { devlog(e) });
 
             })
             .catch((e) => { devlog("Error getting user information", e) })
             .finally(() => $scope.IsLoading = false);
     }
+    /**
+     * Add a log to `MarketingActivityLog` list.
+     * @param {String} Title MA-{RequestId}
+     * @param {String} Status Current Status
+     * @param {String} Comment from comment box
+     * @param {number} MarketingActivityID `RequestId`
+     */
+    const AddToLog = (Title, Status, Comment, MarketingActivityID) => {
+        const url = getApiEndpoint("MarketingActivityLog");
+        const data = {
+            'Title': Title,
+            'Status': Status,
+            'Comment': Comment,
+            'MarketingActivityID': MarketingActivityID,
+            '__metadata': { "type": "SP.Data.MarketingActivityLogListItem" }
+        };
 
+        $http({
+            headers: API_POST_HEADERS,
+            method: "POST",
+            url: url,
+            data: data,
+        })
+            .then((response) => {
+                devlog(response);
+            })
+            .catch(function (message) {
+                devlog(`Error saving data: ${message}`);
+            });
+    }
 }]);
 
 /**
