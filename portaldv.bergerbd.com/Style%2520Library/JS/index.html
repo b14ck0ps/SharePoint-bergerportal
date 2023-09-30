@@ -66,8 +66,8 @@
 <!--#region APP MarketingActivityApp Start -->
 <div ng-app="MarketingActivityApp" class="container BlockStockRequest">
    <div ng-controller="UserController">
-      <div ng-show="IsLoading" class="spinner-container">
-         <div class="spinner"></div>
+      <div ng-show="IsLoading" ng-class="{ 'spinner-container': spinnerActive  }">
+         <div ng-class="{ 'spinner': spinnerActive  }"></div>
       </div>
       <h2>Marketing Activity</h2>
       <div ng-hide="IsLoading" class="panel panel-default" id="divRequestorPanel">
@@ -145,8 +145,8 @@
       <!-- <div class="panel panel-default" id="divReimbursementPanel"> -->
       <div class="panel panel-default">
          <div class="panel-body">
-            <div ng-show="IsLoading" class="spinner-container">
-               <div class="spinner"></div>
+            <div ng-show="IsLoading" ng-class="{ 'spinner-container': spinnerActive  }">
+               <div ng-class="{ 'spinner': spinnerActive  }"></div>
             </div>
             <div id="divInput">
                <div class="row" style="margin-left: -16px;">

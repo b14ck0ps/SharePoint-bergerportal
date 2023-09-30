@@ -24,6 +24,7 @@ let CurrentPendingWith = null;
  * @module MarketingActivityApp
  */
 const MarketingActivityModule = angular.module("MarketingActivityApp", []);
+MarketingActivityModule.run(($rootScope) => $rootScope.spinnerActive = true); /* Active spinner on page load only if `MarketingActivityModule` is loaded */
 
 MarketingActivityModule.controller('UserController', ['$scope', '$http', function ($scope, $http) {
     $scope.today = new Date();
