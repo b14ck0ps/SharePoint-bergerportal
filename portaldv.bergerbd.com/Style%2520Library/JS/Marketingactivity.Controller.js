@@ -196,7 +196,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                  * Saves the request to a SharePoint list `PendingApproval`.
                  * @file constants.js
                  */
-                saveAtMyTask(`MA-${response.data.d.ID}`, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, `	https://portaldv.bergerbd.com/leaveauto/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`);
+                saveAtMyTask(`MA-${response.data.d.ID}`, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, `${ABS_URL}/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`);
             })
             .catch(function (message) {
                 console.log(`Error saving data: ${message}`)
