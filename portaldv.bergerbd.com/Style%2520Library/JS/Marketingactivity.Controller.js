@@ -187,7 +187,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
                 const base = getApiEndpoint("MarketingActivityMaster");
                 const filter = `$filter=ID eq '${RequestId}'`;
-                const query = `$select=ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,AuthorId&$top=1`;
+                const query = `$select=PendingWith/Id,PendingWith/Title,ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,AuthorId&$expand=PendingWith&$top=1`;
 
                 /* Getting the request data from `MarketingActivityMaster` list */
                 $http({
@@ -200,6 +200,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         $scope.requestCode = `MA-${Row.ID}`;
                         $scope.FormData = { ...Row };
                         $scope.IsDataReadOnly = true; /* Hide all the input fields & Shows `MarketingActivityMaster` list data */
+                        devlog(Row);
                     })
                     .catch((e) => devlog("Error getting user information", e))
                     .finally(() => {
@@ -310,8 +311,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         const marketingActivityMasterData = {
             ...$scope.FormData,
             'Status': status,
-
-            // 'PendingWith': { id: OPM_INFO.id }, TODO: Fix this
+            'PendingWithId': OPM_INFO.id,
             '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
         };
 
@@ -347,24 +347,20 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         devlog(`StatusOnApprove: ${StatusOnApprove}, NextPendingWith: ${NextPendingWith}, CurrentPendingWith: ${CurrentPendingWith}, Status: ${CurrentStatus}`);
         devlog(`PendingApprovalId: ${PendingApprovalId}`);
 
+        var setPendingWith = null;
+
         switch (Action) {
             case "Approved":
-                data = {
-                    'Status': StatusOnApprove,
-                    'PendingWithId': { 'results': [NextPendingWith] }
-                };
+                data = { 'Status': StatusOnApprove };
+                setPendingWith = NextPendingWith;
                 break;
             case "Rejected":
-                data = {
-                    'Status': ApprovalStatus.Rejected,
-                    'PendingWithId': { 'results': [USER_ID] }
-                };
+                data = { 'Status': ApprovalStatus.Rejected, };
+                setPendingWith = USER_ID;
                 break;
             case "Changed":
-                data = {
-                    'Status': ApprovalStatus.ChangeRequested,
-                    'PendingWithId': { 'results': [USER_ID] }
-                };
+                data = { 'Status': ApprovalStatus.ChangeRequested, };
+                setPendingWith = USER_ID;
                 break;
             default:
                 devlog(`Invalid action: ${Action}`);
@@ -378,12 +374,12 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             url: `${getApiEndpoint("PendingApproval")}(${PendingApprovalId})`,
             data: {
                 ...data,
+                'PendingWithId': { 'results': [setPendingWith] },
                 '__metadata': { "type": "SP.Data.PendingApprovalListItem" }
             }
         })
             .then((res) => {
                 devlog(res)
-                delete data["PendingWithId"]; // !Sending This casuse error // TODO: Fix this 
 
                 /* Updating the `MarketingActivityMaster` list */
                 $http({
@@ -392,6 +388,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                     url: `${getApiEndpoint("MarketingActivityMaster")}(${RequestId})`,
                     data: {
                         ...data,
+                        'PendingWithId': setPendingWith,
                         '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
                     }
                 }).then((res) => {
