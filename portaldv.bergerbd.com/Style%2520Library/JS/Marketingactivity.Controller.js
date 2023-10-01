@@ -111,7 +111,7 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
             /*getting Approvar information*/
             const base = getApiEndpoint("Approver Info");
             const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver4Id`;
-            const filter = `$filter=DeptID eq '${$scope.UserInfo.DeptID}' and Location eq '${$scope.UserInfo.OfficeLocation}' and Department eq '${$scope.UserInfo.Department}'`;
+            const filter = `$filter=DeptID eq '${$scope.UserInfo.DeptID}' and Location eq '${$scope.UserInfo.OfficeLocation}'`;
 
             $http({
                 method: "GET",
