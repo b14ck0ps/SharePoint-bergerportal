@@ -236,13 +236,13 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         if (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM) {
                             NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.CMO;
                             StatusOnApprove = ApprovalStatus.OPMApproved;
-                        } else if (CurrentStatus === ApprovalStatus.OPMApproved && CurrentPendingWith === ApprovalChain.COO) {
+                        } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved && CurrentPendingWith === ApprovalChain.COO) {
                             NextPendingWith = ApprovalChain.CMO;
                             StatusOnApprove = ApprovalStatus.COOApproved;
-                        } else if (CurrentStatus === ApprovalStatus.COOApproved || ApprovalStatus.OPMApproved && CurrentPendingWith === ApprovalChain.CMO) {
+                        } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.COOApproved || ApprovalStatus.OPMApproved && CurrentPendingWith === ApprovalChain.CMO) {
                             NextPendingWith = ApprovalChain.FinalApprovar;
                             StatusOnApprove = ApprovalStatus.CMOApproved;
-                        } else if (CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) {
+                        } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) {
                             NextPendingWith = USER_ID;
                             StatusOnApprove = ApprovalStatus.FinalApproved;
                         }
@@ -366,7 +366,12 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      */
     const saveOrSubmit = (status) => {
         if (EditMode) {
-            UpdateActivityMaster($scope.FormData, OPM_INFO.id)
+            const data = { 'Status': ApprovalStatus.Submitted };
+            UpddatePendingApproval(data, NextPendingWith)
+                .then(() => {
+                    UpdateActivityMaster($scope.FormData, NextPendingWith, ApprovalStatus.Submitted)
+                })
+                .catch((e) => { console.log("Error getting information", e) })
             return;
         }
 
@@ -437,7 +442,17 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         }
 
         $scope.IsLoading = true;
-        $http({
+        UpddatePendingApproval(data, setPendingWith)
+            .then((res) => {
+                devlog(res)
+                UpdateActivityMaster(data, setPendingWith, StatusOnApprove);
+            })
+            .catch((e) => { devlog("Error getting user information", e) })
+            .finally(() => $scope.IsLoading = false);
+    }
+
+    const UpddatePendingApproval = (data, setPendingWith) => {
+        return $http({
             headers: API_UPDATE_HEADERS,
             method: "POST",
             url: `${getApiEndpoint("PendingApproval")}(${PendingApprovalId})`,
@@ -447,15 +462,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 '__metadata': { "type": "SP.Data.PendingApprovalListItem" }
             }
         })
-            .then((res) => {
-                devlog(res)
-                UpdateActivityMaster(data, setPendingWith);
-            })
-            .catch((e) => { devlog("Error getting user information", e) })
-            .finally(() => $scope.IsLoading = false);
     }
 
-    const UpdateActivityMaster = (data, setPendingWith) => {
+    const UpdateActivityMaster = (data, setPendingWith, Status) => {
 
         const {
             "__metadata": _metadata,
@@ -474,7 +483,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             url: `${getApiEndpoint("MarketingActivityMaster")}(${RequestId})`,
             data: {
                 ...filteredData,
-                'Status': ApprovalStatus.Submitted,
+                'Status': Status,
                 'PendingWithId': setPendingWith,
                 '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
             }
