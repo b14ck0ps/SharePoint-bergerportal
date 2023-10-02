@@ -370,6 +370,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             UpddatePendingApproval(data, NextPendingWith)
                 .then(() => {
                     UpdateActivityMaster($scope.FormData, NextPendingWith, ApprovalStatus.Submitted)
+                    AddToLog(`MA-${RequestId}`, 'Updated', $scope.actionComment, RequestId);
                 })
                 .catch((e) => { console.log("Error getting information", e) })
             return;
@@ -444,8 +445,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         $scope.IsLoading = true;
         UpddatePendingApproval(data, setPendingWith)
             .then((res) => {
-                devlog(res)
                 UpdateActivityMaster(data, setPendingWith, StatusOnApprove);
+                AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
             })
             .catch((e) => { devlog("Error getting user information", e) })
             .finally(() => $scope.IsLoading = false);
@@ -490,7 +491,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         })
             .then((res) => {
                 devlog(res)
-                AddToLog(`MA-${RequestId}`, 'Updated', $scope.actionComment, RequestId);
                 SaveAllAttachments();
             })
             .catch((e) => { devlog(e) })
