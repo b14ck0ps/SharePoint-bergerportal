@@ -315,6 +315,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
         };
 
+        /** Saves/Submit the request to a SharePoint list `MarketingActivityMaster` */
         $http({
             headers: API_POST_HEADERS,
             method: "POST",
@@ -329,9 +330,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 /** Saves the request to a SharePoint list `PendingApproval`. @file constants.js */
                 saveAtMyTask(`MA-${MarketingActivityID}`, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, `${ABS_URL}/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`);
 
-                /** Add a log to `MarketingActivityLog` list*/
                 AddToLog(`MA-${MarketingActivityID}`, status, $scope.actionComment, MarketingActivityID);
-                saveAllAttachments();
+                SaveAllAttachments();
             })
             .catch(function (message) {
                 devlog(`Error saving data: ${message}`);
@@ -395,8 +395,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                     }
                 }).then((res) => {
                     devlog(res)
-                    /* Add a log to `MarketingActivityLog` list*/
                     AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
+                    SaveAllAttachments();
                 }).catch((e) => { devlog(e) });
 
             })
@@ -419,7 +419,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             'MarketingActivityID': MarketingActivityID,
             '__metadata': { "type": "SP.Data.MarketingActivityLogListItem" }
         };
-
+        /** Add a log to `MarketingActivityLog` list. */
         $http({
             headers: API_POST_HEADERS,
             method: "POST",
@@ -434,31 +434,38 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             });
     }
 
-    const saveAllAttachments = () => {
+    /**
+     * Saves all attachments from input file elements to the SP List _MarketingActivityAttachment_.
+     * @description This create a **new item** in the list **for each file** and set the Attachment.
+     * @async
+     */
+    const SaveAllAttachments = async () => {
+        const fileInputs = $("#attachFilesContainer input:file");
+        const filesToUpload = Array.from(fileInputs)
+            .map((input) => input.files[0])
+            .filter((file) => file);
 
-        var fileData = [];
+        if (filesToUpload.length === 0) return;
 
-        if ($("#attachFilesContainer input:file").val() != "") {
-            $("#attachFilesContainer input:file").each(function () {
-                if ($(this)[0].files[0]) {
-                    fileData.push($(this)[0].files[0]);
-                }
-            });
-            for (var start = 0; start < fileData.length; start++) {
-                (function (i) {
-                    $scope.IsLoading = true;
-                    setTimeout(function () {
-                        AddReceiptIntial(fileData[i]);
-                        if (i == (fileData.length - 1)) {
-                            $scope.IsLoading = false;
-                        }
-                    }, 2000);
-                })(start);
-            }
+        try {
+            filesToUpload.forEach(async (file) => await AddReceiptInitial(file));
         }
-    }
-    function AddReceiptIntial(file) {
-        var url = getApiEndpoint("MarketingActivityAttachment");
+        catch (error) {
+            console.error('Error uploading files:', error);
+        }
+    };
+
+    /**
+     * Adds a receipt to the MarketingActivityAttachment list and uploads a file to SharePoint.
+     * @async
+     * @param {File} file - The file to upload to SharePoint.
+     * @returns {Promise<void>}
+     */
+    const AddReceiptInitial = async (file) => {
+        const ListName = "MarketingActivityAttachment";
+        var url = getApiEndpoint(ListName);
+        $scope.IsLoading = true;
+        /** Add a Item with `RequestId`  to `MarketingActivityAttachment` list. */
         $http({
             headers: API_POST_HEADERS,
             method: "POST",
@@ -469,52 +476,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 '__metadata': { "type": "SP.Data.MarketingActivityAttachmentListItem" },
             }
         })
-            .then((res) => {
-                var currentItemIdAttachmentId = res.data.d.ID;
-                uploadFileSP(currentItemIdAttachmentId, file)
-            })
-            .catch(function (message) {
-                console.log(message);
-            });
-
-    }
-    function uploadFileSP(id, file) {
-        var deferred = $.Deferred();
-        getFileBuffer(file).then(
-            function (buffer) {
-                var queryUrl = `${getApiEndpoint('MarketingActivityAttachment')}(${id})/AttachmentFiles/add(FileName='${file.name}')`;
-                $.ajax({
-                    url: queryUrl,
-                    type: "POST",
-                    data: buffer,
-                    headers: {
-                        "X-RequestDigest": $("#__REQUESTDIGEST").val(),
-                    },
-                    success: (x) => {
-                        alert("File uploaded successfully")
-                        console.log(x);
-                    },
-                    error: (e) => {
-                        console.log(e);
-                    }
-                });
-            },
-            function (err) {
-                deferred.reject(err);
-            });
-        return deferred.promise();
-    }
-    function getFileBuffer(file) {
-        var deferred = $.Deferred();
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            deferred.resolve(e.target.result);
-        }
-        reader.onerror = function (e) {
-            deferred.reject(e.target.error);
-        }
-        reader.readAsArrayBuffer(file);
-        return deferred.promise();
+            .then(async (res) => await uploadFileToSharePoint(res.data.d.ID, file, ListName))
+            .catch((e) => { devlog(e) })
+            .finally(() => $scope.IsLoading = false);
     }
 }]);
 
@@ -644,3 +608,45 @@ const vendorQuotations = [
  * @type {number}
  */
 const DefaultExpenseLimit = 300000;
+
+/**
+ * Uploads a file to a SharePoint list item as an attachment.
+ *
+ * @param {number} itemId - The ID of the SharePoint list item.
+ * @param {File} file - The File object representing the file to upload.
+ * @param {string} listName - The name of the SharePoint list.
+ * @returns {Promise<void>} A Promise that resolves when the file is uploaded successfully.
+ */
+const uploadFileToSharePoint = async (itemId, file, listName) => {
+    try {
+        const buffer = await getFileBufferAsync(file);
+        const queryUrl = `${getApiEndpoint(listName)}(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
+
+        await $.ajax({
+            url: queryUrl,
+            type: 'POST',
+            processData: false,
+            contentType: 'application/json;odata=verbose',
+            data: buffer,
+            headers: API_POST_HEADERS,
+        });
+        console.log('File uploaded successfully');
+    } catch (error) {
+        console.error('Error uploading file:', error);
+    }
+}
+
+/**
+ * Reads a File object and returns its content as an ArrayBuffer.
+ *
+ * @param {File} file - The File object to read.
+ * @returns {Promise<ArrayBuffer>} A Promise that resolves with the ArrayBuffer of the file's content.
+ */
+const getFileBufferAsync = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(e.target.error);
+        reader.readAsArrayBuffer(file);
+    });
+}
