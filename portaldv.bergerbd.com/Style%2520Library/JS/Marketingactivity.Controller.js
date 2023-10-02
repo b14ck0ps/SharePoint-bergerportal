@@ -494,7 +494,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         alert("File uploaded successfully")
                         console.log(x);
                     },
-                    error: () => alert("Error uploading file")
+                    error: (e) => {
+                        console.log(e);
+                    }
                 });
             },
             function (err) {
