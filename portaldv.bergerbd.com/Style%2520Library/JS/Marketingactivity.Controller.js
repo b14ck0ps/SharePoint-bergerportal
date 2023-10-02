@@ -324,12 +324,14 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .then((response) => {
                 /**  This is the ID of the newly created item @type {number} */
                 const MarketingActivityID = response.data.d.ID;
+                RequestId = MarketingActivityID;
 
                 /** Saves the request to a SharePoint list `PendingApproval`. @file constants.js */
                 saveAtMyTask(`MA-${MarketingActivityID}`, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, `${ABS_URL}/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`);
 
                 /** Add a log to `MarketingActivityLog` list*/
                 AddToLog(`MA-${MarketingActivityID}`, status, $scope.actionComment, MarketingActivityID);
+                saveAllAttachments();
             })
             .catch(function (message) {
                 devlog(`Error saving data: ${message}`);
@@ -430,6 +432,87 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .catch(function (message) {
                 devlog(`Error saving data: ${message}`);
             });
+    }
+
+    const saveAllAttachments = () => {
+
+        var fileData = [];
+
+        if ($("#attachFilesContainer input:file").val() != "") {
+            $("#attachFilesContainer input:file").each(function () {
+                if ($(this)[0].files[0]) {
+                    fileData.push($(this)[0].files[0]);
+                }
+            });
+            for (var start = 0; start < fileData.length; start++) {
+                (function (i) {
+                    $scope.IsLoading = true;
+                    setTimeout(function () {
+                        AddReceiptIntial(fileData[i]);
+                        if (i == (fileData.length - 1)) {
+                            $scope.IsLoading = false;
+                        }
+                    }, 2000);
+                })(start);
+            }
+        }
+    }
+    function AddReceiptIntial(file) {
+        var url = getApiEndpoint("MarketingActivityAttachment");
+        $http({
+            headers: API_POST_HEADERS,
+            method: "POST",
+            url: url,
+            data: {
+                'Title': `MA-${RequestId}`,
+                'MarketingActivityID': RequestId,
+                '__metadata': { "type": "SP.Data.MarketingActivityAttachmentListItem" },
+            }
+        })
+            .then((res) => {
+                var currentItemIdAttachmentId = res.data.d.ID;
+                uploadFileSP(currentItemIdAttachmentId, file)
+            })
+            .catch(function (message) {
+                console.log(message);
+            });
+
+    }
+    function uploadFileSP(id, file) {
+        var deferred = $.Deferred();
+        getFileBuffer(file).then(
+            function (buffer) {
+                var queryUrl = `${getApiEndpoint('MarketingActivityAttachment')}(${id})/AttachmentFiles/add(FileName='${file.name}')`;
+                $.ajax({
+                    url: queryUrl,
+                    type: "POST",
+                    data: buffer,
+                    headers: {
+                        "X-RequestDigest": $("#__REQUESTDIGEST").val(),
+                    },
+                    success: (x) => {
+                        alert("File uploaded successfully")
+                        console.log(x);
+                    },
+                    error: () => alert("Error uploading file")
+                });
+            },
+            function (err) {
+                deferred.reject(err);
+            });
+        return deferred.promise();
+    }
+    function getFileBuffer(file) {
+        var deferred = $.Deferred();
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            deferred.resolve(e.target.result);
+        }
+        reader.onerror = function (e) {
+            deferred.reject(e.target.error);
+        }
+        reader.readAsArrayBuffer(file);
+        return deferred.promise();
     }
 }]);
 

@@ -318,12 +318,10 @@
                      <span ng-show="IsDataReadOnly">{{FormData.SingleVendorJustification}}</span>
                   </div>
                </div>
-
                <div class="row panel-body">
                   <h4 class="panel-body">Attachments/Receipts:</h4>
                </div>
-               <div id="divChooseAttachmentFile" class="row panel-body" ng-show="status=='ReimbursementSOICToUser'"
-                  ng-hide="status=='GMMarketingToMarketingAccountant'||status=='ReimbursementGMMarketingToACConcern'||readMode == 'read'||status=='UserToSOIC' ||status=='UserToGMMarketing'|| status=='Submitted' ||status=='SOICtoGMMarketing' || status=='MarketingAccountantToAccountsConcern'|| status=='AccountsConcernToMarketingAccountant' ||status=='ReimbursementSubmitted' || status=='ReimbursementSOICtoGMMarketing' || status=='ReimbursementgMMarketingToACConcern' || status=='ReimbursementACConcernToMarketingAC' || status=='Completed' ">
+               <div id="divChooseAttachmentFile" class="row panel-body">
                   <div class="col-sm-2 labelHeader">
                      <h6>Select All Attachments:</h6>
                   </div>
