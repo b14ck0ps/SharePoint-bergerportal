@@ -252,6 +252,22 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                             })
                             .catch((e) => devlog("Error getting user information", e))
 
+                        /*Get The Attachments from `MarketingActivityAttachment` list */
+                        const baseAttachment = getApiEndpoint("MarketingActivityAttachment");
+                        const filterAttachment = `$filter=MarketingActivityID eq '${RequestId}'`;
+                        const queryAttachment = `$select=ID,Title,AttachmentFiles,Created,Author/Title&$expand=AttachmentFiles,Author`;
+
+                        $http({
+                            method: "GET",
+                            url: `${baseAttachment}?${filterAttachment}&${queryAttachment}`,
+                            headers: API_GET_HEADERS
+                        })
+                            .then((response) => {
+                                devlog(response.data.d.results);
+                                $scope.receiptRows = response.data.d.results;
+                            })
+                            .catch((e) => devlog("Error getting user information", e))
+
                         $scope.IsLoading = false
                     });
             });
