@@ -72,6 +72,11 @@ let PendingApprovalId = null;
 * @type {number}
 * */
 let RequestId = null;
+/**
+ * If `ChangeRequested` then `EditMode` will be `true` and `SaveOrSubmit` button will be visible. And input fields will be editable.
+ * @type {boolean}
+ */
+let EditMode = false;
 
 
 
@@ -150,8 +155,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     $scope.commitmentItems = commitmentItems;
     $scope.vendorQuotations = vendorQuotations;
 
-    $scope.MapActivityName = () => getActivityNames();
-    $scope.MapCostHead = () => getCostHead();
+    $scope.MapActivityName = (e) => getActivityNames(e);
+    $scope.MapCostHead = (e) => getCostHead(e);
     $scope.clickSaveOrSubmit = (status) => { saveOrSubmit(status); }
     $scope.ApproverAction = (Action) => { UpdateApproveStatus(Action); }
 
@@ -177,6 +182,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 CurrentPendingWith = Row.PendingWith.results[0].Id;
                 PendingApprovalId = Row.ID;
                 $scope.pendingWithName = Row.PendingWith.results[0].Title;
+                EditMode = CurrentStatus === ApprovalStatus.ChangeRequested && USER_ID === CurrentPendingWith;
             })
             .catch((e) => devlog("Error getting user information", e))
             .finally(() => {
@@ -234,6 +240,16 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 $scope.showRejectBtn = true;
                             }
                         }
+
+                        if (EditMode) {
+                            $scope.showSaveOrSubmitBtn = true;
+                            $scope.EditMode = true;
+
+                            $scope.showApproveBtn = false;
+                            $scope.showChangeBtn = false;
+                            $scope.showRejectBtn = false;
+                        }
+
                         devlog(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
 
                         /* Get The logs from `MarketingActivityLog` list */
@@ -268,6 +284,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                             })
                             .catch((e) => devlog("Error getting user information", e))
 
+                        if (EditMode) {
+                            $scope.MapActivityName(EditMode);
+                            $scope.MapCostHead(EditMode);
+                        }
                         $scope.IsLoading = false
                     });
             });
@@ -275,9 +295,11 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
     /**
      * Retrieves marketing activity names from a SharePoint list `MarketingActivityMapper` based on `$scope.services` and populates the `Activity Name` dropdown.
+     * @param {boolean} IsCalledBySystem - If `true` then `Activity Name` will be set to the data comming from the API.
+     * @description IsCalledBySystem `false` means This function is called by the The user. So, `Activity Name` will be set to empty string.
      * @returns {void}
      */
-    const getActivityNames = () => {
+    const getActivityNames = (IsCalledBySystem) => {
 
         const base = getApiEndpoint("MarketingActivityMapper");
         const filter = `$filter=ServiceName eq '${$scope.FormData.ServiceName}'`;
@@ -288,16 +310,21 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             url: `${base}?${filter}&${query}`,
             headers: API_GET_HEADERS
         })
-            .then((response) => $scope.activityNamesDropdownList = response.data.d.results.map((item) => item.ActivityName))
+            .then((response) => {
+                IsCalledBySystem ? null : $scope.FormData.ActivityName = '';
+                $scope.activityNamesDropdownList = response.data.d.results.map((item) => item.ActivityName)
+            })
             .catch((e) => devlog("Error getting user information", e))
             .finally(() => $scope.IsLoading = false);
     }
 
     /**
      * Retrieves cost head from a SharePoint list `MarketingActivityMapper` based on `$scope.selectedActivity` and populates the `Cost Head` dropdown.
+     * @param {boolean} IsCalledBySystem - If `true` then `Cost Head` will be set to the data comming from the API.
+     * @description IsCalledBySystem `false` means This function is called by the The user. So, `Cost Head` will be set to empty string.
      * @returns {void}
      */
-    const getCostHead = () => {
+    const getCostHead = (IsCalledBySystem) => {
 
         const base = getApiEndpoint("MarketingActivityMapper");
         const filter = `$filter=ActivityName eq '${$scope.FormData.ActivityName}'`;
@@ -309,7 +336,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             url: `${base}?${filter}&${query}`,
             headers: API_GET_HEADERS
         })
-            .then((response) => $scope.costHeadDropdownList = response.data.d.results.map((item) => item.CostHead))
+            .then((response) => {
+                IsCalledBySystem ? null : $scope.FormData.CostHead = '';
+                $scope.costHeadDropdownList = response.data.d.results.map((item) => item.CostHead)
+            })
             .catch((e) => devlog("Error getting user information", e))
             .finally(() => $scope.IsLoading = false);
     }

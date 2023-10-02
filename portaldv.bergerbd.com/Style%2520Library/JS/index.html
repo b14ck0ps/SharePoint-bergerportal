@@ -127,8 +127,8 @@
    <div ng-controller="FormController">
       <div class='row' id="wpiToggleControlBtnDiv">
          <div class='row col-md-4' ng-If="uniqueId == '' ">
-            <h6 style="color:white">(All fields marked
-               <label ng-hide="IsDataReadOnly" class='redStar'>*</label> are mandatory.)
+            <h6 style="color:red">(All fields marked
+               <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label> are mandatory.)
             </h6>
          </div>
          <div class='row col-md-4' ng-If="uniqueId != '' ">
@@ -151,32 +151,32 @@
             <div id="divInput">
                <div class="row" style="margin-left: -16px;">
                   <div class="col-sm-2 labelHeader">Project Name:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input ng-hide="IsDataReadOnly" type="text" ng-model="FormData.ProjectName" class="textBoxBGColor"
-                        id="projectName" />
-                     <span ng-show="IsDataReadOnly">{{FormData.ProjectName}}</span>
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="text" ng-model="FormData.ProjectName"
+                        class="textBoxBGColor" id="projectName" />
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ProjectName}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Service Name:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly" name="serviceName" id="selectService"
+                     <select ng-hide="IsDataReadOnly && !EditMode" name="serviceName" id="selectService"
                         ng-change="MapActivityName()"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'
                         ng-model="FormData.ServiceName">
                         <option ng-repeat="service in services" value="{{service.value}}">{{service.label}}</option>
                      </select>
-                     <span ng-show="IsDataReadOnly">{{FormData.ServiceName}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ServiceName}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Activity Name:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly" id="activitySelect" ng-model="FormData.ActivityName"
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="activitySelect" ng-model="FormData.ActivityName"
                         ng-change="MapCostHead()"
                         ng-disabled="activityNamesDropdownList == undefined || activityNamesDropdownList.length == 0"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
@@ -184,7 +184,7 @@
                         <option ng-repeat="activity in activityNamesDropdownList" value="{{activity}}">
                            {{activity}}</option>
                      </select>
-                     <span ng-show="IsDataReadOnly">{{FormData.ActivityName}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityName}}</span>
                   </div>
 
 
@@ -192,130 +192,131 @@
                <div class="row">
 
                   <div class="col-sm-2 labelHeader">Cost Head:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly" id="selectedCostHead" ng-model="FormData.CostHead"
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="selectedCostHead" ng-model="FormData.CostHead"
                         ng-disabled="costHeadDropdownList == undefined || costHeadDropdownList.length == 0"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option value="">-- Select Cost Head --</option>
                         <option ng-repeat="costHead in costHeadDropdownList" value="{{costHead}}">{{costHead}}</option>
                      </select>
-                     <span ng-show="IsDataReadOnly">{{FormData.CostHead}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CostHead}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Activity Type:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly" id="activitySelect" ng-model="FormData.ActivityType"
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="activitySelect" ng-model="FormData.ActivityType"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option ng-repeat="type in activityTypes" value="{{type.value}}">{{type.label}}</option>
                      </select>
-                     <span ng-show="IsDataReadOnly">{{FormData.ActivityType}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityType}}</span>
                   </div>
 
 
                   <div class="col-sm-2 labelHeader">Budget Type:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly" name="budgetType" id="selectBudgetType"
+                     <select ng-hide="IsDataReadOnly && !EditMode" name="budgetType" id="selectBudgetType"
                         ng-model="FormData.BudgetType"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option ng-repeat="type in budgetTypes" value="{{type.value}}">{{type.label}}</option>
                      </select>
-                     <span ng-show="IsDataReadOnly">{{FormData.BudgetType}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BudgetType}}</span>
                   </div>
                </div>
 
                <div class="row">
                   <div class="col-sm-2 labelHeader">Brand Description:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly" name="brandDescription" id="BrandDescription"
+                     <select ng-hide="IsDataReadOnly && !EditMode" name="brandDescription" id="BrandDescription"
                         ng-model="FormData.BrandDescription"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option ng-repeat="brand in brands" value="{{brand.value}}">{{brand.label}}</option>
                      </select>
-                     <span ng-show="IsDataReadOnly">{{FormData.BrandDescription}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BrandDescription}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Commitment Item Description:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly" name="commitmentItem" id="selectCommitmentItem"
+                     <select ng-hide="IsDataReadOnly && !EditMode" name="commitmentItem" id="selectCommitmentItem"
                         ng-model="FormData.CommitmentItem"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option ng-repeat="item in commitmentItems" value="{{item.value}}">{{item.label}}</option>
                      </select>
-                     <span ng-show="IsDataReadOnly">{{FormData.CommitmentItem}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CommitmentItem}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Total Expected Expenses:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input ng-hide="IsDataReadOnly" type="text" ng-model="FormData.TotalExpectedExpense"
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="text" ng-model="FormData.TotalExpectedExpense"
                         class="textBoxBGColor" valid-number title="Please Fill in with a numerical value only"
                         ng-init="totalExpectedExpense='0'" id="totalExpectedExpense" />
-                     <span ng-show="IsDataReadOnly">{{FormData.TotalExpectedExpense | currency:"৳"}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.TotalExpectedExpense | currency:"৳"}}</span>
                   </div>
                </div>
 
                <div class="row">
                   <div class="col-sm-2 labelHeader">Activity Start Date:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input ng-hide="IsDataReadOnly" type="date" ng-model="FormData.ActivityStartDate"
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ActivityStartDate"
                         class="textBoxBGColor" id="activityStartDate" />
-                     <span ng-show="IsDataReadOnly">{{FormData.ActivityStartDate | date}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityStartDate | date}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Expected Delivery Date:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input ng-hide="IsDataReadOnly" type="date" ng-model="FormData.ExpectedDeliveryDate"
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ExpectedDeliveryDate"
                         class="textBoxBGColor" id="expectedDeliveryDate" />
-                     <span ng-show="IsDataReadOnly">{{FormData.ExpectedDeliveryDate | date}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ExpectedDeliveryDate | date}}</span>
                   </div>
                </div>
 
                <div class="row">
 
                   <div class="col-sm-2 labelHeader">Service Receiving Date:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input ng-hide="IsDataReadOnly" type="date" ng-model="FormData.ServiceReceivingDate"
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ServiceReceivingDate"
                         class="textBoxBGColor" id="serviceReceivingDate" />
-                     <span ng-show="IsDataReadOnly">{{FormData.ServiceReceivingDate | date}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ServiceReceivingDate | date}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Number of vendor require for quotation:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly" name="requiredVendorQuotation" id="selectRequiredVendorQuotation"
-                        ng-model="FormData.RequiredVendorQuotation"
+                     <select ng-hide="IsDataReadOnly && !EditMode" name="requiredVendorQuotation"
+                        id="selectRequiredVendorQuotation" ng-model="FormData.RequiredVendorQuotation"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor'>
                         <option ng-repeat="vendor in vendorQuotations" value="{{vendor.value}}">{{vendor.label}}
                         </option>
                      </select>
-                     <span ng-show="IsDataReadOnly">{{FormData.RequiredVendorQuotation}}</span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.RequiredVendorQuotation}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Justification for Single Vendor:
-                     <label ng-hide="IsDataReadOnly" class='redStar'>*</label>
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input ng-hide="IsDataReadOnly" type="text" ng-model="FormData.SingleVendorJustification"
-                        class="textBoxBGColor" id="singleVendorJustification" />
-                     <span ng-show="IsDataReadOnly">{{FormData.SingleVendorJustification}}</span>
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="text"
+                        ng-model="FormData.SingleVendorJustification" class="textBoxBGColor"
+                        id="singleVendorJustification" />
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.SingleVendorJustification}}</span>
                   </div>
                </div>
                <div class="row panel-body">
