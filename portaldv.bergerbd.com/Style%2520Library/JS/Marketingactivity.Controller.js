@@ -374,10 +374,11 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 break;
             case "Rejected":
                 data = { 'Status': ApprovalStatus.Rejected, };
-                setPendingWith = USER_ID;
+                StatusOnApprove = ApprovalStatus.Rejected;
                 break;
             case "Changed":
                 data = { 'Status': ApprovalStatus.ChangeRequested, };
+                StatusOnApprove = ApprovalStatus.ChangeRequested;
                 setPendingWith = USER_ID;
                 break;
             default:
@@ -392,7 +393,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             url: `${getApiEndpoint("PendingApproval")}(${PendingApprovalId})`,
             data: {
                 ...data,
-                'PendingWithId': { 'results': [setPendingWith] },
+                'PendingWithId': { 'results': StatusOnApprove === ApprovalStatus.Rejected ? [] : [setPendingWith] }, /* if rejected then sending empty array (pending with no one)*/
                 '__metadata': { "type": "SP.Data.PendingApprovalListItem" }
             }
         })
