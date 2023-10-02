@@ -239,8 +239,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         } else if (CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) {
                             NextPendingWith = USER_ID;
                             StatusOnApprove = ApprovalStatus.FinalApproved;
-                        } else if (CurrentStatus === ApprovalStatus.ChangeRequested) {
-
                         }
 
                         /* Approve, Reject, Change buttons configuration */
@@ -248,19 +246,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                             if (CurrentStatus !== ApprovalStatus.Rejected
                                 && CurrentStatus !== ApprovalStatus.ChangeRequested
                                 && CurrentStatus !== ApprovalStatus.FinalApproved) {
-                                $scope.showApproveBtn = true;
-                                $scope.showChangeBtn = true;
-                                $scope.showRejectBtn = true;
+                                $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = true;
                             }
-                        }
-
-                        if (EditMode) {
-                            $scope.showSaveOrSubmitBtn = true;
-                            $scope.EditMode = true;
-
-                            $scope.showApproveBtn = false;
-                            $scope.showChangeBtn = false;
-                            $scope.showRejectBtn = false;
                         }
 
                         devlog(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
@@ -284,6 +271,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         if (EditMode) {
                             $scope.MapActivityName(EditMode);
                             $scope.MapCostHead(EditMode);
+
+                            /* Button Config */
+                            $scope.showSaveOrSubmitBtn = $scope.EditMode = true;
+                            $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = false;
                         }
                         $scope.IsLoading = false
                     });
