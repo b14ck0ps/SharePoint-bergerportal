@@ -204,7 +204,13 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                     .then((response) => {
                         const Row = response.data.d.results[0];
                         $scope.requestCode = `MA-${Row.ID}`;
-                        $scope.FormData = { ...Row };
+                        $scope.FormData = {
+                            ...Row,
+                            ActivityStartDate: new Date(Row.ActivityStartDate),
+                            ExpectedDeliveryDate: new Date(Row.ExpectedDeliveryDate),
+                            ServiceReceivingDate: new Date(Row.ServiceReceivingDate),
+                        };
+
                         $scope.IsDataReadOnly = true; /* Hide all the input fields & Shows `MarketingActivityMaster` list data */
                         devlog(Row);
                     })
