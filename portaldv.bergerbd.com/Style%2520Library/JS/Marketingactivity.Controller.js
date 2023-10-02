@@ -209,7 +209,18 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         devlog(Row);
                     })
                     .catch((e) => devlog("Error getting user information", e))
-                    .finally(() => {
+                    .finally(async () => {
+                        const logs = $scope.auditHistory = await getAllLogs();
+
+                        if (EditMode) {
+                            /**Getting The latest log. In edit mode, when user submit again, it should goto the last user who requested for Change. And that should be the latest log entry */
+                            const latestLogEntry = logs.reduce((latest, current) => {
+                                if (!latest || new Date(current.Created) > new Date(latest.Created)) return current;
+                                return latest;
+                            }, null);
+                            NextPendingWith = latestLogEntry.Author.Id; /* This should user who requested the change */
+                        }
+
                         /**
                          * @type {number}
                          */
@@ -228,6 +239,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         } else if (CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) {
                             NextPendingWith = USER_ID;
                             StatusOnApprove = ApprovalStatus.FinalApproved;
+                        } else if (CurrentStatus === ApprovalStatus.ChangeRequested) {
+
                         }
 
                         /* Approve, Reject, Change buttons configuration */
@@ -251,22 +264,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         }
 
                         devlog(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
-
-                        /* Get The logs from `MarketingActivityLog` list */
-                        const base = getApiEndpoint("MarketingActivityLog");
-                        const filter = `$filter=MarketingActivityID eq '${RequestId}'`;
-                        const query = `$select=ID,Title,Status,Comment,Created,Author/Id,Author/Title,Author/EMail&$expand=Author&$orderby=Created asc`;
-
-                        $http({
-                            method: "GET",
-                            url: `${base}?${filter}&${query}`,
-                            headers: API_GET_HEADERS
-                        })
-                            .then((response) => {
-                                devlog(response.data.d.results);
-                                $scope.auditHistory = response.data.d.results;
-                            })
-                            .catch((e) => devlog("Error getting user information", e))
 
                         /*Get The Attachments from `MarketingActivityAttachment` list */
                         const baseAttachment = getApiEndpoint("MarketingActivityAttachment");
@@ -292,6 +289,27 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                     });
             });
     }
+
+    const getAllLogs = async () => {
+        try {
+            /* Get The logs from `MarketingActivityLog` list */
+            const base = getApiEndpoint("MarketingActivityLog");
+            const filter = `$filter=MarketingActivityID eq '${RequestId}'`;
+            const query = `$select=ID,Title,Status,Comment,Created,Author/Id,Author/Title,Author/EMail&$expand=Author&$orderby=Created asc`;
+
+            const response = await $http({
+                method: "GET",
+                url: `${base}?${filter}&${query}`,
+                headers: API_GET_HEADERS
+            });
+
+            return response.data.d.results;
+        } catch (e) {
+            devlog("Error getting user information", e);
+            throw e; // Re-throw the error to propagate it further if needed
+        }
+    };
+
 
     /**
      * Retrieves marketing activity names from a SharePoint list `MarketingActivityMapper` based on `$scope.services` and populates the `Activity Name` dropdown.
@@ -350,7 +368,11 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      * @returns {void}
      */
     const saveOrSubmit = (status) => {
-        $scope.IsLoading = true;
+        if (EditMode) {
+            UpdateActivityMaster($scope.FormData, OPM_INFO.id)
+            return;
+        }
+
         const url = getApiEndpoint("MarketingActivityMaster");
 
         /* Spreding the FormData and adding the metadata */
@@ -362,6 +384,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         };
 
         /** Saves/Submit the request to a SharePoint list `MarketingActivityMaster` */
+        $scope.IsLoading = true;
         $http({
             headers: API_POST_HEADERS,
             method: "POST",
@@ -429,27 +452,45 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         })
             .then((res) => {
                 devlog(res)
-
-                /* Updating the `MarketingActivityMaster` list */
-                $http({
-                    headers: API_UPDATE_HEADERS,
-                    method: "POST",
-                    url: `${getApiEndpoint("MarketingActivityMaster")}(${RequestId})`,
-                    data: {
-                        ...data,
-                        'PendingWithId': setPendingWith,
-                        '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
-                    }
-                }).then((res) => {
-                    devlog(res)
-                    AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
-                    SaveAllAttachments();
-                }).catch((e) => { devlog(e) });
-
+                UpdateActivityMaster(data, setPendingWith);
             })
             .catch((e) => { devlog("Error getting user information", e) })
             .finally(() => $scope.IsLoading = false);
     }
+
+    const UpdateActivityMaster = (data, setPendingWith) => {
+
+        const {
+            "__metadata": _metadata,
+            "PendingWith": _pendingWith,
+            "Id": _id,
+            "Status": _status,
+            "AuthorId": _authorId,
+            ...filteredData
+        } = data; /* Remove unnecessary data from the `data` object */
+
+        $scope.IsLoading = true;
+        /* Updating the `MarketingActivityMaster` list */
+        $http({
+            headers: API_UPDATE_HEADERS,
+            method: "POST",
+            url: `${getApiEndpoint("MarketingActivityMaster")}(${RequestId})`,
+            data: {
+                ...filteredData,
+                'Status': ApprovalStatus.Submitted,
+                'PendingWithId': setPendingWith,
+                '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
+            }
+        })
+            .then((res) => {
+                devlog(res)
+                AddToLog(`MA-${RequestId}`, 'Updated', $scope.actionComment, RequestId);
+                SaveAllAttachments();
+            })
+            .catch((e) => { devlog(e) })
+            .finally(() => $scope.IsLoading = false);
+    }
+
     /**
      * Add a log to `MarketingActivityLog` list.
      * @param {String} Title MA-{RequestId}
