@@ -107,6 +107,7 @@ const FetchPendingApproval = async () => {
             "Author": info.Author.Title,
             "AuthorId": info.Author.Id,
             "RequestLink": info.RequestLink,
+            "PendingWith": info.PendingWith?.results?.[0]?.Title ?? "N/A"
         }));
     } catch (error) {
         console.error("Error getting user information", error);
@@ -165,6 +166,7 @@ const JoinPendingApprovalWithMaster = () => {
                 "Status": item.Status,
                 "Created": item.Created,
                 "RequestLink": item.RequestLink,
+                "PendingWith": item.PendingWith,
                 "TotalExpectedExpense": marketingData.TotalExpectedExpense
             };
         } else {
@@ -176,6 +178,7 @@ const JoinPendingApprovalWithMaster = () => {
                 "Status": item.Status,
                 "Created": item.Created,
                 "RequestLink": item.RequestLink,
+                "PendingWith": item.PendingWith,
                 "TotalExpectedExpense": 0 // or any default value you prefer
             };
         }
