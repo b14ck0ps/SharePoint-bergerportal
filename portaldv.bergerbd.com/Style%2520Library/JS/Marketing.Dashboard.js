@@ -4,14 +4,14 @@ var TableData = [];
 
 const gridOptions = {
     columnDefs: [
+        { headerName: "Emp.Id", field: 'AuthorId', maxWidth: 100 },
         { headerName: "Requested By", field: 'Author', enableRowGroup: true },
         { headerName: "RequestID", field: 'Title', maxWidth: 140 },
-        { headerName: "Created", field: 'Created', enableRowGroup: true, maxWidth: 130 },
-        { headerName: "Emp.Id", field: 'AuthorId', maxWidth: 100 },
         { headerName: "Total Expected Expense", field: 'TotalExpectedExpense' },
         { headerName: "Status", field: 'Status', enableRowGroup: true, maxWidth: 140 },
         { headerName: "PendingWith", field: 'PendingWith', enableRowGroup: true, minWidth: 250 },
-        { headerName: "View", field: 'RequestLink', cellRenderer: viewActionCellRenderer, maxWidth: 100 },
+        { headerName: "Link", field: 'RequestLink', cellRenderer: viewActionCellRenderer, maxWidth: 100 },
+        { headerName: "Created", field: 'Created', enableRowGroup: true, maxWidth: 130 },
     ],
     defaultColDef: {
         sortable: true,
