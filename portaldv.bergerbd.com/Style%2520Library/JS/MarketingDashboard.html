@@ -1,0 +1,41 @@
+<link href="../../SiteAssets/MasterPage/bootstrap/css/bootstrap.css" rel="stylesheet" />
+<link href="../../Style Library/CSS/jquery-ui.css" rel="stylesheet" />
+<link href="../../Style Library/CSS/BergerPaintsWorkflow.css" rel="stylesheet" />
+<script type="text/javascript" src="../../Style Library/JS/jquery.min.js"></script>
+<script src="../../Style Library/JS/jquery-ui.js" type="text/javascript"></script>
+<script type="text/javascript" src="../../Style Library/JS/ui-bootstrap-tpls-0.10.0.min.js"></script>
+<script src="../../Style Library/JS/constants.js" type="text/javascript"></script>
+<script src="../../Style Library/JS/designationJSON.js" type="text/javascript"></script>
+<script type="text/javascript" src="../../Style Library/JS/Marketing.Dashboard.js"></script>
+
+<head>
+    <title>Dashboard</title>
+    <meta charSet="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<main>
+    <nav>
+        <div>
+            <span>Quick Filter:</span>
+            <input type="text" id="filter-text-box" placeholder="Filter..." oninput="onFilterTextBoxChanged()">
+        </div>
+        <div>
+            <button onclick="onBtExport()" style="margin-bottom: 5px; font-weight: bold">
+                Export to Excel
+            </button>
+        </div>
+    </nav>
+    <div id="dataGrid" style="width: 99%; height: 500px; margin-left: 3px;" class="ag-theme-alpine">
+</main>
+
+<script type="text/javascript" src="../../Style Library/JS/Marketing.Dashboard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-enterprise@30.2.0/dist/ag-grid-enterprise.min.js"></script>
