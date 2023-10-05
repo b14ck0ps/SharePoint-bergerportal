@@ -81,7 +81,7 @@ function LinkRanderer(params, label) {
 
 const FetchPendingApproval = async () => {
     const base = "https://portaldv.bergerbd.com/leaveauto/_api/web/lists/getByTitle('PendingApproval')/items";
-    const queryx = `$expand=PendingWith,Author&$select=ID,Title,Author/Title,Created,Status,PendingWith/Id,PendingWith/Title&$top=20000`;
+    const queryx = `$expand=PendingWith,Author&$select=ID,Title,Author/Title,Author/Id,Created,Status,PendingWith/Id,PendingWith/Title&$top=20000`;
 
     const url = `${base}?&${queryx}`;
     try {
@@ -104,7 +104,8 @@ const FetchPendingApproval = async () => {
             "Status": info.Status,
             "ID": info.ID,
             "Created": info.Created,
-            "Author": info.Author.Title
+            "Author": info.Author.Title,
+            "AuthorId": info.Author.Id,
         }));
 
         /* gridOptions.api.setRowData(
