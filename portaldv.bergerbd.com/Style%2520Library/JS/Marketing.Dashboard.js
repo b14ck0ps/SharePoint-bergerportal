@@ -5,12 +5,11 @@ var TableData = [];
 const gridOptions = {
     columnDefs: [
         { headerName: "Requested By", field: 'Author', enableRowGroup: true },
-        { headerName: "RequestID", field: 'Title' },
-        { headerName: "Created", field: 'Created', enableRowGroup: true },
+        { headerName: "RequestID", field: 'Title', maxWidth: 140 },
+        { headerName: "Created", field: 'Created', enableRowGroup: true, maxWidth: 130 },
         { headerName: "Emp.Id", field: 'AuthorId', maxWidth: 100 },
-        { headerName: "Request for", field: 'PendinWith', enableRowGroup: true, minWidth: 300 },
-        { headerName: "Total Expected Expense", field: 'TotalExpectedExpense', maxWidth: 150 },
-        { headerName: "Status", field: 'Status', enableRowGroup: true, minWidth: 300 },
+        { headerName: "Total Expected Expense", field: 'TotalExpectedExpense' },
+        { headerName: "Status", field: 'Status', enableRowGroup: true, minWidth: 140 },
         { headerName: "PendingWith", field: 'PendingWith', enableRowGroup: true },
         { headerName: "View/Action", field: 'RequestLink', cellRenderer: viewActionCellRenderer, maxWidth: 150 },
     ],
