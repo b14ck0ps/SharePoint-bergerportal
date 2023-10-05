@@ -9,9 +9,9 @@ const gridOptions = {
         { headerName: "Created", field: 'Created', enableRowGroup: true, maxWidth: 130 },
         { headerName: "Emp.Id", field: 'AuthorId', maxWidth: 100 },
         { headerName: "Total Expected Expense", field: 'TotalExpectedExpense' },
-        { headerName: "Status", field: 'Status', enableRowGroup: true, minWidth: 140 },
-        { headerName: "PendingWith", field: 'PendingWith', enableRowGroup: true },
-        { headerName: "View/Action", field: 'RequestLink', cellRenderer: viewActionCellRenderer, maxWidth: 150 },
+        { headerName: "Status", field: 'Status', enableRowGroup: true, maxWidth: 140 },
+        { headerName: "PendingWith", field: 'PendingWith', enableRowGroup: true, minWidth: 250 },
+        { headerName: "View", field: 'RequestLink', cellRenderer: viewActionCellRenderer, maxWidth: 100 },
     ],
     defaultColDef: {
         sortable: true,
