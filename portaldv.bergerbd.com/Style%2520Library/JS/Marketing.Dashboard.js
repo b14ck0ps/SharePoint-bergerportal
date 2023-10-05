@@ -107,15 +107,6 @@ const FetchPendingApproval = async () => {
             "Author": info.Author.Title,
             "AuthorId": info.Author.Id,
         }));
-
-        /* gridOptions.api.setRowData(
-            filteredObjects.map((item) => {
-                return {
-                    ...item,
-                    Created: new Date(item.Created),
-                };
-            })
-        ); */
     } catch (error) {
         console.error("Error getting user information", error);
     }
