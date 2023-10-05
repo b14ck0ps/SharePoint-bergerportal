@@ -373,6 +373,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                     AddToLog(`MA-${RequestId}`, 'Updated', $scope.actionComment, RequestId);
                 })
                 .catch((e) => { console.log("Error getting information", e) })
+                .finally(() => {
+                    window.location.href = RedirectOnSubmit;
+                });
             return;
         }
 
@@ -411,7 +414,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .catch(function (message) {
                 devlog(`Error saving data: ${message}`);
             })
-            .finally(() => $scope.IsLoading = false);
+            .finally(() => {
+                $scope.IsLoading = false;
+                window.location.href = RedirectOnSubmit;
+            });
     }
 
     /**
@@ -452,7 +458,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
             })
             .catch((e) => { devlog("Error getting user information", e) })
-            .finally(() => $scope.IsLoading = false);
+            .finally(() => {
+                $scope.IsLoading = false;
+                window.location.href = RedirectOnApprove;
+            });
     }
 
     const UpddatePendingApproval = (data, setPendingWith) => {
@@ -824,3 +833,5 @@ const getFileBufferAsync = (file) => {
         reader.readAsArrayBuffer(file);
     });
 }
+const RedirectOnSubmit = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/leaveauto/SitePages/MyWFRequest.aspx`
+const RedirectOnApprove = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/leaveauto/Lists/PendingApproval/AllItems.aspx`
