@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 function LinkRanderer(params, label) {
-    const viewActionValue = params.valueGg;
+    const viewActionValue = params.value;
 
     const linkElement = document.createElement('a');
     linkElement.href = viewActionValue;
