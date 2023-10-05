@@ -12,7 +12,7 @@ const gridOptions = {
         { headerName: "Total Expected Expense", field: 'TotalExpectedExpense', maxWidth: 150 },
         { headerName: "Status", field: 'Status', enableRowGroup: true, minWidth: 300 },
         { headerName: "PendingWith", field: 'PendingWith', enableRowGroup: true },
-        { headerName: "View/Action", field: 'View_Action', cellRenderer: viewActionCellRenderer, maxWidth: 150 },
+        { headerName: "View/Action", field: 'RequestLink', cellRenderer: viewActionCellRenderer, maxWidth: 150 },
     ],
     defaultColDef: {
         sortable: true,
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 function LinkRanderer(params, label) {
-    const viewActionValue = `?id=${params.value}`;
+    const viewActionValue = params.value;
 
     const linkElement = document.createElement('a');
     linkElement.href = viewActionValue;
@@ -81,7 +81,7 @@ function LinkRanderer(params, label) {
 
 const FetchPendingApproval = async () => {
     const base = "https://portaldv.bergerbd.com/leaveauto/_api/web/lists/getByTitle('PendingApproval')/items";
-    const queryx = `$expand=PendingWith,Author&$select=ID,Title,Author/Title,Author/Id,Created,Status,PendingWith/Id,PendingWith/Title&$top=20000`;
+    const queryx = `$expand=PendingWith,Author&$select=ID,Title,Author/Title,Author/Id,Created,Status,RequestLink,PendingWith/Id,PendingWith/Title&$top=20000`;
 
     const url = `${base}?&${queryx}`;
     try {
@@ -106,6 +106,7 @@ const FetchPendingApproval = async () => {
             "Created": info.Created,
             "Author": info.Author.Title,
             "AuthorId": info.Author.Id,
+            "RequestLink": info.RequestLink,
         }));
     } catch (error) {
         console.error("Error getting user information", error);
@@ -163,6 +164,7 @@ const JoinPendingApprovalWithMaster = () => {
                 "Title": item.Title,
                 "Status": item.Status,
                 "Created": item.Created,
+                "RequestLink": item.RequestLink,
                 "TotalExpectedExpense": marketingData.TotalExpectedExpense
             };
         } else {
@@ -173,6 +175,7 @@ const JoinPendingApprovalWithMaster = () => {
                 "Title": item.Title,
                 "Status": item.Status,
                 "Created": item.Created,
+                "RequestLink": item.RequestLink,
                 "TotalExpectedExpense": 0 // or any default value you prefer
             };
         }
