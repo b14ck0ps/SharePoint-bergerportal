@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 function LinkRanderer(params, label) {
-    const viewActionValue = params.value;
+    const viewActionValue = params.valueGg;
 
     const linkElement = document.createElement('a');
     linkElement.href = viewActionValue;
@@ -82,8 +82,9 @@ function LinkRanderer(params, label) {
 const FetchPendingApproval = async () => {
     const base = "https://portaldv.bergerbd.com/leaveauto/_api/web/lists/getByTitle('PendingApproval')/items";
     const queryx = `$expand=PendingWith,Author&$select=ID,Title,Author/Title,Author/Id,Created,Status,RequestLink,PendingWith/Id,PendingWith/Title&$top=20000`;
+    const filter = `$filter=ProcessName eq 'MarketingActivity'`;
 
-    const url = `${base}?&${queryx}`;
+    const url = `${base}?&${queryx}&${filter}`;
     try {
         const response = await fetch(url, {
             method: "GET",
