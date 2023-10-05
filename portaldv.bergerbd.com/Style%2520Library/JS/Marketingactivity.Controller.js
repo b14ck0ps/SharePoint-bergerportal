@@ -398,12 +398,15 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 /**  This is the ID of the newly created item @type {number} */
                 const MarketingActivityID = response.data.d.ID;
                 RequestId = MarketingActivityID;
+                const Title = `MA-${MarketingActivityID}`;
+                const UniqueUrl = `${ABS_URL}/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`;
 
                 /** Saves the request to a SharePoint list `PendingApproval`. @file constants.js */
-                saveAtMyTask(`MA-${MarketingActivityID}`, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, `${ABS_URL}/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`);
+                saveAtMyTask(Title, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, UniqueUrl);
 
-                AddToLog(`MA-${MarketingActivityID}`, status, $scope.actionComment, MarketingActivityID);
+                AddToLog(Title, status, $scope.actionComment, MarketingActivityID);
                 SaveAllAttachments();
+                readNotificationListTemplate(InitiatorRequesterTemplate, USER_ID, [], $scope.UserInfo.EmployeeName, $scope.pendingWithName, Title, StatusOnApprove, UniqueUrl, "", "Marketing Activity");
             })
             .catch(function (message) {
                 devlog(`Error saving data: ${message}`);
@@ -573,6 +576,83 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .then(async (res) => await uploadFileToSharePoint(res.data.d.ID, file, ListName))
             .catch((e) => { devlog(e) })
             .finally(() => $scope.IsLoading = false);
+    }
+
+    //Function readNotificationListTemplate --- Start//
+    const readNotificationListTemplate = (template, toList, ccList, initiator, approver, requestId, requestStatus, reviewLink, approvalLink, wfName) => {
+        var varUrl = _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getByTitle('" + notificationTemplateList + "')/items?&$top=2000000&$select=Title,Body,BottomBodyText&$filter=ID eq '" + template + "'";
+        $http(
+            {
+                method: "GET",
+                url: varUrl,
+                async: false,
+                headers: { "accept": "application/json;odata=verbose" }
+            }
+        ).success(function (data, status, headers, config) {
+            if (data.d.results.length > 0) {
+                var varSubject = data.d.results[0].Title;
+                var varBody = data.d.results[0].Body;
+                var varBodyBottomText = data.d.results[0].BottomBodyText;
+
+                if (varSubject.indexOf("[Workflow]") > -1)
+                    varSubject = varSubject.replace(/\[Workflow\]/g, wfName);
+                if (varSubject.indexOf("[RequestId]") > -1)
+                    varSubject = varSubject.replace(/\[RequestId\]/g, requestId);
+
+                if (varBody.indexOf("[Workflow]") > -1)
+                    varBody = varBody.replace(/\[Workflow\]/g, wfName);
+                if (varBody.indexOf("[RequestId]") > -1)
+                    varBody = varBody.replace(/\[RequestId\]/g, requestId);
+                if (varBody.indexOf("[Initiator]") > -1)
+                    varBody = varBody.replace(/\[Initiator\]/g, initiator);
+                if (varBody.indexOf("[Approver]") > -1)
+                    varBody = varBody.replace(/\[Approver\]/g, approver);
+                if (varBody.indexOf("[ApprovalStatus]") > -1)
+                    varBody = varBody.replace(/\[ApprovalStatus\]/g, requestStatus);
+                //alert(varBody);
+
+                if (template != ApproverTemplate && template != ChangeRequestTemplate) {
+                    approvalLink = "";
+                }
+
+                $scope.createNotificationItem(varSubject, varBody, toList, ccList, reviewLink, approvalLink, varBodyBottomText);
+            }
+        }).error(function (data, status, headers, config) {
+            $scope.insertLog("ReadNotificatinList", "Error", "Fail");
+        });
+    }
+    //Function readNotificationListTemplate --- End//
+
+    //Create Notification Item --- Start//
+    const createNotificationItem = (subject, body, toList, ccList, reviewLink, approvalLink, varBodyBottomText) => {
+        var varUrl = _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getByTitle('" + notificationList + "')/items";
+        var varData =
+        {
+            __metadata: { "type": "SP.Data.NotificationListListItem" },
+            Title: subject,
+            Body: body,
+            ToId: { results: toList },//jsonResponse.Designation[0].value//
+            CCId: { results: ccList },//jsonResponse.Designation[1].value//
+            ReviewLink: reviewLink,
+            ApprovalLink: approvalLink,
+            BodyBottomText: varBodyBottomText,
+            Status: "Started"
+        }
+        return $http({
+            headers: { "Accept": "application/json; odata=verbose", "Content-Type": "application/json; odata=verbose", "X-RequestDigest": $("#__REQUESTDIGEST").val() },
+            method: "POST",
+            url: varUrl,
+            async: false,
+            data: varData
+        })
+            .then(logAdded)
+            .catch(function (message) {
+                $scope.insertLog(notificationList, message, "Fail");
+            });
+        function logAdded(data, status, headers, config) {
+            //alert("Notification Added Successfully");
+            return data.data.d;
+        }
     }
 }]);
 
