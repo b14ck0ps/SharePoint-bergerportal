@@ -134,15 +134,7 @@
          <div class='row col-md-4' ng-If="uniqueId != '' ">
             <h3 style="color:white">Ref ID # {{requestCode}}</h3>
          </div>
-         <!--<div ng-model="status" ng-bind-html="false" class="row col-md-4" id="wpiToggleControlBtn">
-         <h3 style="color:white">Proposal Info
-            <button type="button" value="A Show/Hide" id="toggleMessage" ng-click="toggle=!toggle" >					
-               {{toggle ? "Hide" : "Show"}}
-            </button>
-         </h3>
-         </div>-->
       </div>
-      <!-- <div class="panel panel-default" id="divReimbursementPanel"> -->
       <div class="panel panel-default">
          <div class="panel-body">
             <div ng-show="IsLoading" ng-class="{ 'spinner-container': spinnerActive  }">
@@ -356,7 +348,6 @@
                               </td>
                               <td id="tdAttachted">{{receiptRow.Author.Title}}</td>
                               <td id="tdDate">{{receiptRow.Created | date}}</td>
-                              <!-- <td id="tdDelete" ng-hide="readMode == 'read'|| status=='Completed' ||status=='Submitted' || status=='SOICtoGMMarketing' || status=='GMMarketingToAccountsConcern'||status=='AccountsConcernToMarketingAccountant'|| status=='ReimbursementSubmitted' || status=='ReimbursementSOICtoGMMarketing' || status=='ReimbursementgMMarketingToACConcern' || status=='ReimbursementACConcernToMarketingAC'"><img id='imgDelete' src='../../Style Library/Images/Delete.png' class='delete' title='Delete' ng-click="deleteReceiptRow(i,receiptRow)" /></td> -->
                            </tr>
                         </tbody>
                      </table>
@@ -371,10 +362,6 @@
                         </div>
                         <div class="col-sm-7">
                            <div class=" row">
-                              <!-- <div class="col-sm-2">
-                                 <input type="button" id="btnsave" ng-show="showSaveOrSubmitBtn" value="Save"
-                                    ng-click="clickSaveOrSubmit('Saved')" />
-                              </div> -->
                               <div class="col-sm-2">
                                  <input type="button" id="btnsubmit" value="Submit" ng-show="showSaveOrSubmitBtn"
                                     ng-click="clickSaveOrSubmit('Submitted')" />
