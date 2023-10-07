@@ -11,7 +11,7 @@ const gridOptions = {
         { headerName: "Status", field: 'Status', enableRowGroup: true, maxWidth: 140 },
         { headerName: "PendingWith", field: 'PendingWith', enableRowGroup: true, minWidth: 250 },
         { headerName: "Link", field: 'RequestLink', cellRenderer: viewActionCellRenderer, maxWidth: 100 },
-        { headerName: "Created", field: 'Created', enableRowGroup: true, maxWidth: 130 },
+        { headerName: "Created", field: 'Created', enableRowGroup: true },
     ],
     defaultColDef: {
         sortable: true,
