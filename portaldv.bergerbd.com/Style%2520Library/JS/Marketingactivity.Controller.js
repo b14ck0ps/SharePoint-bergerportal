@@ -422,7 +422,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
                 AddToLog(Title, status, $scope.actionComment, MarketingActivityID);
                 SaveAllAttachments();
-                readNotificationListTemplate(InitiatorRequesterTemplate, USER_ID, [], $scope.UserInfo.EmployeeName, $scope.pendingWithName, Title, StatusOnApprove, UniqueUrl, "", "Marketing Activity");
+                if ($scope.pendingWithName === undefined) $scope.pendingWithName = OPM_INFO.name;
+                SendEmail(InitiatorRequesterTemplate, USER_ID, [], RequesterInfo.name, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
             })
             .catch(function (message) {
                 devlog(`Error saving data: ${message}`);
@@ -600,79 +601,97 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .finally(() => $scope.IsLoading = false);
     }
 
-    //Function readNotificationListTemplate --- Start//
-    const readNotificationListTemplate = (template, toList, ccList, initiator, approver, requestId, requestStatus, reviewLink, approvalLink, wfName) => {
-        var varUrl = _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getByTitle('" + notificationTemplateList + "')/items?&$top=2000000&$select=Title,Body,BottomBodyText&$filter=ID eq '" + template + "'";
+    /**
+     * Reads a notification list template and creates a notification item.
+     *
+     * @param {string} template - The ID of the notification list template to read.
+     * @param {string} toList - The email address of the recipient of the notification.
+     * @param {string} ccList - The email address of the CC recipient of the notification.
+     * @param {string} initiator - The name of the initiator of the notification.
+     * @param {string} approver - The name of the approver of the notification.
+     * @param {string} requestId - The ID of the request associated with the notification.
+     * @param {string} requestStatus - The status of the request associated with the notification.
+     * @param {string} reviewLink - The link to the review page associated with the notification.
+     * @param {string} approvalLink - The link to the approval page associated with the notification.
+     * @param {string} wfName - The name of the workflow associated with the notification.
+     */
+    const SendEmail = (template, toList, ccList, initiator, approver, requestId, requestStatus, reviewLink, approvalLink, wfName) => {
+
+        const base = getApiEndpoint(notificationTemplateList);
+        const filter = `$filter=ID eq '${template}'`;
+        const query = `$select=Title,Body,BottomBodyText`;
+
         $http(
             {
                 method: "GET",
-                url: varUrl,
-                async: false,
+                url: `${base}?${filter}&${query}`,
                 headers: { "accept": "application/json;odata=verbose" }
             }
-        ).success(function (data, status, headers, config) {
+        ).success(function (data) {
+            const replacements = [
+                ['Workflow', wfName],
+                ['RequestId', requestId],
+                ['Initiator', initiator],
+                ['Approver', approver],
+                ['ApprovalStatus', requestStatus],
+            ];
+
             if (data.d.results.length > 0) {
-                var varSubject = data.d.results[0].Title;
-                var varBody = data.d.results[0].Body;
-                var varBodyBottomText = data.d.results[0].BottomBodyText;
+                const { Title, Body, BottomBodyText } = data.d.results[0];
 
-                if (varSubject.indexOf("[Workflow]") > -1)
-                    varSubject = varSubject.replace(/\[Workflow\]/g, wfName);
-                if (varSubject.indexOf("[RequestId]") > -1)
-                    varSubject = varSubject.replace(/\[RequestId\]/g, requestId);
+                const replaceInText = (text) => {
+                    for (const [placeholder, value] of replacements) {
+                        const regex = new RegExp(`\\[${placeholder}\\]`, 'g');
+                        text = text.replace(regex, value);
+                    }
+                    return text;
+                };
 
-                if (varBody.indexOf("[Workflow]") > -1)
-                    varBody = varBody.replace(/\[Workflow\]/g, wfName);
-                if (varBody.indexOf("[RequestId]") > -1)
-                    varBody = varBody.replace(/\[RequestId\]/g, requestId);
-                if (varBody.indexOf("[Initiator]") > -1)
-                    varBody = varBody.replace(/\[Initiator\]/g, initiator);
-                if (varBody.indexOf("[Approver]") > -1)
-                    varBody = varBody.replace(/\[Approver\]/g, approver);
-                if (varBody.indexOf("[ApprovalStatus]") > -1)
-                    varBody = varBody.replace(/\[ApprovalStatus\]/g, requestStatus);
-                //alert(varBody);
+                const varSubject = replaceInText(Title);
+                const varBody = replaceInText(Body);
+                const varBodyBottomText = replaceInText(BottomBodyText);
 
-                if (template != ApproverTemplate && template != ChangeRequestTemplate) {
-                    approvalLink = "";
-                }
-
-                $scope.createNotificationItem(varSubject, varBody, toList, ccList, reviewLink, approvalLink, varBodyBottomText);
+                CreateNotificationItem(varSubject, varBody, toList, ccList, reviewLink, approvalLink, varBodyBottomText);
             }
-        }).error(function (data, status, headers, config) {
-            $scope.insertLog("ReadNotificatinList", "Error", "Fail");
+        }).error(function (e) {
+            console.log("Something went wrong, ", e)
         });
     }
-    //Function readNotificationListTemplate --- End//
-
-    //Create Notification Item --- Start//
-    const createNotificationItem = (subject, body, toList, ccList, reviewLink, approvalLink, varBodyBottomText) => {
-        var varUrl = _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getByTitle('" + notificationList + "')/items";
-        var varData =
+    /**
+     * Creates a notification item with the given subject, body, toList, ccList, reviewLink, approvalLink, and varBodyBottomText.
+     * @param {string} subject - The subject of the notification item.
+     * @param {string} body - The body of the notification item.
+     * @param {string[]} toList - An array of user IDs to whom the notification should be sent.
+     * @param {string[]} ccList - An array of user IDs to whom the notification should be CC'd.
+     * @param {string} reviewLink - The link to the review page.
+     * @param {string} approvalLink - The link to the approval page.
+     * @param {string} varBodyBottomText - The text to be displayed at the bottom of the notification body.
+     * @returns {Promise} A Promise that resolves with the created notification item data.
+     */
+    const CreateNotificationItem = (subject, body, toList, ccList, reviewLink, approvalLink, varBodyBottomText) => {
+        const MailData =
         {
             __metadata: { "type": "SP.Data.NotificationListListItem" },
             Title: subject,
             Body: body,
-            ToId: { results: toList },//jsonResponse.Designation[0].value//
-            CCId: { results: ccList },//jsonResponse.Designation[1].value//
+            ToId: { results: [toList] },
+            CCId: { results: ccList },
             ReviewLink: reviewLink,
             ApprovalLink: approvalLink,
             BodyBottomText: varBodyBottomText,
             Status: "Started"
         }
         return $http({
-            headers: { "Accept": "application/json; odata=verbose", "Content-Type": "application/json; odata=verbose", "X-RequestDigest": $("#__REQUESTDIGEST").val() },
+            headers: API_POST_HEADERS,
             method: "POST",
-            url: varUrl,
-            async: false,
-            data: varData
+            url: getApiEndpoint(notificationList),
+            data: MailData
         })
             .then(logAdded)
             .catch(function (message) {
-                $scope.insertLog(notificationList, message, "Fail");
+                console.log(`Error saving data: ${message}`);
             });
-        function logAdded(data, status, headers, config) {
-            //alert("Notification Added Successfully");
+        function logAdded(data) {
             return data.data.d;
         }
     }
