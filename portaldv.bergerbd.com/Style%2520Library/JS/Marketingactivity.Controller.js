@@ -157,8 +157,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
     $scope.MapActivityName = (e) => getActivityNames(e);
     $scope.MapCostHead = (e) => getCostHead(e);
-    $scope.clickSaveOrSubmit = (status) => { saveOrSubmit(status); }
     $scope.ApproverAction = (Action) => { UpdateApproveStatus(Action); }
+    $scope.clickSaveOrSubmit = (status) => { saveOrSubmit(status); }
 
     if (!PendingApprovalUniqueId) {
         $scope.showSaveOrSubmitBtn = true;
@@ -365,6 +365,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      * @returns {void}
      */
     const saveOrSubmit = (status) => {
+
+        if (!isFormDataValid($scope.FormData)) return;
+
         if (EditMode) {
             const data = { 'Status': ApprovalStatus.Submitted };
             UpddatePendingApproval(data, NextPendingWith)
@@ -833,5 +836,31 @@ const getFileBufferAsync = (file) => {
         reader.readAsArrayBuffer(file);
     });
 }
+/**
+ * Checks if the given form data is valid or not.
+ * @param {Object} formData - The form data to be validated.
+ * @returns {boolean} - Returns true if the form data is valid, false otherwise.
+ */
+const isFormDataValid = (formData) => {
+    if (
+        formData.ServiceName === undefined || formData.ServiceName === '' ||
+        formData.ActivityName === undefined || formData.ActivityName === '' ||
+        formData.CostHead === undefined || formData.CostHead === '' ||
+        formData.BrandDescription === undefined || formData.BrandDescription === '' ||
+        formData.ActivityStartDate === undefined || formData.ActivityStartDate === '' ||
+        formData.ServiceReceivingDate === undefined || formData.ServiceReceivingDate === '' ||
+        formData.ExpectedDeliveryDate === undefined || formData.ExpectedDeliveryDate === '' ||
+        formData.RequiredVendorQuotation === undefined || formData.RequiredVendorQuotation === '' ||
+        formData.ActivityType === undefined || formData.ActivityType === '' ||
+        formData.CommitmentItem === undefined || formData.CommitmentItem === '' ||
+        formData.BudgetType === undefined || formData.BudgetType === '' ||
+        formData.TotalExpectedExpense === undefined || formData.TotalExpectedExpense === '' ||
+        formData.SingleVendorJustification === undefined || formData.SingleVendorJustification === ''
+    ) {
+        return false;
+    }
+    return true;
+};
+
 const RedirectOnSubmit = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/leaveauto/SitePages/MyWFRequest.aspx`
 const RedirectOnApprove = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/leaveauto/Lists/PendingApproval/AllItems.aspx`
