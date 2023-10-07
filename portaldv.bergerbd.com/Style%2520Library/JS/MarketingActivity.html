@@ -339,20 +339,23 @@
                         <span ng-show="IsDataReadOnly && !EditMode">{{FormData.SingleVendorJustification}}</span>
                      </div>
                   </div>
-                  <div class="row panel-body">
-                     <h4 class="panel-body">Attachments/Receipts:</h4>
-                  </div>
-                  <div id="divChooseAttachmentFile" class="row panel-body">
-                     <div class="col-sm-2 labelHeader">
-                        <h6>Select All Attachments:</h6>
+                  <div ng-hide="IsRejectedOrCompleted">
+                     <div class="row panel-body">
+                        <h4 class="panel-body">Attachments/Receipts:</h4>
                      </div>
-                     <div class="files col-sm-6 row" id="attachFilesContainer" ng-model="attachment1">
-                        <input id="infringementFiles" type="file" class="multi browsebtn textBoxBGColor"
-                           title="Any attachment name including any special charecter like ' & . will not be uploded" />
-                     </div>
-                     <div class="col-sm-4" ng-show='vm.uniqueId !=""'>
-                        <span class='et-right et-style-night'>N.B. Any attachment name including any special charecter
-                           e.g.<label class='redStar'>" ', . @ ` ~ " </label>will not be uploded.</span>
+                     <div id="divChooseAttachmentFile" class="row panel-body">
+                        <div class="col-sm-2 labelHeader">
+                           <h6>Select All Attachments:</h6>
+                        </div>
+                        <div class="files col-sm-6 row" id="attachFilesContainer" ng-model="attachment1">
+                           <input id="infringementFiles" type="file" class="multi browsebtn textBoxBGColor"
+                              title="Any attachment name including any special charecter like ' & . will not be uploded" />
+                        </div>
+                        <div class="col-sm-4" ng-show='vm.uniqueId !=""'>
+                           <span class='et-right et-style-night'>N.B. Any attachment name including any special
+                              charecter
+                              e.g.<label class='redStar'>" ', . @ ` ~ " </label>will not be uploded.</span>
+                        </div>
                      </div>
                   </div>
                   <div id="divAttachmentDisplayTbl" class="row" style="padding-left: 15px; overflow:hidden;"
@@ -379,9 +382,10 @@
                               </tr>
                            </tbody>
                         </table>
+                        <strong style="text-align: center;" ng-show="receiptRows.length === 0">No Attachment</strong>
                      </div>
                   </div>
-                  <div id="divActionButtonPanel" class="panel panel-default" ng-hide='readMode == "read"'>
+                  <div id="divActionButtonPanel" class="panel panel-default" ng-hide="IsRejectedOrCompleted">
                      <div class="panel-body">
                         <div class="row">
                            <div class="col-sm-1 labelHeader comment">Comment:</div>
@@ -392,7 +396,7 @@
                               <div class=" row">
                                  <div class="col-sm-2">
                                     <input type="submit" id="btnsubmit" value="Submit" ng-show="showSaveOrSubmitBtn"
-                                       ng-click="clickSaveOrSubmit('Submitted')" ng-disabled="form.$invalid" />
+                                       ng-click="clickSaveOrSubmit(' Submitted')" ng-disabled="form.$invalid" />
                                  </div>
                                  <div class="col-sm-2">
                                     <input type="button" id="btncancel" value="Cancel" ng-show="showCancelBtn" />

@@ -6,6 +6,11 @@ const API_POST_HEADERS = {
     "X-RequestDigest": $("#__REQUESTDIGEST").val()
 };
 const API_UPDATE_HEADERS = { ...API_POST_HEADERS, "IF-MATCH": "*", "X-HTTP-Method": "MERGE" };
+/** no dev test 
+ * @type {string}
+ * @description add `&nodev` at the end of the url to disable the `DEV_ENV` flag
+*/
+const nodev = new URLSearchParams(window.location.search).get('nodev');
 /**
  * Flag indicating whether the current environment is a development environment.
  * Any URL containing `portaldv` is considered a development environment.
@@ -13,7 +18,7 @@ const API_UPDATE_HEADERS = { ...API_POST_HEADERS, "IF-MATCH": "*", "X-HTTP-Metho
  * @example DEV_ENV ? console.table(SomeTestVariable) : null;
  * @type {boolean}
  */
-const DEV_ENV = ABS_URL.includes("portaldv");
+const DEV_ENV = ABS_URL.includes("portaldv") && nodev === null;
 const PendingApprovalUniqueId = new URLSearchParams(window.location.search).get('UniqueId');
 const USER_ID = _spPageContextInfo.userId;
 const OPM_INFO = { id: 0, name: "" };
@@ -254,6 +259,11 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 && CurrentStatus !== ApprovalStatus.FinalApproved) {
                                 $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = true;
                             }
+                        }
+                        /* Hide Attachments Panel and Comment Box if rejected or final approved */
+                        if (CurrentStatus === ApprovalStatus.Rejected
+                            || CurrentStatus === ApprovalStatus.FinalApproved || USER_ID !== CurrentPendingWith && !DEV_ENV) {
+                            $scope.IsRejectedOrCompleted = true;
                         }
 
                         devlog(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
