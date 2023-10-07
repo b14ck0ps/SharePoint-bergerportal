@@ -63,6 +63,17 @@
       min-width: 110px;
    }
 
+   input[type=number] {
+      width: 100%;
+      padding: 2px 5px;
+      font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+      border: 1px solid #ABABAB;
+      color: #444;
+      background-color: aliceblue !important;
+      font-size: inherit;
+      line-height: inherit;
+   }
+
    @keyframes spin {
       0% {
          transform: rotate(0deg);
@@ -263,7 +274,7 @@
                         <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                      </div>
                      <div class="col-sm-2">
-                        <input ng-hide="IsDataReadOnly && !EditMode" type="text"
+                        <input ng-hide="IsDataReadOnly && !EditMode" type="number"
                            ng-model="FormData.TotalExpectedExpense" class="textBoxBGColor" valid-number
                            title="Please Fill in with a numerical value only" ng-init="totalExpectedExpense='0'"
                            id="totalExpectedExpense" required />
