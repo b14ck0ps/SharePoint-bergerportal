@@ -53,6 +53,16 @@
       animation: spin 1s linear infinite;
    }
 
+   input[type=submit] {
+      font-size: 14px;
+      font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+      border-radius: 4px 4px 4px 4px;
+      padding: 5px 10px;
+      background-color: navy !important;
+      color: white;
+      min-width: 110px;
+   }
+
    @keyframes spin {
       0% {
          transform: rotate(0deg);
@@ -256,7 +266,7 @@
                         <input ng-hide="IsDataReadOnly && !EditMode" type="text"
                            ng-model="FormData.TotalExpectedExpense" class="textBoxBGColor" valid-number
                            title="Please Fill in with a numerical value only" ng-init="totalExpectedExpense='0'"
-                           id="totalExpectedExpense" required/>
+                           id="totalExpectedExpense" required />
                         <span ng-show="IsDataReadOnly && !EditMode">{{FormData.TotalExpectedExpense |
                            currency:"৳"}}</span>
                      </div>
@@ -268,7 +278,7 @@
                      </div>
                      <div class="col-sm-2">
                         <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ActivityStartDate"
-                           class="textBoxBGColor" id="activityStartDate" required/>
+                           class="textBoxBGColor" id="activityStartDate" required />
                         <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityStartDate | date}}</span>
                      </div>
 
@@ -277,7 +287,8 @@
                      </div>
                      <div class="col-sm-2">
                         <input ng-hide="IsDataReadOnly && !EditMode" type="date"
-                           ng-model="FormData.ExpectedDeliveryDate" class="textBoxBGColor" id="expectedDeliveryDate" required/>
+                           ng-model="FormData.ExpectedDeliveryDate" class="textBoxBGColor" id="expectedDeliveryDate"
+                           required />
                         <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ExpectedDeliveryDate | date}}</span>
                      </div>
                   </div>
@@ -289,7 +300,8 @@
                      </div>
                      <div class="col-sm-2">
                         <input ng-hide="IsDataReadOnly && !EditMode" type="date"
-                           ng-model="FormData.ServiceReceivingDate" class="textBoxBGColor" id="serviceReceivingDate" required/>
+                           ng-model="FormData.ServiceReceivingDate" class="textBoxBGColor" id="serviceReceivingDate"
+                           required />
                         <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ServiceReceivingDate | date}}</span>
                      </div>
 
@@ -312,7 +324,7 @@
                      <div class="col-sm-2">
                         <input ng-hide="IsDataReadOnly && !EditMode" type="text"
                            ng-model="FormData.SingleVendorJustification" class="textBoxBGColor"
-                           id="singleVendorJustification" required/>
+                           id="singleVendorJustification" required />
                         <span ng-show="IsDataReadOnly && !EditMode">{{FormData.SingleVendorJustification}}</span>
                      </div>
                   </div>
