@@ -162,306 +162,300 @@
                <div ng-class="{ 'spinner': spinnerActive  }"></div>
             </div>
             <div id="divInput">
-               <form name="form">
-                  <div class="row" style="margin-left: -16px;">
-                     <div class="col-sm-2 labelHeader">Project Name:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <input ng-hide="IsDataReadOnly && !EditMode" type="text" ng-model="FormData.ProjectName"
-                           class="textBoxBGColor" id="projectName" name="pName" required />
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ProjectName}}</span>
-                     </div>
-
-                     <div class="col-sm-2 labelHeader">Service Name:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <select ng-hide="IsDataReadOnly && !EditMode" name="serviceName" id="selectService"
-                           ng-change="MapActivityName()"
-                           class='fld_single float-label-parent float-label-select-parent textBoxBGColor'
-                           ng-model="FormData.ServiceName" required>
-                           <option ng-repeat="service in services" value="{{service.value}}">{{service.label}}</option>
-                        </select>
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ServiceName}}</span>
-                     </div>
-
-                     <div class="col-sm-2 labelHeader">Activity Name:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <select ng-hide="IsDataReadOnly && !EditMode" id="activitySelect"
-                           ng-model="FormData.ActivityName" ng-change="MapCostHead()"
-                           ng-disabled="activityNamesDropdownList == undefined || activityNamesDropdownList.length == 0"
-                           class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                           <option value="">-- Select Activity --</option>
-                           <option ng-repeat="activity in activityNamesDropdownList" value="{{activity}}">
-                              {{activity}}</option>
-                        </select>
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityName}}</span>
-                     </div>
-
-
+               <div class="row" style="margin-left: -16px;">
+                  <div class="col-sm-2 labelHeader">Project Name:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
-                  <div class="row">
-
-                     <div class="col-sm-2 labelHeader">Cost Head:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <select ng-hide="IsDataReadOnly && !EditMode" id="selectedCostHead" ng-model="FormData.CostHead"
-                           ng-disabled="costHeadDropdownList == undefined || costHeadDropdownList.length == 0"
-                           class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                           <option value="">-- Select Cost Head --</option>
-                           <option ng-repeat="costHead in costHeadDropdownList" value="{{costHead}}">{{costHead}}
-                           </option>
-                        </select>
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CostHead}}</span>
-                     </div>
-
-                     <div class="col-sm-2 labelHeader">Activity Type:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <select ng-hide="IsDataReadOnly && !EditMode" id="activitySelect"
-                           ng-model="FormData.ActivityType"
-                           class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                           <option ng-repeat="type in activityTypes" value="{{type.value}}">{{type.label}}</option>
-                        </select>
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityType}}</span>
-                     </div>
-
-
-                     <div class="col-sm-2 labelHeader">Budget Type:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <select ng-hide="IsDataReadOnly && !EditMode" name="budgetType" id="selectBudgetType"
-                           ng-model="FormData.BudgetType"
-                           class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                           <option ng-repeat="type in budgetTypes" value="{{type.value}}">{{type.label}}</option>
-                        </select>
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BudgetType}}</span>
-                     </div>
+                  <div class="col-sm-2">
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="text" ng-model="FormData.ProjectName"
+                        class="textBoxBGColor" id="projectName" name="pName" required />
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ProjectName}}</span>
                   </div>
 
-                  <div class="row">
-                     <div class="col-sm-2 labelHeader">Brand Description:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <select ng-hide="IsDataReadOnly && !EditMode" name="brandDescription" id="BrandDescription"
-                           ng-model="FormData.BrandDescription"
-                           class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                           <option ng-repeat="brand in brands" value="{{brand.value}}">{{brand.label}}</option>
-                        </select>
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BrandDescription}}</span>
-                     </div>
-
-                     <div class="col-sm-2 labelHeader">Commitment Item Description:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <select ng-hide="IsDataReadOnly && !EditMode" name="commitmentItem" id="selectCommitmentItem"
-                           ng-model="FormData.CommitmentItem"
-                           class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                           <option ng-repeat="item in commitmentItems" value="{{item.value}}">{{item.label}}</option>
-                        </select>
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CommitmentItem}}</span>
-                     </div>
-
-                     <div class="col-sm-2 labelHeader">Total Expected Expenses:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <input ng-hide="IsDataReadOnly && !EditMode" type="number"
-                           ng-model="FormData.TotalExpectedExpense" class="textBoxBGColor" valid-number
-                           title="Please Fill in with a numerical value only" ng-init="totalExpectedExpense='0'"
-                           id="totalExpectedExpense" required />
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.TotalExpectedExpense |
-                           currency:"৳"}}</span>
-                     </div>
+                  <div class="col-sm-2 labelHeader">Service Name:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" name="serviceName" id="selectService"
+                        ng-change="MapActivityName()"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor'
+                        ng-model="FormData.ServiceName" required>
+                        <option ng-repeat="service in services" value="{{service.value}}">{{service.label}}</option>
+                     </select>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ServiceName}}</span>
                   </div>
 
-                  <div class="row">
-                     <div class="col-sm-2 labelHeader">Activity Start Date:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ActivityStartDate"
-                           class="textBoxBGColor" id="activityStartDate" required />
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityStartDate | date}}</span>
-                     </div>
-
-                     <div class="col-sm-2 labelHeader">Expected Delivery Date:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <input ng-hide="IsDataReadOnly && !EditMode" type="date"
-                           ng-model="FormData.ExpectedDeliveryDate" class="textBoxBGColor" id="expectedDeliveryDate"
-                           required />
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ExpectedDeliveryDate | date}}</span>
-                     </div>
+                  <div class="col-sm-2 labelHeader">Activity Name:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="activitySelect" ng-model="FormData.ActivityName"
+                        ng-change="MapCostHead()"
+                        ng-disabled="activityNamesDropdownList == undefined || activityNamesDropdownList.length == 0"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option value="">-- Select Activity --</option>
+                        <option ng-repeat="activity in activityNamesDropdownList" value="{{activity}}">
+                           {{activity}}</option>
+                     </select>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityName}}</span>
                   </div>
 
-                  <div class="row">
 
-                     <div class="col-sm-2 labelHeader">Service Receiving Date:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <input ng-hide="IsDataReadOnly && !EditMode" type="date"
-                           ng-model="FormData.ServiceReceivingDate" class="textBoxBGColor" id="serviceReceivingDate"
-                           required />
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ServiceReceivingDate | date}}</span>
-                     </div>
+               </div>
+               <div class="row">
 
-                     <div class="col-sm-2 labelHeader">Number of vendor require for quotation:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                     </div>
-                     <div class="col-sm-2">
-                        <select ng-hide="IsDataReadOnly && !EditMode" name="requiredVendorQuotation"
-                           id="selectRequiredVendorQuotation" ng-model="FormData.RequiredVendorQuotation"
-                           class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                           <option ng-repeat="vendor in vendorQuotations" value="{{vendor.value}}">{{vendor.label}}
-                           </option>
-                        </select>
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.RequiredVendorQuotation}}</span>
-                     </div>
+                  <div class="col-sm-2 labelHeader">Cost Head:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="selectedCostHead" ng-model="FormData.CostHead"
+                        ng-disabled="costHeadDropdownList == undefined || costHeadDropdownList.length == 0"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option value="">-- Select Cost Head --</option>
+                        <option ng-repeat="costHead in costHeadDropdownList" value="{{costHead}}">{{costHead}}
+                        </option>
+                     </select>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CostHead}}</span>
+                  </div>
 
-                     <div class="col-sm-2 labelHeader">Justification for Single Vendor:
-                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  <div class="col-sm-2 labelHeader">Activity Type:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="activitySelect" ng-model="FormData.ActivityType"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option ng-repeat="type in activityTypes" value="{{type.value}}">{{type.label}}</option>
+                     </select>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityType}}</span>
+                  </div>
+
+
+                  <div class="col-sm-2 labelHeader">Budget Type:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" name="budgetType" id="selectBudgetType"
+                        ng-model="FormData.BudgetType"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option ng-repeat="type in budgetTypes" value="{{type.value}}">{{type.label}}</option>
+                     </select>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BudgetType}}</span>
+                  </div>
+               </div>
+
+               <div class="row">
+                  <div class="col-sm-2 labelHeader">Brand Description:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" name="brandDescription" id="BrandDescription"
+                        ng-model="FormData.BrandDescription"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option ng-repeat="brand in brands" value="{{brand.value}}">{{brand.label}}</option>
+                     </select>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BrandDescription}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">Commitment Item Description:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" name="commitmentItem" id="selectCommitmentItem"
+                        ng-model="FormData.CommitmentItem"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option ng-repeat="item in commitmentItems" value="{{item.value}}">{{item.label}}</option>
+                     </select>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CommitmentItem}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">Total Expected Expenses:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="number" ng-model="FormData.TotalExpectedExpense"
+                        class="textBoxBGColor" valid-number title="Please Fill in with a numerical value only"
+                        ng-init="totalExpectedExpense='0'" id="totalExpectedExpense" required />
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.TotalExpectedExpense |
+                        currency:"৳"}}</span>
+                  </div>
+               </div>
+
+               <div class="row">
+                  <div class="col-sm-2 labelHeader">Activity Start Date:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ActivityStartDate"
+                        class="textBoxBGColor" id="activityStartDate" required />
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityStartDate | date}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">Expected Delivery Date:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ExpectedDeliveryDate"
+                        class="textBoxBGColor" id="expectedDeliveryDate" required />
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ExpectedDeliveryDate | date}}</span>
+                  </div>
+               </div>
+
+               <div class="row">
+
+                  <div class="col-sm-2 labelHeader">Service Receiving Date:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ServiceReceivingDate"
+                        class="textBoxBGColor" id="serviceReceivingDate" required />
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ServiceReceivingDate | date}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">Number of vendor require for quotation:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" name="requiredVendorQuotation"
+                        id="selectRequiredVendorQuotation" ng-model="FormData.RequiredVendorQuotation"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option ng-repeat="vendor in vendorQuotations" value="{{vendor.value}}">{{vendor.label}}
+                        </option>
+                     </select>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.RequiredVendorQuotation}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">Justification for Single Vendor:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="text"
+                        ng-model="FormData.SingleVendorJustification" class="textBoxBGColor"
+                        id="singleVendorJustification" required />
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.SingleVendorJustification}}</span>
+                  </div>
+               </div>
+               <div ng-hide="IsRejectedOrCompleted">
+                  <div class="row panel-body">
+                     <h4 class="panel-body">Attachments/Receipts:</h4>
+                  </div>
+                  <div id="divChooseAttachmentFile" class="row panel-body">
+                     <div class="col-sm-2 labelHeader">
+                        <h6>Select All Attachments:</h6>
                      </div>
-                     <div class="col-sm-2">
-                        <input ng-hide="IsDataReadOnly && !EditMode" type="text"
-                           ng-model="FormData.SingleVendorJustification" class="textBoxBGColor"
-                           id="singleVendorJustification" required />
-                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.SingleVendorJustification}}</span>
+                     <div class="files col-sm-6 row" id="attachFilesContainer" ng-model="attachment1">
+                        <input id="infringementFiles" type="file" class="multi browsebtn textBoxBGColor"
+                           title="Any attachment name including any special charecter like ' & . will not be uploded" />
+                     </div>
+                     <div class="col-sm-4" ng-show='vm.uniqueId !=""'>
+                        <span class='et-right et-style-night'>N.B. Any attachment name including any special
+                           charecter
+                           e.g.<label class='redStar'>" ', . @ ` ~ " </label>will not be uploded.</span>
                      </div>
                   </div>
-                  <div ng-hide="IsRejectedOrCompleted">
-                     <div class="row panel-body">
-                        <h4 class="panel-body">Attachments/Receipts:</h4>
-                     </div>
-                     <div id="divChooseAttachmentFile" class="row panel-body">
-                        <div class="col-sm-2 labelHeader">
-                           <h6>Select All Attachments:</h6>
+               </div>
+               <div id="divAttachmentDisplayTbl" class="row" style="padding-left: 15px; overflow:hidden;"
+                  ng-hide='uId == ""||status==""||hideAttachmentDiv = "true"'>
+                  <div class="table-responsive panel-body" style="overflow-x:auto;">
+                     <table id="tblReceipt" class="table css-serial">
+                        <tbody>
+                           <tr>
+                              <th id="">SL#</th>
+                              <th id="thReceipt">View Attachment</th>
+                              <th id="thAttachted">Attached By</th>
+                              <th id="thDate">Attachment Date</th>
+                              <th id="thDelete" ng-hide="readMode == 'read' || status=='Completed'"></th>
+                           </tr>
+                        </tbody>
+                        <tbody>
+                           <tr ng-repeat="(i,receiptRow) in receiptRows">
+                              <td id="tdSlNo"></td>
+                              <td id="tdReceipt"><a
+                                    href="{{receiptRow.AttachmentFiles.results[0].ServerRelativeUrl}}">{{receiptRow.AttachmentFiles.results[0].FileName}}</a>
+                              </td>
+                              <td id="tdAttachted">{{receiptRow.Author.Title}}</td>
+                              <td id="tdDate">{{receiptRow.Created | date}}</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <strong style="text-align: center;" ng-show="receiptRows.length === 0">No Attachment</strong>
+                  </div>
+               </div>
+               <div id="divActionButtonPanel" class="panel panel-default" ng-hide="IsRejectedOrCompleted">
+                  <div class="panel-body">
+                     <div class="row">
+                        <div class="col-sm-1 labelHeader comment">Comment:</div>
+                        <div class="col-sm-4">
+                           <textarea name="actionComment" ng-model="actionComment" cols="32" rows="3"></textarea>
                         </div>
-                        <div class="files col-sm-6 row" id="attachFilesContainer" ng-model="attachment1">
-                           <input id="infringementFiles" type="file" class="multi browsebtn textBoxBGColor"
-                              title="Any attachment name including any special charecter like ' & . will not be uploded" />
-                        </div>
-                        <div class="col-sm-4" ng-show='vm.uniqueId !=""'>
-                           <span class='et-right et-style-night'>N.B. Any attachment name including any special
-                              charecter
-                              e.g.<label class='redStar'>" ', . @ ` ~ " </label>will not be uploded.</span>
-                        </div>
-                     </div>
-                  </div>
-                  <div id="divAttachmentDisplayTbl" class="row" style="padding-left: 15px; overflow:hidden;"
-                     ng-hide='uId == ""||status==""||hideAttachmentDiv = "true"'>
-                     <div class="table-responsive panel-body" style="overflow-x:auto;">
-                        <table id="tblReceipt" class="table css-serial">
-                           <tbody>
-                              <tr>
-                                 <th id="">SL#</th>
-                                 <th id="thReceipt">View Attachment</th>
-                                 <th id="thAttachted">Attached By</th>
-                                 <th id="thDate">Attachment Date</th>
-                                 <th id="thDelete" ng-hide="readMode == 'read' || status=='Completed'"></th>
-                              </tr>
-                           </tbody>
-                           <tbody>
-                              <tr ng-repeat="(i,receiptRow) in receiptRows">
-                                 <td id="tdSlNo"></td>
-                                 <td id="tdReceipt"><a
-                                       href="{{receiptRow.AttachmentFiles.results[0].ServerRelativeUrl}}">{{receiptRow.AttachmentFiles.results[0].FileName}}</a>
-                                 </td>
-                                 <td id="tdAttachted">{{receiptRow.Author.Title}}</td>
-                                 <td id="tdDate">{{receiptRow.Created | date}}</td>
-                              </tr>
-                           </tbody>
-                        </table>
-                        <strong style="text-align: center;" ng-show="receiptRows.length === 0">No Attachment</strong>
-                     </div>
-                  </div>
-                  <div id="divActionButtonPanel" class="panel panel-default" ng-hide="IsRejectedOrCompleted">
-                     <div class="panel-body">
-                        <div class="row">
-                           <div class="col-sm-1 labelHeader comment">Comment:</div>
-                           <div class="col-sm-4">
-                              <textarea name="actionComment" ng-model="actionComment" cols="32" rows="3"></textarea>
-                           </div>
-                           <div class="col-sm-7">
-                              <div class=" row">
-                                 <div class="col-sm-2">
-                                    <input type="submit" id="btnsubmit" value="Submit" ng-show="showSaveOrSubmitBtn"
-                                       ng-click="clickSaveOrSubmit(' Submitted')" ng-disabled="form.$invalid" />
-                                 </div>
-                                 <div class="col-sm-2">
-                                    <input type="button" id="btncancel" value="Cancel" ng-show="showCancelBtn" />
-                                 </div>
+                        <div class="col-sm-7">
+                           <div class=" row">
+                              <div class="col-sm-2">
+                                 <input type="button" id="btnsubmit" value="Submit" ng-show="showSaveOrSubmitBtn"
+                                    ng-click="clickSaveOrSubmit('Submitted')" ng-disabled="form.$invalid" />
                               </div>
-                              <div class="row">
-                                 <div class="col-sm-2">
-                                    <input type="button" id="btnApprove" value="Approve"
-                                       ng-click="ApproverAction('Approved')" ng-show="showApproveBtn" />
-                                 </div>
-                                 <div class="col-sm-2">
-                                    <input type="button" id="btnReject" value="Reject"
-                                       ng-click="ApproverAction('Rejected')" ng-show="showRejectBtn">
-                                 </div>
-                                 <div class="col-sm-2">
-                                    <input type="button" id="btnChange" value="Request Change"
-                                       ng-click="ApproverAction('Changed')" ng-show="showChangeBtn" />
-                                 </div>
+                              <div class="col-sm-2">
+                                 <input type="button" id="btncancel" value="Cancel" ng-show="showCancelBtn" />
+                              </div>
+                           </div>
+                           <div class="row">
+                              <div class="col-sm-2">
+                                 <input type="button" id="btnApprove" value="Approve"
+                                    ng-click="ApproverAction('Approved')" ng-show="showApproveBtn" />
+                              </div>
+                              <div class="col-sm-2">
+                                 <input type="button" id="btnReject" value="Reject"
+                                    ng-click="ApproverAction('Rejected')" ng-show="showRejectBtn">
+                              </div>
+                              <div class="col-sm-2">
+                                 <input type="button" id="btnChange" value="Request Change"
+                                    ng-click="ApproverAction('Changed')" ng-show="showChangeBtn" />
                               </div>
                            </div>
                         </div>
                      </div>
                   </div>
-                  <div class="panel panel-default" id="divErrorPanel" ng-show="showStatus">
-                     <div class="panel-body">
-                        <div id="status" ng-style="{'font-weight': bold, 'color': textColor}" ng-bind="statusText">
-                        </div>
+               </div>
+               <div class="panel panel-default" id="divErrorPanel" ng-show="showStatus">
+                  <div class="panel-body">
+                     <div id="status" ng-style="{'font-weight': bold, 'color': textColor}" ng-bind="statusText">
                      </div>
                   </div>
-                  <div class="panel-body" id="divAuditPanel" ng-hide='status==""'>
-                     <div class="row">
-                        <h4>Approval History</h4>
-                     </div>
-                     <div class="row">
-                        <div class="col-sm-2 labelHeader">Pending With:</div>
-                        <div class="col-sm-2">
-                           <label id="lblPendingWith">{{pendingWithName}}</label>
-                        </div>
-                     </div>
-                     <div class="table-responsive" style="overflow-x:auto;">
-                        <table id="tblAudit" class="table css-serial">
-                           <tbody>
-                              <tr>
-                                 <th>SL#</th>
-                                 <th>Approval Date</th>
-                                 <th>Status</th>
-                                 <th>Action By</th>
-                                 <th>Comment</th>
-                              </tr>
-                           </tbody>
-                           <tbody>
-                              <tr ng-repeat="(i,audit) in auditHistory">
-                                 <td></td>
-                                 <td>{{audit.Created | date}}</td>
-                                 <td>{{audit.Status}}</td>
-                                 <td>{{audit.Author.Title}}</td>
-                                 <td>
-                                    <p ng-bind-html="audit.Comment"></p>
-                                 </td>
-                              </tr>
-                           </tbody>
-                        </table>
+               </div>
+               <div class="panel-body" id="divAuditPanel" ng-hide='status==""'>
+                  <div class="row">
+                     <h4>Approval History</h4>
+                  </div>
+                  <div class="row">
+                     <div class="col-sm-2 labelHeader">Pending With:</div>
+                     <div class="col-sm-2">
+                        <label id="lblPendingWith">{{pendingWithName}}</label>
                      </div>
                   </div>
-               </form>
+                  <div class="table-responsive" style="overflow-x:auto;">
+                     <table id="tblAudit" class="table css-serial">
+                        <tbody>
+                           <tr>
+                              <th>SL#</th>
+                              <th>Approval Date</th>
+                              <th>Status</th>
+                              <th>Action By</th>
+                              <th>Comment</th>
+                           </tr>
+                        </tbody>
+                        <tbody>
+                           <tr ng-repeat="(i,audit) in auditHistory">
+                              <td></td>
+                              <td>{{audit.Created | date}}</td>
+                              <td>{{audit.Status}}</td>
+                              <td>{{audit.Author.Title}}</td>
+                              <td>
+                                 <p ng-bind-html="audit.Comment"></p>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
             </div>
          </div>
       </div>
