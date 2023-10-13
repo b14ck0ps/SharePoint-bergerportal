@@ -10,6 +10,7 @@ const gridOptions = {
         { headerName: "Total Expected Expense", field: 'TotalExpectedExpense' },
         { headerName: "Status", field: 'Status', enableRowGroup: true, maxWidth: 140 },
         { headerName: "PendingWith", field: 'PendingWith', enableRowGroup: true, minWidth: 250 },
+        { headerName: "PRNumber", field: 'PRNumber', maxWidth: 140 },
         { headerName: "Link", field: 'RequestLink', cellRenderer: viewActionCellRenderer, maxWidth: 100 },
         { headerName: "Created", field: 'Created', enableRowGroup: true },
     ],
@@ -116,9 +117,9 @@ const FetchPendingApproval = async () => {
 
 const FetchMarketingMaster = async () => {
     const base = "https://portaldv.bergerbd.com/leaveauto/_api/web/lists/getByTitle('MarketingActivityMaster')/items";
-    const queryx = `$select=ID,TotalExpectedExpense&$top=20000`;
+    const query = `$select=ID,TotalExpectedExpense,PRNumber&$top=20000`;
 
-    const url = `${base}?&${queryx}`;
+    const url = `${base}?&${query}`;
 
     try {
         const response = await fetch(url, {
@@ -136,7 +137,8 @@ const FetchMarketingMaster = async () => {
 
         MarketingMasterData = data.d.results.map(info => ({
             "Id": info.Id,
-            "TotalExpectedExpense": info.TotalExpectedExpense
+            "TotalExpectedExpense": info.TotalExpectedExpense,
+            "PRNumber": info.PRNumber
         }));
 
         console.log(MarketingMasterData);
@@ -157,30 +159,16 @@ const JoinPendingApprovalWithMaster = () => {
         // Find the corresponding MarketingMasterData object with the same Id
         const marketingData = MarketingMasterData.find(data => data.Id === titleInteger);
 
-        // If a matching object is found, add TotalExpectedExpense to the new object
-        if (marketingData) {
-            return {
-                "Author": item.Author,
-                "AuthorId": item.AuthorId,
-                "Title": item.Title,
-                "Status": item.Status,
-                "Created": item.Created,
-                "RequestLink": item.RequestLink,
-                "PendingWith": item.PendingWith,
-                "TotalExpectedExpense": marketingData.TotalExpectedExpense
-            };
-        } else {
-            // If no matching object is found, return a default object
-            return {
-                "Author": item.Author,
-                "AuthorId": item.AuthorId,
-                "Title": item.Title,
-                "Status": item.Status,
-                "Created": item.Created,
-                "RequestLink": item.RequestLink,
-                "PendingWith": item.PendingWith,
-                "TotalExpectedExpense": 0 // or any default value you prefer
-            };
-        }
+        return {
+            "Author": item.Author,
+            "AuthorId": item.AuthorId,
+            "Title": item.Title,
+            "Status": item.Status,
+            "Created": item.Created,
+            "RequestLink": item.RequestLink,
+            "PendingWith": item.PendingWith,
+            "PRNumber": marketingData?.PRNumber,
+            "TotalExpectedExpense": marketingData?.TotalExpectedExpense ?? 0
+        };
     });
 };

@@ -198,7 +198,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
                 const base = getApiEndpoint("MarketingActivityMaster");
                 const filter = `$filter=ID eq '${RequestId}'`;
-                const query = `$select=PendingWith/Id,PendingWith/Title,ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,AuthorId&$expand=PendingWith&$top=1`;
+                const query = `$select=PendingWith/Id,PendingWith/Title,ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,PRNumber,Reamarks,AuthorId&$expand=PendingWith&$top=1`;
 
                 /* Getting the request data from `MarketingActivityMaster` list */
                 $http({
@@ -258,6 +258,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 && CurrentStatus !== ApprovalStatus.ChangeRequested
                                 && CurrentStatus !== ApprovalStatus.FinalApproved) {
                                 $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = true;
+                                CurrentPendingWith == ApprovalChain.FinalApprovar ? $scope.isFinalApprover = true : null; /* `PRN & Remark` Input Field Config */
                             }
                         }
                         /* Hide Attachments Panel and Comment Box if rejected or final approved */
@@ -464,14 +465,21 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 devlog(`Invalid action: ${Action}`);
                 return;
         }
+        if (CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRNumber === null || $scope.FormData.PRNumber === '') {
+            alert("Please fill up PR Number");
+            return;
+        }
 
         $scope.IsLoading = true;
         UpddatePendingApproval(data, setPendingWith)
             .then((res) => {
+                if (CurrentPendingWith === ApprovalChain.FinalApprovar && Action === 'Approved') {
+                    data = { ...data, 'PRNumber': $scope.FormData.PRNumber, 'Reamarks': $scope.FormData.Reamarks };
+                }
                 UpdateActivityMaster(data, setPendingWith, StatusOnApprove);
                 AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
             })
-            .catch((e) => { devlog("Error getting user information", e) })
+            .catch((e) => { DEV_ENV && console.log(e); })
             .finally(() => {
                 $scope.IsLoading = false;
                 window.location.href = RedirectOnApprove;
@@ -883,8 +891,7 @@ const isFormDataValid = (formData) => {
         formData.ActivityType === undefined || formData.ActivityType === '' ||
         formData.CommitmentItem === undefined || formData.CommitmentItem === '' ||
         formData.BudgetType === undefined || formData.BudgetType === '' ||
-        formData.TotalExpectedExpense === undefined || formData.TotalExpectedExpense === '' ||
-        formData.SingleVendorJustification === undefined || formData.SingleVendorJustification === ''
+        formData.TotalExpectedExpense === undefined || formData.TotalExpectedExpense === ''
     ) {
         return false;
     }

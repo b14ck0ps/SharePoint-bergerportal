@@ -325,7 +325,6 @@
                   </div>
 
                   <div class="col-sm-2 labelHeader">Justification for Single Vendor:
-                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
                      <input ng-hide="IsDataReadOnly && !EditMode" type="text"
@@ -334,6 +333,19 @@
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.SingleVendorJustification}}</span>
                   </div>
                </div>
+               <div ng-show="FormData.PRNumber !== null " class="row">
+                  <div class="col-sm-2 labelHeader">PR Number:
+                  </div>
+                  <div class="col-sm-2">
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PRNumber}}</span>
+                  </div>
+                  <div class="col-sm-2 labelHeader">Remarks:
+                  </div>
+                  <div class="col-sm-2">
+                     <span ng-bind-html="FormData.Reamarks" ng-show="IsDataReadOnly && !EditMode"></span>
+                  </div>
+               </div>
+
                <div ng-hide="IsRejectedOrCompleted">
                   <div class="row panel-body">
                      <h4 class="panel-body">Attachments/Receipts:</h4>
@@ -382,10 +394,28 @@
                </div>
                <div id="divActionButtonPanel" class="panel panel-default" ng-hide="IsRejectedOrCompleted">
                   <div class="panel-body">
+                     <!-- Final Approver Fields -->
+                     <div ng-show="isFinalApprover">
+                        <div class="row">
+                        </div>
+                        <div class="row">
+                           <div class="col-sm-1 labelHeader">PR Number: <span style="color: red;">*</span></div>
+                           <div class="col-sm-2">
+                              <input name="PRNumber" type="number" ng-model="FormData.PRNumber" required></input>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-sm-1 labelHeader">Remarks:</div>
+                           <div class="col-sm-4">
+                              <textarea name="Remarks" type="text" ng-model="FormData.Reamarks" cols="36"
+                                 rows="3"></textarea>
+                           </div>
+                        </div>
+                     </div>
                      <div class="row">
                         <div class="col-sm-1 labelHeader comment">Comment:</div>
                         <div class="col-sm-4">
-                           <textarea name="actionComment" ng-model="actionComment" cols="32" rows="3"></textarea>
+                           <textarea name="actionComment" ng-model="actionComment" cols="36" rows="3"></textarea>
                         </div>
                         <div class="col-sm-7">
                            <div class=" row">
