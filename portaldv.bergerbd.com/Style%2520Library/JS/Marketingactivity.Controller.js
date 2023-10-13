@@ -496,7 +496,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 DEV_ENV && console.log(`Invalid action: ${Action}`);
                 return;
         }
-        if (CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRNumber === null || $scope.FormData.PRNumber === '') {
+        if (Action === "Approved" && CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRNumber === null || $scope.FormData.PRNumber === '') {
             $scope.errors.PRNumber = 'Please fill up PR Number'
             return;
         }
