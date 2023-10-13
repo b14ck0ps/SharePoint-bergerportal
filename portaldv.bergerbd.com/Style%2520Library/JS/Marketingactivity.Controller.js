@@ -165,6 +165,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     $scope.ApproverAction = (Action) => { UpdateApproveStatus(Action); }
     $scope.clickSaveOrSubmit = (status) => { saveOrSubmit(status); }
 
+    $scope.errors = {};
     if (!PendingApprovalUniqueId) {
         $scope.showSaveOrSubmitBtn = true;
     } else {
@@ -466,7 +467,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 return;
         }
         if (CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRNumber === null || $scope.FormData.PRNumber === '') {
-            alert("Please fill up PR Number");
+            $scope.errors.PRNumber = 'Please fill up PR Number'
             return;
         }
 

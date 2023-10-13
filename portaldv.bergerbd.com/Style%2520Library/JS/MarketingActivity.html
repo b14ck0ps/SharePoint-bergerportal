@@ -74,6 +74,12 @@
       line-height: inherit;
    }
 
+   .error {
+      color: red;
+      font-weight: bold;
+      font-size: small;
+   }
+
    @keyframes spin {
       0% {
          transform: rotate(0deg);
@@ -403,6 +409,7 @@
                            <div class="col-sm-2">
                               <input name="PRNumber" type="number" ng-model="FormData.PRNumber" required></input>
                            </div>
+                           <span class="error" ng-show="errors.PRNumber"> {{errors.PRNumber}} </span>
                         </div>
                         <div class="row">
                            <div class="col-sm-1 labelHeader">Remarks:</div>
