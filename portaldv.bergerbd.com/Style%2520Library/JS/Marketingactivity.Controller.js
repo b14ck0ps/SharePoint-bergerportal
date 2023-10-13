@@ -20,7 +20,7 @@ const nodev = new URLSearchParams(window.location.search).get('nodev');
  */
 const DEV_ENV = ABS_URL.includes("portaldv") && nodev === null;
 const PendingApprovalUniqueId = new URLSearchParams(window.location.search).get('UniqueId');
-const USER_ID = _spPageContextInfo.userId;
+const CURRENT_USER_ID = _spPageContextInfo.userId;
 const OPM_INFO = { id: 0, name: "" };
 const RequesterInfo = {
     id: 0,
@@ -95,61 +95,78 @@ MarketingActivityModule.run(($rootScope) => $rootScope.spinnerActive = true); /*
 MarketingActivityModule.controller('UserController', ['$scope', '$http', function ($scope, $http) {
     $scope.today = new Date();
     $scope.UserInfo = {};
+    let CurrentRequesterId = null;
 
-    const base = getApiEndpoint("bergerEmployeeInformation");
-    const filter = `$filter=Email/ID eq '${USER_ID}'`;
-    const query = `$select=EmployeeName,Email/ID,Email/Title,Email/EMail,OptManagerEmail/ID,OptManagerEmail/Title,DeptID,EmployeeId,EmployeeGrade,Department,Designation,OfficeLocation,Mobile,CostCenter&$expand=Email/ID,OptManagerEmail/ID&$top=1`;
+    const P_base = getApiEndpoint("PendingApproval");
+    const P_filter = `$filter=substringof('${PendingApprovalUniqueId}',RequestLink)`;
+    const P_query = `$expand=Author&$select=Author/Id`;
 
     $scope.IsLoading = true;
+    /* Getting the request id from `PendingApproval` list */
     $http({
         method: "GET",
-        url: `${base}?${filter}&${query}`,
+        url: `${P_base}?${P_filter}&${P_query}`,
         headers: API_GET_HEADERS
     })
-        .then(function (response) {
-            $scope.UserInfo = response.data.d.results[0];
-            RequesterInfo.name = $scope.UserInfo.EmployeeName;
-            RequesterInfo.email = $scope.UserInfo.Email.EMail;
-            RequesterInfo.id = $scope.UserInfo.Email.ID;
-
-            OPM_INFO.id = $scope.UserInfo.OptManagerEmail.ID;
-            OPM_INFO.name = $scope.UserInfo.OptManagerEmail.Title;
-            ApprovalChain["OPM"] = OPM_INFO.id;
-        })
-        .catch((e) => devlog("Error getting user information", e))
+        .then((response) => { CurrentRequesterId = response.data.d.results[0].Author.Id })
+        .catch((e) => console.log(e))
         .finally(() => {
-            /*getting Approvar information*/
-            const base = getApiEndpoint("Approver Info");
-            const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver4Id`;
-            const filter = `$filter=DeptID eq '${$scope.UserInfo.DeptID}' and Location eq '${$scope.UserInfo.OfficeLocation}'`;
 
+            CurrentRequesterId = CurrentRequesterId ?? CURRENT_USER_ID;
+            const base = getApiEndpoint("bergerEmployeeInformation");
+            const filter = `$filter=Email/ID eq '${CurrentRequesterId}'`;
+            const query = `$select=EmployeeName,Email/ID,Email/Title,Email/EMail,OptManagerEmail/ID,OptManagerEmail/Title,DeptID,EmployeeId,EmployeeGrade,Department,Designation,OfficeLocation,Mobile,CostCenter&$expand=Email/ID,OptManagerEmail/ID&$top=1`;
+
+            $scope.IsLoading = true;
             $http({
                 method: "GET",
-                url: `${base}?${query}&${filter}`,
-            }).then(function (response) {
-                const approverInfoResponse = response.data.value[0];
-
-                const keyMapping = {
-                    "Approver2Id": "CMO",
-                    "Approver3Id": "COO",
-                    "Approver4Id": "FinalApprovar",
-                };
-
-                for (const key in keyMapping) {
-                    const value = approverInfoResponse[key];
-                    if (value !== null) {
-                        const renamedKey = keyMapping[key];
-                        ApprovalChain[renamedKey] = value;
-                    }
-                }
-                devlog(ApprovalChain);
+                url: `${base}?${filter}&${query}`,
+                headers: API_GET_HEADERS
             })
-                .catch((e) => devlog("Error getting user information", e))
+                .then(function (response) {
+                    $scope.UserInfo = response.data.d.results[0];
+                    RequesterInfo.name = $scope.UserInfo.EmployeeName;
+                    RequesterInfo.email = $scope.UserInfo.Email.EMail;
+                    RequesterInfo.id = $scope.UserInfo.Email.ID;
 
-            $scope.IsLoading = false
+                    OPM_INFO.id = $scope.UserInfo.OptManagerEmail.ID;
+                    OPM_INFO.name = $scope.UserInfo.OptManagerEmail.Title;
+                    ApprovalChain["OPM"] = OPM_INFO.id;
+                })
+                .catch((e) => devlog("Error getting user information", e))
+                .finally(() => {
+                    /*getting Approvar information*/
+                    const base = getApiEndpoint("Approver Info");
+                    const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver4Id`;
+                    const filter = `$filter=DeptID eq '${$scope.UserInfo.DeptID}' and Location eq '${$scope.UserInfo.OfficeLocation}'`;
+
+                    $http({
+                        method: "GET",
+                        url: `${base}?${query}&${filter}`,
+                    }).then(function (response) {
+                        const approverInfoResponse = response.data.value[0];
+
+                        const keyMapping = {
+                            "Approver2Id": "CMO",
+                            "Approver3Id": "COO",
+                            "Approver4Id": "FinalApprovar",
+                        };
+
+                        for (const key in keyMapping) {
+                            const value = approverInfoResponse[key];
+                            if (value !== null) {
+                                const renamedKey = keyMapping[key];
+                                ApprovalChain[renamedKey] = value;
+                            }
+                        }
+                        devlog(ApprovalChain);
+                    })
+                        .catch((e) => devlog("Error getting user information", e))
+
+                    $scope.IsLoading = false
+                });
         });
 }]);
-
 
 MarketingActivityModule.controller('FormController', ['$scope', '$http', function ($scope, $http) {
 
@@ -172,7 +189,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         /* If Some one click on a link from `Pending Approval` list */
         const base = getApiEndpoint("PendingApproval");
         const filter = `$filter=substringof('${PendingApprovalUniqueId}',RequestLink)`;
-        const query = `$expand=PendingWith&$select=ID,Title,ProcessName,Status,PendingWith/Id,PendingWith/Title`;
+        const query = `$expand=PendingWith,Author&$select=ID,Title,Author/Id,ProcessName,Status,PendingWith/Id,PendingWith/Title`;
 
         $scope.IsLoading = true;
         /* Getting the request id, status and pendingwith from `PendingApproval` list */
@@ -184,11 +201,12 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .then((response) => {
                 const Row = response.data.d.results[0];
                 RequestId = parseInt(Row.Title.replace(/\D/g, ''), 10); /* convert `MA-1` to `1` */
+                RequesterId = Row.Author.Id;
                 CurrentStatus = Row.Status;
                 CurrentPendingWith = Row.PendingWith.results[0].Id;
                 PendingApprovalId = Row.ID;
                 $scope.pendingWithName = Row.PendingWith.results[0].Title;
-                EditMode = CurrentStatus === ApprovalStatus.ChangeRequested && USER_ID === CurrentPendingWith;
+                EditMode = CurrentStatus === ApprovalStatus.ChangeRequested && CURRENT_USER_ID === CurrentPendingWith;
             })
             .catch((e) => devlog("Error getting user information", e))
             .finally(() => {
@@ -249,12 +267,12 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                             NextPendingWith = ApprovalChain.FinalApprovar;
                             StatusOnApprove = ApprovalStatus.CMOApproved;
                         } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) {
-                            NextPendingWith = USER_ID;
+                            NextPendingWith = CURRENT_USER_ID;
                             StatusOnApprove = ApprovalStatus.FinalApproved;
                         }
 
                         /* Approve, Reject, Change buttons configuration */
-                        if (USER_ID === CurrentPendingWith || DEV_ENV) {
+                        if (CURRENT_USER_ID === CurrentPendingWith || DEV_ENV) {
                             if (CurrentStatus !== ApprovalStatus.Rejected
                                 && CurrentStatus !== ApprovalStatus.ChangeRequested
                                 && CurrentStatus !== ApprovalStatus.FinalApproved) {
@@ -264,7 +282,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         }
                         /* Hide Attachments Panel and Comment Box if rejected or final approved */
                         if (CurrentStatus === ApprovalStatus.Rejected
-                            || CurrentStatus === ApprovalStatus.FinalApproved || USER_ID !== CurrentPendingWith && !DEV_ENV) {
+                            || CurrentStatus === ApprovalStatus.FinalApproved || CURRENT_USER_ID !== CurrentPendingWith && !DEV_ENV) {
                             $scope.IsRejectedOrCompleted = true;
                         }
 
@@ -425,7 +443,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 AddToLog(Title, status, $scope.actionComment, MarketingActivityID);
                 SaveAllAttachments();
                 if ($scope.pendingWithName === undefined) $scope.pendingWithName = OPM_INFO.name;
-                SendEmail(InitiatorRequesterTemplate, USER_ID, [], RequesterInfo.name, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
+                SendEmail(InitiatorRequesterTemplate, CURRENT_USER_ID, [], RequesterInfo.name, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
             })
             .catch(function (message) {
                 devlog(`Error saving data: ${message}`);
@@ -460,7 +478,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             case "Changed":
                 data = { 'Status': ApprovalStatus.ChangeRequested, };
                 StatusOnApprove = ApprovalStatus.ChangeRequested;
-                setPendingWith = USER_ID;
+                setPendingWith = CURRENT_USER_ID;
                 break;
             default:
                 devlog(`Invalid action: ${Action}`);
@@ -809,7 +827,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     };
 
 }]);
-
 /**
  * Retrieves the base URL for a SharePoint list.
  * @param {string} ListName Name of the SharePoint list
