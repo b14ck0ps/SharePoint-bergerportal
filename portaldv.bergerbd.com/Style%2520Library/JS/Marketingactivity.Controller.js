@@ -116,7 +116,11 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
         url: `${P_base}?${P_filter}&${P_query}`,
         headers: API_GET_HEADERS
     })
-        .then((response) => { CurrentRequesterId = response.data.d.results[0].Author.Id })
+        .then((response) => {
+            if (PendingApprovalUniqueId) {
+                CurrentRequesterId = response.data.d.results[0].Author.Id
+            }
+        })
         .catch((e) => console.log(e))
         .finally(() => {
 
@@ -277,6 +281,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) {
                             NextPendingWith = CURRENT_USER_ID;
                             StatusOnApprove = ApprovalStatus.FinalApproved;
+                            $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
                         }
 
                         /* Approve, Reject, Change buttons configuration */
@@ -285,7 +290,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 && CurrentStatus !== ApprovalStatus.ChangeRequested
                                 && CurrentStatus !== ApprovalStatus.FinalApproved) {
                                 $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = true;
-                                CurrentPendingWith == ApprovalChain.FinalApprovar ? $scope.isFinalApprover = true : null; /* `PRN & Remark` Input Field Config */
                             }
                         }
                         /* Hide Attachments Panel and Comment Box if rejected or final approved */
@@ -457,8 +461,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 DEV_ENV && console.log(`Error saving data: ${message}`);
             })
             .finally(() => {
-                $scope.IsLoading = false;
                 window.location.href = RedirectOnSubmit;
+                $scope.IsLoading = false;
             });
     }
 
