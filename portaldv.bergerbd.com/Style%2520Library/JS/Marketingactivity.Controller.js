@@ -46,6 +46,14 @@ const ApprovalChain = {
     "COO": null,
     "FinalApprovar": null
 }
+const RedirectOnSubmit = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/leaveauto/SitePages/MyWFRequest.aspx`
+const RedirectOnApprove = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/_layouts/15/PendingApproval/PendingApproval.aspx`
+/**
+ * Default Expense Limit for `OPM` and `CMO` approval.
+ * @constant 3,00,000 (3 Lakh)
+ * @type {number}
+ */
+const DefaultExpenseLimit = 300000;
 /**
  * Assigned in when getting the request data from `PendingApproval` list.
  * @type {number}
@@ -131,9 +139,9 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
 
                     OPM_INFO.id = $scope.UserInfo.OptManagerEmail.ID;
                     OPM_INFO.name = $scope.UserInfo.OptManagerEmail.Title;
-                    ApprovalChain["OPM"] = OPM_INFO.id;
+                    ApprovalChain.OPM = OPM_INFO.id;
                 })
-                .catch((e) => devlog("Error getting user information", e))
+                .catch((e) => DEV_ENV && console.log("Error getting user information", e))
                 .finally(() => {
                     /*getting Approvar information*/
                     const base = getApiEndpoint("Approver Info");
@@ -159,9 +167,9 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
                                 ApprovalChain[renamedKey] = value;
                             }
                         }
-                        devlog(ApprovalChain);
+                        DEV_ENV && console.log(ApprovalChain);
                     })
-                        .catch((e) => devlog("Error getting user information", e))
+                        .catch((e) => DEV_ENV && console.log("Error getting user information", e))
 
                     $scope.IsLoading = false
                 });
@@ -170,6 +178,7 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
 
 MarketingActivityModule.controller('FormController', ['$scope', '$http', function ($scope, $http) {
 
+    /** All Concrete Data comming from @file Marketingactivity.Data.js */
     $scope.services = services;
     $scope.activityTypes = activityTypes;
     $scope.budgetTypes = budgetTypes;
@@ -201,14 +210,13 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .then((response) => {
                 const Row = response.data.d.results[0];
                 RequestId = parseInt(Row.Title.replace(/\D/g, ''), 10); /* convert `MA-1` to `1` */
-                RequesterId = Row.Author.Id;
                 CurrentStatus = Row.Status;
                 CurrentPendingWith = Row.PendingWith.results[0].Id;
                 PendingApprovalId = Row.ID;
                 $scope.pendingWithName = Row.PendingWith.results[0].Title;
                 EditMode = CurrentStatus === ApprovalStatus.ChangeRequested && CURRENT_USER_ID === CurrentPendingWith;
             })
-            .catch((e) => devlog("Error getting user information", e))
+            .catch((e) => DEV_ENV && console.log("Error getting user information", e))
             .finally(() => {
                 if (!RequestId) {
                     $scope.IsLoading = false;
@@ -236,9 +244,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         };
 
                         $scope.IsDataReadOnly = true; /* Hide all the input fields & Shows `MarketingActivityMaster` list data */
-                        devlog(Row);
+                        DEV_ENV && console.log(Row);
                     })
-                    .catch((e) => devlog("Error getting user information", e))
+                    .catch((e) => DEV_ENV && console.log("Error getting user information", e))
                     .finally(async () => {
                         const logs = $scope.auditHistory = await getAllLogs();
 
@@ -286,7 +294,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                             $scope.IsRejectedOrCompleted = true;
                         }
 
-                        devlog(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
+                        DEV_ENV && console.log(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
 
                         /*Get The Attachments from `MarketingActivityAttachment` list */
                         const baseAttachment = getApiEndpoint("MarketingActivityAttachment");
@@ -299,10 +307,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                             headers: API_GET_HEADERS
                         })
                             .then((response) => {
-                                devlog(response.data.d.results);
+                                DEV_ENV && console.log(response.data.d.results);
                                 $scope.receiptRows = response.data.d.results;
                             })
-                            .catch((e) => devlog("Error getting user information", e))
+                            .catch((e) => DEV_ENV && console.log("Error getting user information", e))
 
                         if (EditMode) {
                             $scope.MapActivityName(EditMode);
@@ -332,7 +340,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
             return response.data.d.results;
         } catch (e) {
-            devlog("Error getting user information", e);
+            DEV_ENV && console.log("Error getting user information", e);
             throw e; // Re-throw the error to propagate it further if needed
         }
     };
@@ -359,7 +367,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 IsCalledBySystem ? null : $scope.FormData.ActivityName = '';
                 $scope.activityNamesDropdownList = response.data.d.results.map((item) => item.ActivityName)
             })
-            .catch((e) => devlog("Error getting user information", e))
+            .catch((e) => DEV_ENV && console.log("Error getting user information", e))
             .finally(() => $scope.IsLoading = false);
     }
 
@@ -385,7 +393,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 IsCalledBySystem ? null : $scope.FormData.CostHead = '';
                 $scope.costHeadDropdownList = response.data.d.results.map((item) => item.CostHead)
             })
-            .catch((e) => devlog("Error getting user information", e))
+            .catch((e) => DEV_ENV && console.log("Error getting user information", e))
             .finally(() => $scope.IsLoading = false);
     }
 
@@ -446,7 +454,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 SendEmail(InitiatorRequesterTemplate, CURRENT_USER_ID, [], RequesterInfo.name, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
             })
             .catch(function (message) {
-                devlog(`Error saving data: ${message}`);
+                DEV_ENV && console.log(`Error saving data: ${message}`);
             })
             .finally(() => {
                 $scope.IsLoading = false;
@@ -460,9 +468,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      */
     const UpdateApproveStatus = (Action) => {
         var data = {};
-        devlog(`Action: ${Action}`);
-        devlog(`StatusOnApprove: ${StatusOnApprove}, NextPendingWith: ${NextPendingWith}, CurrentPendingWith: ${CurrentPendingWith}, Status: ${CurrentStatus}`);
-        devlog(`PendingApprovalId: ${PendingApprovalId}`);
+        DEV_ENV && console.log(`Action: ${Action}`);
+        DEV_ENV && console.log(`StatusOnApprove: ${StatusOnApprove}, NextPendingWith: ${NextPendingWith}, CurrentPendingWith: ${CurrentPendingWith}, Status: ${CurrentStatus}`);
+        DEV_ENV && console.log(`PendingApprovalId: ${PendingApprovalId}`);
 
         var setPendingWith = null;
 
@@ -481,7 +489,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 setPendingWith = CURRENT_USER_ID;
                 break;
             default:
-                devlog(`Invalid action: ${Action}`);
+                DEV_ENV && console.log(`Invalid action: ${Action}`);
                 return;
         }
         if (CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRNumber === null || $scope.FormData.PRNumber === '') {
@@ -543,10 +551,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             }
         })
             .then((res) => {
-                devlog(res)
+                DEV_ENV && console.log(res)
                 SaveAllAttachments();
             })
-            .catch((e) => { devlog(e) })
+            .catch((e) => { DEV_ENV && console.log(e) })
             .finally(() => $scope.IsLoading = false);
     }
 
@@ -574,10 +582,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             data: data,
         })
             .then((response) => {
-                devlog(response);
+                DEV_ENV && console.log(response);
             })
             .catch(function (message) {
-                devlog(`Error saving data: ${message}`);
+                DEV_ENV && console.log(`Error saving data: ${message}`);
             });
     }
 
@@ -624,7 +632,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             }
         })
             .then(async (res) => await uploadFileToSharePoint(res.data.d.ID, file, ListName))
-            .catch((e) => { devlog(e) })
+            .catch((e) => { DEV_ENV && console.log(e) })
             .finally(() => $scope.IsLoading = false);
     }
 
@@ -834,125 +842,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
  * @returns {string} API base URL
  */
 const getApiEndpoint = (ListName) => `${ABS_URL}/_api/web/lists/getByTitle('${ListName}')/items`;
-/**
- * Logs a message to the console if the `DEV_ENV` flag is set to true.
- * @param {string} message - The message to log to the console.
- */
-const devlog = (message) => DEV_ENV ? console.log(message) : null;
-const services = [
-    { value: '', label: '-- Select Service --' },
-    { value: 'TV Media', label: 'TV Media' },
-    { value: 'TV Production and TVC', label: 'TV Production and TVC' },
-    { value: 'Redio Media', label: 'Redio Media' },
-    { value: 'Social Media', label: 'Social Media' },
-    { value: 'Sponsorship', label: 'Sponsorship' },
-    { value: 'Press Ad', label: 'Press Ad' },
-    { value: 'Outdoor Billboard, Wall and Shutter Painting', label: 'Outdoor Billboard, Wall and Shutter Painting' },
-    { value: 'Shop Sign and Decoration', label: 'Shop Sign and Decoration' },
-    { value: 'Software Development and Other', label: 'Software Development and Other' },
-    { value: 'Corporate Marketing Service', label: 'Corporate Marketing Service' },
-    { value: 'Market Research - Retail Audit', label: 'Market Research - Retail Audit' },
-    { value: 'Market Research', label: 'Market Research' },
-    { value: 'Scratch card, Mobile SMS, Recharge Service', label: 'Scratch card, Mobile SMS, Recharge Service' },
-    { value: 'Dealer Shop Merchandising', label: 'Dealer Shop Merchandising' },
-    { value: 'Event Management (Art, Competition, Awards, Daily Star Anniversary)', label: 'Event Management (Art, Competition, Awards, Daily Star Anniversary)' },
-    { value: 'Consumer Promotion- Activation', label: 'Consumer Promotion- Activation' },
-    { value: 'Fair and Exhibition', label: 'Fair and Exhibition' },
-    { value: 'Pack Design & Creative', label: 'Pack Design & Creative' },
-    { value: 'Franchise Expense-Experience Zone', label: 'Franchise Expense-Experience Zone' },
-    { value: 'Umbrella - courier', label: 'Umbrella - courier' },
-    { value: 'Shomporko Club scheme', label: 'Shomporko Club scheme' },
-    { value: 'PTI service', label: 'PTI service' }
-];
-
-const activityTypes = [
-    { value: '', label: '-- Select Activity Type --' },
-    { value: 'One Time', label: 'One Time' },
-    { value: 'Monthly Recurring', label: 'Monthly Recurring' }
-];
-
-const budgetTypes = [
-    { value: '', label: '-- Select Budget Type --' },
-    { value: 'Available Budget', label: 'Available Budget' },
-    { value: 'Need to Transfer', label: 'Need to Transfer' },
-    { value: 'Supplementary', label: 'Supplementary' }
-];
-
-const brands = [
-    { value: '', label: '-- Select Brand Description --' },
-    { value: 'Adhesive -Power Bond', label: 'Adhesive -Power Bond' },
-    { value: 'Adhesive -Tex Bond', label: 'Adhesive -Tex Bond' },
-    { value: 'APE', label: 'APE' },
-    { value: 'Auto Refinish', label: 'Auto Refinish' },
-    { value: 'Berger Experience Zone (Decorative)', label: 'Berger Experience Zone (Decorative)' },
-    { value: 'BREATHE EASY', label: 'BREATHE EASY' },
-    { value: 'BREATHE EASY Ena', label: 'BREATHE EASY Ena' },
-    { value: 'Color Bank', label: 'Color Bank' },
-    { value: 'Corporate Brand', label: 'Corporate Brand' },
-    { value: 'Damp Guard', label: 'Damp Guard' },
-    { value: 'Decorative', label: 'Decorative' },
-    { value: 'DUROCEM', label: 'DUROCEM' },
-    { value: 'EASY CLEAN', label: 'EASY CLEAN' },
-    { value: 'EP Tools (Express Painting)', label: 'EP Tools (Express Painting)' },
-    { value: 'Express Painting Service', label: 'Express Painting Service' },
-    { value: 'Home Décor Branding', label: 'Home Décor Branding' },
-    { value: 'Industrial Paints', label: 'Industrial Paints' },
-    { value: 'INNOVA', label: 'INNOVA' },
-    { value: 'JHILIK', label: 'JHILIK' },
-    { value: 'LS. Metallic Finish', label: 'LS. Metallic Finish' },
-    { value: 'LSE', label: 'LSE' },
-    { value: 'Marine Paints', label: 'Marine Paints' },
-    { value: 'Mr.EXPERT DAMP GUARD', label: 'Mr.EXPERT DAMP GUARD' },
-    { value: 'Painters App', label: 'Painters App' },
-    { value: 'Powder Coating', label: 'Powder Coating' },
-    { value: 'PRE TREATMENT CHEM', label: 'PRE TREATMENT CHEM' },
-    { value: 'Printing Ink', label: 'Printing Ink' },
-    { value: 'REX', label: 'REX' },
-    { value: 'RIN', label: 'RIN' },
-    { value: 'ROBB WALL PUTTY', label: 'ROBB WALL PUTTY' },
-    { value: 'ROBB WATER SEALER', label: 'ROBB WATER SEALER' },
-    { value: 'RSE', label: 'RSE' },
-    { value: 'Salt Safe', label: 'Salt Safe' },
-    { value: 'SPD', label: 'SPD' },
-    { value: 'Touch putty (Decorative)', label: 'Touch putty (Decorative)' },
-    { value: 'Value Club App, LMS, Happy Wallet, MR/VR', label: 'Value Club App, LMS, Happy Wallet, MR/VR' },
-    { value: 'Vehicle Refinish', label: 'Vehicle Refinish' },
-    { value: 'W/C ANTIDIRT', label: 'W/C ANTIDIRT' },
-    { value: 'W/C ANTIDIRT LONGLIF', label: 'W/C ANTIDIRT LONGLIF' },
-    { value: 'W/C ANTIDIRT LONGLIFE (F167)', label: 'W/C ANTIDIRT LONGLIFE (F167)' },
-    { value: 'W/C Antidirt Supreme (F168)', label: 'W/C Antidirt Supreme (F168)' },
-    { value: 'W/C EXTERIOR SEALER', label: 'W/C EXTERIOR SEALER' },
-    { value: 'W/C SMOOTH', label: 'W/C SMOOTH' },
-    { value: 'WC GLOW', label: 'WC GLOW' },
-    { value: 'WEATHER COAT EXTERIOR SEALER', label: 'WEATHER COAT EXTERIOR SEALER' },
-    { value: 'Wood Coating / Innova', label: 'Wood Coating / Innova' },
-    { value: 'WOOD KEEPER', label: 'WOOD KEEPER' },
-    { value: 'Xpress Sealer (Decorative)', label: 'Xpress Sealer (Decorative)' }
-];
-const commitmentItems = [
-    { value: '', label: '-- Select Commitment Item --' },
-    { value: 'Con Pro_Campaign Actv Cost', label: 'Con Pro_Campaign Actv Cost' },
-    { value: 'Corporate - Other', label: 'Corporate - Other' },
-    { value: 'PTI Gift', label: 'PTI Gift' },
-    { value: 'SC Production Cost', label: 'SC Production Cost' },
-    { value: 'Shomporko Scheme_On invoice', label: 'Shomporko Scheme_On invoice' },
-    { value: 'Mass Calendar Production', label: 'Mass Calendar Production' },
-    { value: 'Exec. Diary Prod.', label: 'Exec. Diary Prod.' },
-    { value: 'Small Diary Prod.', label: 'Small Diary Prod.' },
-    { value: 'Shade Card Mgt', label: 'Shade Card Mgt' },
-    { value: 'POSM Print', label: 'POSM Print' }
-];
-const vendorQuotations = [
-    { value: '', label: '-- Select Required Vendor Quotation --' },
-    { value: 'Minimum 3 parties', label: 'Minimum 3 parties' },
-    { value: 'Single Vendor', label: 'Single Vendor' }
-];
-/**
- * Default Expense Limit for `OPM` and `CMO` approval.
- * @constant 3,00,000 (3 Lakh)
- * @type {number}
- */
-const DefaultExpenseLimit = 300000;
 
 /**
  * Uploads a file to a SharePoint list item as an attachment.
@@ -995,5 +884,3 @@ const getFileBufferAsync = (file) => {
         reader.readAsArrayBuffer(file);
     });
 }
-const RedirectOnSubmit = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/leaveauto/SitePages/MyWFRequest.aspx`
-const RedirectOnApprove = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/leaveauto/Lists/PendingApproval/AllItems.aspx`
