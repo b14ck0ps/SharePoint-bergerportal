@@ -704,6 +704,110 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             return data.data.d;
         }
     }
+    /**
+     * Checks if the given form data is valid and add errors to the `$scope.errors` object.
+     *
+     * @param {Object} formData - The form data to validate.
+     * @returns {boolean} - Returns true if the form data is valid, false otherwise.
+     */
+    const isFormDataValid = (formData) => {
+        if (formData === undefined) formData = {};
+
+        let isValid = true;
+        $scope.errors = {};
+
+        if (formData.ProjectName === undefined || formData.ProjectName === '') {
+            $scope.errors.ProjectName = 'Please fill up Project Name';
+            isValid = false;
+        }
+
+        if (formData.ServiceName === undefined || formData.ServiceName === '') {
+            $scope.errors.ServiceName = 'Please Select a Service Name';
+            isValid = false;
+        }
+
+        if (formData.ActivityName === undefined || formData.ActivityName === '') {
+            $scope.errors.ActivityName = 'Please Select an Activity Name';
+            isValid = false;
+        }
+
+        if (formData.CostHead === undefined || formData.CostHead === '') {
+            $scope.errors.CostHead = 'Please Select a Cost Head';
+            isValid = false;
+        }
+
+        if (formData.BrandDescription === undefined || formData.BrandDescription === '') {
+            $scope.errors.BrandDescription = 'Please Select a Brand Description';
+            isValid = false;
+        }
+
+        const activityStartDate = new Date(formData.ActivityStartDate);
+        const serviceReceivingDate = new Date(formData.ServiceReceivingDate);
+        const expectedDeliveryDate = new Date(formData.ExpectedDeliveryDate);
+
+        if (formData.ActivityStartDate === undefined) {
+            $scope.errors.ActivityStartDate = 'Please Select a valid Activity Start Date';
+            isValid = false;
+        }
+
+        if (formData.ServiceReceivingDate === undefined) {
+            $scope.errors.ServiceReceivingDate = 'Please Select a valid Service Receiving Date';
+            isValid = false;
+        }
+
+        if (formData.ExpectedDeliveryDate === undefined) {
+            $scope.errors.ExpectedDeliveryDate = 'Please Select a valid Expected Delivery Date';
+            isValid = false;
+        }
+
+        if (activityStartDate > expectedDeliveryDate) {
+            $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Expected Delivery Date';
+            isValid = false;
+        }
+
+        if (activityStartDate > serviceReceivingDate) {
+            $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Service Receiving Date';
+            isValid = false;
+        }
+
+        if (expectedDeliveryDate > serviceReceivingDate) {
+            $scope.errors.ExpectedDeliveryDate = 'Expected Delivery Date can\'t be greater than Service Receiving Date';
+            isValid = false;
+        }
+
+        if (serviceReceivingDate === 'Invalid Date') {
+            $scope.errors.ServiceReceivingDate = 'Please Select a valid Service Receiving Date';
+            isValid = false;
+        }
+
+        if (formData.RequiredVendorQuotation === undefined || formData.RequiredVendorQuotation === '') {
+            $scope.errors.RequiredVendorQuotation = 'Please fill up Required Vendor Quotation';
+            isValid = false;
+        }
+
+        if (formData.ActivityType === undefined || formData.ActivityType === '') {
+            $scope.errors.ActivityType = 'Please fill up Activity Type';
+            isValid = false;
+        }
+
+        if (formData.CommitmentItem === undefined || formData.CommitmentItem === '') {
+            $scope.errors.CommitmentItem = 'Please fill up Commitment Item';
+            isValid = false;
+        }
+
+        if (formData.BudgetType === undefined || formData.BudgetType === '') {
+            $scope.errors.BudgetType = 'Please fill up Budget Type';
+            isValid = false;
+        }
+
+        if (formData.TotalExpectedExpense === undefined || formData.TotalExpectedExpense === '') {
+            $scope.errors.TotalExpectedExpense = 'Please fill up Total Expected Expense';
+            isValid = false;
+        }
+
+        return isValid;
+    };
+
 }]);
 
 /**
@@ -874,30 +978,5 @@ const getFileBufferAsync = (file) => {
         reader.readAsArrayBuffer(file);
     });
 }
-/**
- * Checks if the given form data is valid or not.
- * @param {Object} formData - The form data to be validated.
- * @returns {boolean} - Returns true if the form data is valid, false otherwise.
- */
-const isFormDataValid = (formData) => {
-    if (
-        formData.ServiceName === undefined || formData.ServiceName === '' ||
-        formData.ActivityName === undefined || formData.ActivityName === '' ||
-        formData.CostHead === undefined || formData.CostHead === '' ||
-        formData.BrandDescription === undefined || formData.BrandDescription === '' ||
-        formData.ActivityStartDate === undefined || formData.ActivityStartDate === '' ||
-        formData.ServiceReceivingDate === undefined || formData.ServiceReceivingDate === '' ||
-        formData.ExpectedDeliveryDate === undefined || formData.ExpectedDeliveryDate === '' ||
-        formData.RequiredVendorQuotation === undefined || formData.RequiredVendorQuotation === '' ||
-        formData.ActivityType === undefined || formData.ActivityType === '' ||
-        formData.CommitmentItem === undefined || formData.CommitmentItem === '' ||
-        formData.BudgetType === undefined || formData.BudgetType === '' ||
-        formData.TotalExpectedExpense === undefined || formData.TotalExpectedExpense === ''
-    ) {
-        return false;
-    }
-    return true;
-};
-
 const RedirectOnSubmit = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/leaveauto/SitePages/MyWFRequest.aspx`
 const RedirectOnApprove = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/leaveauto/Lists/PendingApproval/AllItems.aspx`

@@ -175,6 +175,7 @@
                   <div class="col-sm-2">
                      <input ng-hide="IsDataReadOnly && !EditMode" type="text" ng-model="FormData.ProjectName"
                         class="textBoxBGColor" id="projectName" name="pName" required />
+                     <span class="error" ng-show="errors.ProjectName"> {{errors.ProjectName}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ProjectName}}</span>
                   </div>
 
@@ -188,6 +189,7 @@
                         ng-model="FormData.ServiceName" required>
                         <option ng-repeat="service in services" value="{{service.value}}">{{service.label}}</option>
                      </select>
+                     <span class="error" ng-show="errors.ServiceName"> {{errors.ServiceName}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ServiceName}}</span>
                   </div>
 
@@ -203,6 +205,7 @@
                         <option ng-repeat="activity in activityNamesDropdownList" value="{{activity}}">
                            {{activity}}</option>
                      </select>
+                     <span class="error" ng-show="errors.ActivityName"> {{errors.ActivityName}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityName}}</span>
                   </div>
 
@@ -221,6 +224,7 @@
                         <option ng-repeat="costHead in costHeadDropdownList" value="{{costHead}}">{{costHead}}
                         </option>
                      </select>
+                     <span class="error" ng-show="errors.CostHead"> {{errors.CostHead}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CostHead}}</span>
                   </div>
 
@@ -232,6 +236,7 @@
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
                         <option ng-repeat="type in activityTypes" value="{{type.value}}">{{type.label}}</option>
                      </select>
+                     <span class="error" ng-show="errors.ActivityType"> {{errors.ActivityType}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityType}}</span>
                   </div>
 
@@ -245,6 +250,7 @@
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
                         <option ng-repeat="type in budgetTypes" value="{{type.value}}">{{type.label}}</option>
                      </select>
+                     <span class="error" ng-show="errors.BudgetType"> {{errors.BudgetType}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BudgetType}}</span>
                   </div>
                </div>
@@ -259,6 +265,7 @@
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
                         <option ng-repeat="brand in brands" value="{{brand.value}}">{{brand.label}}</option>
                      </select>
+                     <span class="error" ng-show="errors.BrandDescription"> {{errors.BrandDescription}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BrandDescription}}</span>
                   </div>
 
@@ -271,6 +278,7 @@
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
                         <option ng-repeat="item in commitmentItems" value="{{item.value}}">{{item.label}}</option>
                      </select>
+                     <span class="error" ng-show="errors.CommitmentItem"> {{errors.CommitmentItem}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CommitmentItem}}</span>
                   </div>
 
@@ -281,6 +289,7 @@
                      <input ng-hide="IsDataReadOnly && !EditMode" type="number" ng-model="FormData.TotalExpectedExpense"
                         class="textBoxBGColor" valid-number title="Please Fill in with a numerical value only"
                         ng-init="totalExpectedExpense='0'" id="totalExpectedExpense" required />
+                     <span class="error" ng-show="errors.TotalExpectedExpense"> {{errors.TotalExpectedExpense}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.TotalExpectedExpense |
                         currency:"৳"}}</span>
                   </div>
@@ -293,6 +302,7 @@
                   <div class="col-sm-2">
                      <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ActivityStartDate"
                         class="textBoxBGColor" id="activityStartDate" required />
+                     <span class="error" ng-show="errors.ActivityStartDate"> {{errors.ActivityStartDate}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityStartDate | date}}</span>
                   </div>
 
@@ -302,6 +312,7 @@
                   <div class="col-sm-2">
                      <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ExpectedDeliveryDate"
                         class="textBoxBGColor" id="expectedDeliveryDate" required />
+                     <span class="error" ng-show="errors.ExpectedDeliveryDate"> {{errors.ExpectedDeliveryDate}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ExpectedDeliveryDate | date}}</span>
                   </div>
                </div>
@@ -314,6 +325,7 @@
                   <div class="col-sm-2">
                      <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ServiceReceivingDate"
                         class="textBoxBGColor" id="serviceReceivingDate" required />
+                     <span class="error" ng-show="errors.ServiceReceivingDate"> {{errors.ServiceReceivingDate}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ServiceReceivingDate | date}}</span>
                   </div>
 
@@ -327,6 +339,8 @@
                         <option ng-repeat="vendor in vendorQuotations" value="{{vendor.value}}">{{vendor.label}}
                         </option>
                      </select>
+                     <span class="error" ng-show="errors.RequiredVendorQuotation"> {{errors.RequiredVendorQuotation}}
+                     </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.RequiredVendorQuotation}}</span>
                   </div>
 
