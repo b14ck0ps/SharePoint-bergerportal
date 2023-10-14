@@ -41,10 +41,11 @@ const ApprovalStatus = {
  * Approval chain for `Approver Info` list Filtered by `DeptID`, `Location` and `Department`.
  */
 const ApprovalChain = {
-    "OPM": null,
-    "CMO": null,
-    "COO": null,
-    "FinalApprovar": null
+    SOIC: null,
+    OPM: null,
+    CMO: null,
+    COO: null,
+    FinalApprovar: null
 }
 const RedirectOnSubmit = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/leaveauto/SitePages/MyWFRequest.aspx`
 const RedirectOnApprove = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/_layouts/15/PendingApproval/PendingApproval.aspx`
@@ -149,7 +150,7 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
                 .finally(() => {
                     /*getting Approvar information*/
                     const base = getApiEndpoint("Approver Info");
-                    const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver4Id`;
+                    const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver4Id,BranchSalesMId`;
                     const filter = `$filter=DeptID eq '${$scope.UserInfo.DeptID}' and Location eq '${$scope.UserInfo.OfficeLocation}'`;
 
                     $http({
@@ -159,6 +160,7 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
                         const approverInfoResponse = response.data.value[0];
 
                         const keyMapping = {
+                            "BranchSalesMId": "SOIC",
                             "Approver2Id": "CMO",
                             "Approver3Id": "COO",
                             "Approver4Id": "FinalApprovar",
