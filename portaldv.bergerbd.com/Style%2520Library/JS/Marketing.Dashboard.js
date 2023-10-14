@@ -1,3 +1,4 @@
+const ABS_URL = _spPageContextInfo.webAbsoluteUrl;
 var PendingApprovalData = [];
 var MarketingMasterData = [];
 var TableData = [];
@@ -80,7 +81,7 @@ function LinkRanderer(params, label) {
 }
 
 const FetchPendingApproval = async () => {
-    const base = "https://portaldv.bergerbd.com/leaveauto/_api/web/lists/getByTitle('PendingApproval')/items";
+    const base = `${ABS_URL}/_api/web/lists/getByTitle('PendingApproval')/items`;
     const queryx = `$expand=PendingWith,Author&$select=ID,Title,Author/Title,Author/Id,Created,Status,RequestLink,PendingWith/Id,PendingWith/Title&$top=20000`;
     const filter = `$filter=ProcessName eq 'MarketingActivity'`;
 
@@ -116,7 +117,7 @@ const FetchPendingApproval = async () => {
 };
 
 const FetchMarketingMaster = async () => {
-    const base = "https://portaldv.bergerbd.com/leaveauto/_api/web/lists/getByTitle('MarketingActivityMaster')/items";
+    const base = `${ABS_URL}/_api/web/lists/getByTitle('MarketingActivityMaster')/items`;
     const query = `$select=ID,TotalExpectedExpense,PRNumber&$top=20000`;
 
     const url = `${base}?&${query}`;
