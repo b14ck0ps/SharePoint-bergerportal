@@ -22,16 +22,20 @@ const DEV_ENV = ABS_URL.includes("portaldv") && nodev === null;
 const PendingApprovalUniqueId = new URLSearchParams(window.location.search).get('UniqueId');
 const CURRENT_USER_ID = _spPageContextInfo.userId;
 const OPM_INFO = { id: 0, name: "" };
+const SOIC_INFO = { id: 0, name: "" };
 const RequesterInfo = {
     id: 0,
     name: "",
     email: "",
+    location: "",
+    DeptID: "",
 };
 const ApprovalStatus = {
     Saved: "Saved",
     Submitted: "Submitted",
     ChangeRequested: "ChangeRequested",
     OPMApproved: "OPMApproved",
+    SOICApproved: "SOICApproved",
     CMOApproved: "CMOApproved",
     COOApproved: "COOApproved",
     FinalApproved: "FinalApproved",
@@ -141,46 +145,69 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
                     RequesterInfo.name = $scope.UserInfo.EmployeeName;
                     RequesterInfo.email = $scope.UserInfo.Email.EMail;
                     RequesterInfo.id = $scope.UserInfo.Email.ID;
+                    RequesterInfo.location = $scope.UserInfo.OfficeLocation;
+                    RequesterInfo.DeptID = $scope.UserInfo.DeptID;
 
                     OPM_INFO.id = $scope.UserInfo.OptManagerEmail.ID;
                     OPM_INFO.name = $scope.UserInfo.OptManagerEmail.Title;
                     ApprovalChain.OPM = OPM_INFO.id;
                 })
                 .catch((e) => DEV_ENV && console.log("Error getting user information", e))
-                .finally(() => {
-                    /*getting Approvar information*/
-                    const base = getApiEndpoint("Approver Info");
-                    const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver4Id,BranchSalesMId`;
-                    const filter = `$filter=DeptID eq '${$scope.UserInfo.DeptID}' and Location eq '${$scope.UserInfo.OfficeLocation}'`;
-
-                    $http({
-                        method: "GET",
-                        url: `${base}?${query}&${filter}`,
-                    }).then(function (response) {
-                        const approverInfoResponse = response.data.value[0];
-
-                        const keyMapping = {
-                            "BranchSalesMId": "SOIC",
-                            "Approver2Id": "CMO",
-                            "Approver3Id": "COO",
-                            "Approver4Id": "FinalApprovar",
-                        };
-
-                        for (const key in keyMapping) {
-                            const value = approverInfoResponse[key];
-                            if (value !== null) {
-                                const renamedKey = keyMapping[key];
-                                ApprovalChain[renamedKey] = value;
-                            }
-                        }
-                        DEV_ENV && console.log(ApprovalChain);
-                    })
-                        .catch((e) => DEV_ENV && console.log("Error getting user information", e))
-
-                    $scope.IsLoading = false
-                });
+                .finally(() => { $scope.IsLoading = false });
         });
 }]);
+
+/**
+ * Retrieves the approver information for a given department ID.
+ * @param {string} DeptID - The ID of the department to retrieve approver information for.
+ * @returns {Promise<Object>} - A Promise that resolves with an object containing the approval chain for the given department.
+ */
+const getApproverInfo = (DeptID) => {
+    return new Promise((resolve, reject) => {
+        const base = getApiEndpoint("Approver Info");
+        const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver4Id,BranchSalesMId,HODId,Location`;
+        const filter = `$filter=DeptID eq '${DeptID}'`;
+
+        $.ajax({
+            method: "GET",
+            url: `${base}?${query}&${filter}`,
+            headers: API_GET_HEADERS,
+            success: function (response) {
+                const approverInfoResponse = response.d.results;
+
+                const corporateApprovalRow = approverInfoResponse.find(item => item.Location === 'Corporate');
+                const OtherLocationApprovalRow = approverInfoResponse.find(item => item.Location === RequesterInfo.location);
+
+                const DefaultkeyMapping = {
+                    "Approver2Id": "CMO",
+                    "Approver3Id": "COO",
+                    "Approver4Id": "FinalApprovar",
+                };
+
+                /* Default Approval Chain (OPM->COO/CMO->FinalApprover) */
+                for (const key in DefaultkeyMapping) {
+                    const value = corporateApprovalRow[key];
+                    if (value !== null) {
+                        const renamedKey = DefaultkeyMapping[key];
+                        ApprovalChain[renamedKey] = value;
+                    }
+                }
+
+                /* SOIC for non-corporate employee */
+                if (OtherLocationApprovalRow.BranchSalesMId) {
+                    ApprovalChain.SOIC = OtherLocationApprovalRow.BranchSalesMId;
+                } else if (OtherLocationApprovalRow.HODId) {
+                    ApprovalChain.SOIC = OtherLocationApprovalRow.HODId;
+                }
+                resolve(ApprovalChain);
+            },
+            error: function (xhr, status, error) {
+                DEV_ENV && console.error("Error getting user information", error);
+                reject(error);
+            }
+        });
+    });
+}
 
 MarketingActivityModule.controller('FormController', ['$scope', '$http', function ($scope, $http) {
 
@@ -270,64 +297,70 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                          */
                         const TotalExpectedExpense = $scope.FormData.TotalExpectedExpense;
 
-                        /* Setting the `NextPendingWith` and `StatusOnApprove` based on the `Status` and `TotalExpectedExpense` */
-                        if (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM) {
-                            NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.CMO;
-                            StatusOnApprove = ApprovalStatus.OPMApproved;
-                        } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved && CurrentPendingWith === ApprovalChain.COO) {
-                            NextPendingWith = ApprovalChain.CMO;
-                            StatusOnApprove = ApprovalStatus.COOApproved;
-                        } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.COOApproved || ApprovalStatus.OPMApproved && CurrentPendingWith === ApprovalChain.CMO) {
-                            NextPendingWith = ApprovalChain.FinalApprovar;
-                            StatusOnApprove = ApprovalStatus.CMOApproved;
-                        } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) {
-                            NextPendingWith = CURRENT_USER_ID;
-                            StatusOnApprove = ApprovalStatus.FinalApproved;
-                            $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
-                        }
+                        /* Getting the `ApprovalChain` based on the `DeptID`, `Location` and `Department` */
+                        getApproverInfo(RequesterInfo.DeptID)
+                            .then(() => {
+                                $scope.IsLoading = false
+                                DEV_ENV && console.log(ApprovalChain);
+                                /* Setting the `NextPendingWith` and `StatusOnApprove` based on the `Status` and `TotalExpectedExpense` */
+                                if (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM || CurrentPendingWith === ApprovalChain.SOIC) {
+                                    NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.CMO;
+                                    StatusOnApprove = ApprovalChain.SOIC !== null ? ApprovalStatus.SOICApproved : ApprovalStatus.OPMApproved;
+                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved && CurrentPendingWith === ApprovalChain.COO) {
+                                    NextPendingWith = ApprovalChain.CMO;
+                                    StatusOnApprove = ApprovalStatus.COOApproved;
+                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.COOApproved || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved && CurrentPendingWith === ApprovalChain.CMO) {
+                                    NextPendingWith = ApprovalChain.FinalApprovar;
+                                    StatusOnApprove = ApprovalStatus.CMOApproved;
+                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) {
+                                    NextPendingWith = CURRENT_USER_ID;
+                                    StatusOnApprove = ApprovalStatus.FinalApproved;
+                                    $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
+                                }
 
-                        /* Approve, Reject, Change buttons configuration */
-                        if (CURRENT_USER_ID === CurrentPendingWith || DEV_ENV) {
-                            if (CurrentStatus !== ApprovalStatus.Rejected
-                                && CurrentStatus !== ApprovalStatus.ChangeRequested
-                                && CurrentStatus !== ApprovalStatus.FinalApproved) {
-                                $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = true;
-                            }
-                        }
-                        /* Hide Attachments Panel and Comment Box if rejected or final approved */
-                        if (CurrentStatus === ApprovalStatus.Rejected
-                            || CurrentStatus === ApprovalStatus.FinalApproved || CURRENT_USER_ID !== CurrentPendingWith && !DEV_ENV) {
-                            $scope.IsRejectedOrCompleted = true;
-                        }
+                                /* Approve, Reject, Change buttons configuration */
+                                if (CURRENT_USER_ID === CurrentPendingWith || DEV_ENV) {
+                                    if (CurrentStatus !== ApprovalStatus.Rejected
+                                        && CurrentStatus !== ApprovalStatus.ChangeRequested
+                                        && CurrentStatus !== ApprovalStatus.FinalApproved) {
+                                        $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = true;
+                                    }
+                                }
+                                /* Hide Attachments Panel and Comment Box if rejected or final approved */
+                                if (CurrentStatus === ApprovalStatus.Rejected
+                                    || CurrentStatus === ApprovalStatus.FinalApproved || CURRENT_USER_ID !== CurrentPendingWith && !DEV_ENV) {
+                                    $scope.IsRejectedOrCompleted = true;
+                                }
 
-                        DEV_ENV && console.log(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
+                                DEV_ENV && console.log(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
 
-                        /*Get The Attachments from `MarketingActivityAttachment` list */
-                        const baseAttachment = getApiEndpoint("MarketingActivityAttachment");
-                        const filterAttachment = `$filter=MarketingActivityID eq '${RequestId}'`;
-                        const queryAttachment = `$select=ID,Title,AttachmentFiles,Created,Author/Title&$expand=AttachmentFiles,Author`;
+                                /*Get The Attachments from `MarketingActivityAttachment` list */
+                                const baseAttachment = getApiEndpoint("MarketingActivityAttachment");
+                                const filterAttachment = `$filter=MarketingActivityID eq '${RequestId}'`;
+                                const queryAttachment = `$select=ID,Title,AttachmentFiles,Created,Author/Title&$expand=AttachmentFiles,Author`;
 
-                        $http({
-                            method: "GET",
-                            url: `${baseAttachment}?${filterAttachment}&${queryAttachment}`,
-                            headers: API_GET_HEADERS
-                        })
-                            .then((response) => {
-                                DEV_ENV && console.log(response.data.d.results);
-                                $scope.receiptRows = response.data.d.results;
-                            })
-                            .catch((e) => DEV_ENV && console.log("Error getting user information", e))
+                                $http({
+                                    method: "GET",
+                                    url: `${baseAttachment}?${filterAttachment}&${queryAttachment}`,
+                                    headers: API_GET_HEADERS
+                                })
+                                    .then((response) => {
+                                        DEV_ENV && console.log(response.data.d.results);
+                                        $scope.receiptRows = response.data.d.results;
+                                    })
+                                    .catch((e) => DEV_ENV && console.log("Error getting user information", e))
 
-                        if (EditMode) {
-                            $scope.MapActivityName(EditMode);
-                            $scope.MapCostHead(EditMode);
+                                if (EditMode) {
+                                    $scope.MapActivityName(EditMode);
+                                    $scope.MapCostHead(EditMode);
 
-                            /* Button Config */
-                            $scope.showSaveOrSubmitBtn = $scope.EditMode = true;
-                            $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = false;
-                        }
-                        $scope.IsLoading = false
-                    });
+                                    /* Button Config */
+                                    $scope.showSaveOrSubmitBtn = $scope.EditMode = true;
+                                    $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = false;
+                                }
+                                $scope.IsLoading = false
+                            });
+                    })
             });
     }
 
@@ -427,12 +460,11 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         }
 
         const url = getApiEndpoint("MarketingActivityMaster");
-
         /* Spreding the FormData and adding the metadata */
         const marketingActivityMasterData = {
             ...$scope.FormData,
             'Status': status,
-            'PendingWithId': OPM_INFO.id,
+            'PendingWithId': ApprovalChain.SOIC ?? ApprovalChain.OPM,
             '__metadata': { "type": "SP.Data.MarketingActivityMasterListItem" }
         };
 
@@ -452,7 +484,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 const UniqueUrl = `${ABS_URL}/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`;
 
                 /** Saves the request to a SharePoint list `PendingApproval`. @file constants.js */
-                saveAtMyTask(Title, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, OPM_INFO.id, UniqueUrl);
+                saveAtMyTask(Title, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, ApprovalChain.SOIC ?? ApprovalChain.OPM, UniqueUrl);
 
                 AddToLog(Title, status, $scope.actionComment, MarketingActivityID);
                 SaveAllAttachments();
