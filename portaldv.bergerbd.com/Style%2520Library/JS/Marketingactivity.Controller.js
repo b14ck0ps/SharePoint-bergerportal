@@ -897,7 +897,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             $scope.errors.TotalExpectedExpense = 'Please fill up Total Expected Expense';
             isValid = false;
         }
-
+        isValid ? null : alert('Please fill up all the required fields');
         return isValid;
     };
 
