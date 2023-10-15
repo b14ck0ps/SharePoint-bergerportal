@@ -305,7 +305,11 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 /* Setting the `NextPendingWith` and `StatusOnApprove` based on the `Status` and `TotalExpectedExpense` */
                                 if (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM || CurrentPendingWith === ApprovalChain.SOIC) {
                                     NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.CMO;
-                                    StatusOnApprove = ApprovalChain.SOIC !== null ? ApprovalStatus.SOICApproved : ApprovalStatus.OPMApproved;
+                                    if (RequesterInfo.location === 'Corporate' && CurrentPendingWith === ApprovalChain.OPM) {
+                                        StatusOnApprove = ApprovalStatus.OPMApproved;
+                                    } else {
+                                        StatusOnApprove = ApprovalStatus.SOICApproved;
+                                    }
                                 } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved && CurrentPendingWith === ApprovalChain.COO) {
                                     NextPendingWith = ApprovalChain.CMO;
                                     StatusOnApprove = ApprovalStatus.COOApproved;
