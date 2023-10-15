@@ -39,6 +39,7 @@ const ApprovalStatus = {
     CMOApproved: "CMOApproved",
     COOApproved: "COOApproved",
     FinalApproved: "FinalApproved",
+    Closed: "Closed",
     Rejected: "Rejected",
 }
 /**
@@ -302,37 +303,43 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                             .then(() => {
                                 $scope.IsLoading = false
                                 DEV_ENV && console.log(ApprovalChain);
-                                /* Setting the `NextPendingWith` and `StatusOnApprove` based on the `Status` and `TotalExpectedExpense` */
-                                if (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM || CurrentPendingWith === ApprovalChain.SOIC) {
-                                    NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.CMO;
+
+                                /* -Start----------------------------------------------APPROVAL FLOW-------------------------------------------------- */
+                                if (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM || CurrentPendingWith === ApprovalChain.SOIC) { /* CMO*/
+                                    NextPendingWith = ApprovalChain.CMO;
                                     if (RequesterInfo.location === 'Corporate' && CurrentPendingWith === ApprovalChain.OPM) {
                                         StatusOnApprove = ApprovalStatus.OPMApproved;
                                     } else {
                                         StatusOnApprove = ApprovalStatus.SOICApproved;
                                     }
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved && CurrentPendingWith === ApprovalChain.COO) {
-                                    NextPendingWith = ApprovalChain.CMO;
-                                    StatusOnApprove = ApprovalStatus.COOApproved;
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.COOApproved || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved && CurrentPendingWith === ApprovalChain.CMO) {
-                                    NextPendingWith = ApprovalChain.FinalApprovar;
+                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved && CurrentPendingWith === ApprovalChain.CMO) { /* COO / Final */
+                                    NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.FinalApprovar;
                                     StatusOnApprove = ApprovalStatus.CMOApproved;
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) {
+                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.COO) { /* COO */
+                                    NextPendingWith = ApprovalChain.FinalApprovar;
+                                    StatusOnApprove = ApprovalStatus.COOApproved;
+                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved || CurrentStatus === ApprovalStatus.COOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) { /* Requester */
                                     NextPendingWith = CURRENT_USER_ID;
                                     StatusOnApprove = ApprovalStatus.FinalApproved;
                                     $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
+                                } else if (CurrentStatus === ApprovalStatus.FinalApproved && CurrentPendingWith === CURRENT_USER_ID) { /* Closed */
+                                    NextPendingWith = null;
+                                    StatusOnApprove = ApprovalStatus.Closed;
+                                    $scope.showCloseBtn = true;
                                 }
+                                /* -End-----------------------------------------------APPROVAL FLOW-------------------------------------------------- */
 
                                 /* Approve, Reject, Change buttons configuration */
-                                if (CURRENT_USER_ID === CurrentPendingWith || DEV_ENV) {
+                                if (CURRENT_USER_ID === CurrentPendingWith && CurrentStatus !== ApprovalStatus.FinalApproved || DEV_ENV) {
                                     if (CurrentStatus !== ApprovalStatus.Rejected
                                         && CurrentStatus !== ApprovalStatus.ChangeRequested
-                                        && CurrentStatus !== ApprovalStatus.FinalApproved) {
+                                        && CurrentStatus !== ApprovalStatus.Closed) {
                                         $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = true;
                                     }
                                 }
-                                /* Hide Attachments Panel and Comment Box if rejected or final approved */
+                                /* Hide Attachments Panel and Comment Box if rejected or closed */
                                 if (CurrentStatus === ApprovalStatus.Rejected
-                                    || CurrentStatus === ApprovalStatus.FinalApproved || CURRENT_USER_ID !== CurrentPendingWith && !DEV_ENV) {
+                                    || CurrentStatus === ApprovalStatus.Closed || CURRENT_USER_ID !== CurrentPendingWith && !DEV_ENV) {
                                     $scope.IsRejectedOrCompleted = true;
                                 }
 
@@ -462,6 +469,19 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 });
             return;
         }
+        if (StatusOnApprove === ApprovalStatus.Closed) {
+            const data = { 'Status': StatusOnApprove };
+            UpddatePendingApproval(data, NextPendingWith)
+                .then(() => {
+                    UpdateActivityMaster($scope.FormData, NextPendingWith, StatusOnApprove)
+                    AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
+                })
+                .catch((e) => { console.log("Error getting information", e) })
+                .finally(() => {
+                    window.location.href = RedirectOnSubmit;
+                });
+            return;
+        }
 
         const url = getApiEndpoint("MarketingActivityMaster");
         /* Spreding the FormData and adding the metadata */
@@ -521,14 +541,18 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 data = { 'Status': StatusOnApprove };
                 setPendingWith = NextPendingWith;
                 break;
-            case "Rejected":
-                data = { 'Status': ApprovalStatus.Rejected, };
-                StatusOnApprove = ApprovalStatus.Rejected;
-                break;
             case "Changed":
                 data = { 'Status': ApprovalStatus.ChangeRequested, };
                 StatusOnApprove = ApprovalStatus.ChangeRequested;
                 setPendingWith = CURRENT_USER_ID;
+                break;
+            case "Rejected":
+                data = { 'Status': ApprovalStatus.Rejected, };
+                StatusOnApprove = ApprovalStatus.Rejected;
+                break;
+            case "Closed":
+                data = { 'Status': ApprovalStatus.Closed, };
+                StatusOnApprove = ApprovalStatus.Closed;
                 break;
             default:
                 DEV_ENV && console.log(`Invalid action: ${Action}`);
@@ -562,7 +586,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             url: `${getApiEndpoint("PendingApproval")}(${PendingApprovalId})`,
             data: {
                 ...data,
-                'PendingWithId': { 'results': StatusOnApprove === ApprovalStatus.Rejected ? [] : [setPendingWith] }, /* if rejected then sending empty array (pending with no one)*/
+                'PendingWithId': { 'results': StatusOnApprove === ApprovalStatus.Rejected || StatusOnApprove === ApprovalStatus.Closed ? [] : [setPendingWith] }, /* if rejected or closed then sending empty array (pending with no one)*/
                 '__metadata': { "type": "SP.Data.PendingApprovalListItem" }
             }
         })
