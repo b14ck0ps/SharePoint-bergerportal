@@ -228,6 +228,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     $scope.errors = {};
     if (!PendingApprovalUniqueId) {
         $scope.showSaveOrSubmitBtn = true;
+        $scope.showPRNumber = false;
     } else {
         /* If Some one click on a link from `Pending Approval` list */
         const base = getApiEndpoint("PendingApproval");
