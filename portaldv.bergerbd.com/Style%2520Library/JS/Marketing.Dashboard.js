@@ -13,7 +13,7 @@ const gridOptions = {
         { headerName: "PendingWith", field: 'PendingWith', enableRowGroup: true, minWidth: 250 },
         { headerName: "PRNumber", field: 'PRNumber', maxWidth: 140 },
         { headerName: "Link", field: 'RequestLink', cellRenderer: viewActionCellRenderer, maxWidth: 100 },
-        { headerName: "Created", field: 'Created', enableRowGroup: true },
+        { headerName: "Created", field: 'Created', enableRowGroup: true, sort: 'desc' },
     ],
     defaultColDef: {
         sortable: true,
