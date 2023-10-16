@@ -342,6 +342,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 if (CurrentStatus === ApprovalStatus.Rejected
                                     || CurrentStatus === ApprovalStatus.Closed || CURRENT_USER_ID !== CurrentPendingWith && !DEV_ENV) {
                                     $scope.IsRejectedOrCompleted = true;
+                                    $scope.showPRNumber = true;
                                 }
 
                                 DEV_ENV && console.log(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
