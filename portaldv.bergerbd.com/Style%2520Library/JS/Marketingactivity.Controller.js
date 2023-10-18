@@ -466,9 +466,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                     AddToLog(`MA-${RequestId}`, 'Updated', $scope.actionComment, RequestId);
                 })
                 .catch((e) => { console.log("Error getting information", e) })
-                .finally(() => {
-                    window.location.href = RedirectOnSubmit;
-                });
             return;
         }
         if (StatusOnApprove === ApprovalStatus.Closed) {
@@ -479,9 +476,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                     AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
                 })
                 .catch((e) => { console.log("Error getting information", e) })
-                .finally(() => {
-                    window.location.href = RedirectOnSubmit;
-                });
             return;
         }
 
@@ -521,7 +515,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 DEV_ENV && console.log(`Error saving data: ${message}`);
             })
             .finally(() => {
-                window.location.href = RedirectOnSubmit;
                 $scope.IsLoading = false;
             });
     }
@@ -577,7 +570,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .catch((e) => { DEV_ENV && console.log(e); })
             .finally(() => {
                 $scope.IsLoading = false;
-                window.location.href = RedirectOnApprove;
             });
     }
 
@@ -668,10 +660,23 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .map((input) => input.files[0])
             .filter((file) => file);
 
-        if (filesToUpload.length === 0) return;
+        if (filesToUpload.length === 0) {
+            if (StatusOnApprove === ApprovalStatus.Submitted)
+                window.location.href = RedirectOnSubmit;
+            else
+                window.location.href = RedirectOnApprove;
+            return
+        };
 
         try {
             filesToUpload.forEach(async (file) => await AddReceiptInitial(file));
+            $scope.IsLoading = true;
+            if (StatusOnApprove === ApprovalStatus.Submitted)
+                window.location.href = RedirectOnSubmit;
+            else
+                window.location.href = RedirectOnApprove;
+            $scope.IsLoading = false;
+            return
         }
         catch (error) {
             console.error('Error uploading files:', error);
