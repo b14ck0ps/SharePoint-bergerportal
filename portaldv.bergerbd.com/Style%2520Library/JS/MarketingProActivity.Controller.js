@@ -19,10 +19,7 @@ const nodev = new URLSearchParams(window.location.search).get('nodev');
  * @type {boolean}
  */
 const DEV_ENV = ABS_URL.includes("portaldv") && nodev === null;
-//const PendingApprovalUniqueId = new URLSearchParams(window.location.search).get('UniqueId');
-
-const TempPendingApprovalUniqueId = new URLSearchParams(window.location.search).get('UniqueId');
-const PendingApprovalUniqueId = TempPendingApprovalUniqueId ? TempPendingApprovalUniqueId.replace(/\/$/, '') : null;
+const PendingApprovalUniqueId = new URLSearchParams(window.location.search).get('UniqueId');
 const CURRENT_USER_ID = _spPageContextInfo.userId;
 const OPM_INFO = { id: 0, name: "" };
 const SOIC_INFO = { id: 0, name: "" };
@@ -39,9 +36,9 @@ const ApprovalStatus = {
     ChangeRequested: "ChangeRequested",
     OPMApproved: "OPMApproved",
     SOICApproved: "SOICApproved",
-    CMOApproved: "CMOApproved",
+    HODApproved: "HODApproved",
     COOApproved: "COOApproved",
-    FinalApproved: "FinalApproved",
+    MarketingSupportApproved: "MarketingSupportApproved",
     Closed: "Closed",
     Rejected: "Rejected",
 }
@@ -51,9 +48,9 @@ const ApprovalStatus = {
 const ApprovalChain = {
     SOIC: null,
     OPM: null,
-    CMO: null,
+    HOD: null, //CMO
     COO: null,
-    FinalApprovar: null
+    MarketingSupport: null
 }
 const RedirectOnSubmit = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/leaveauto/SitePages/MyWFRequest.aspx`
 const RedirectOnApprove = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.com/_layouts/15/PendingApproval/PendingApproval.aspx`
@@ -63,7 +60,6 @@ const RedirectOnApprove = `https://${DEV_ENV ? 'portaldv' : 'portal'}.bergerbd.c
  * @type {number}
  */
 const DefaultExpenseLimit = 300000;
-
 /**
  * Assigned in when getting the request data from `PendingApproval` list.
  * @type {number}
@@ -100,16 +96,23 @@ let RequestId = null;
  * @type {boolean}
  */
 let EditMode = false;
+let CurrentRequesterId = null;
 
+
+
+/**
+ * Angular module for the Marketing Activity app.
+ * @module MarketingActivityApp
+ */
 const MarketingActivityModule = angular.module("MarketingActivityApp", ['ngSanitize']);
 MarketingActivityModule.run(($rootScope) => $rootScope.spinnerActive = true); /* Active spinner on page load only if `MarketingActivityModule` is loaded */
 
 MarketingActivityModule.controller('UserController', ['$scope', '$http', function ($scope, $http) {
     $scope.today = new Date();
     $scope.UserInfo = {};
-    let CurrentRequesterId = null;
+
     const P_base = getApiEndpoint("PendingApproval");
-    const P_filter = `$filter=substringof('${PendingApprovalUniqueId}',RequestLink)`;;
+    const P_filter = `$filter=substringof('${PendingApprovalUniqueId}',RequestLink)`;
     const P_query = `$expand=Author&$select=Author/Id`;
 
     $scope.IsLoading = true;
@@ -139,7 +142,6 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
                 headers: API_GET_HEADERS
             })
                 .then(function (response) {
-                    console.log(response);
                     $scope.UserInfo = response.data.d.results[0];
                     RequesterInfo.name = $scope.UserInfo.EmployeeName;
                     RequesterInfo.email = $scope.UserInfo.Email.EMail;
@@ -164,7 +166,7 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
 const getApproverInfo = (DeptID) => {
     return new Promise((resolve, reject) => {
         const base = getApiEndpoint("Approver Info");
-        const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver4Id,BranchSalesMId,HODId,Location`;
+        const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver5Id,BranchSalesMId,HODId,Location`;
         const filter = `$filter=DeptID eq '${DeptID}'`;
 
         $.ajax({
@@ -174,17 +176,16 @@ const getApproverInfo = (DeptID) => {
             success: function (response) {
                 const approverInfoResponse = response.d.results;
 
-                console.log("apap", approverInfoResponse);
                 const corporateApprovalRow = approverInfoResponse.find(item => item.Location === 'Corporate');
                 const OtherLocationApprovalRow = approverInfoResponse.find(item => item.Location === RequesterInfo.location);
 
                 const DefaultkeyMapping = {
-                    "Approver2Id": "CMO",
+                    "Approver2Id": "HOD",
                     "Approver3Id": "COO",
-                    "Approver4Id": "FinalApprovar",
+                    "Approver5Id": "MarketingSupport",
                 };
 
-                /* Default Approval Chain (OPM->COO/CMO->FinalApprover) */
+                /* Default Approval Chain (OPM->HOD->COO/MarketingSupport) */
                 for (const key in DefaultkeyMapping) {
                     const value = corporateApprovalRow[key];
                     if (value !== null) {
@@ -222,8 +223,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         $scope.showSaveOrSubmitBtn = true;
         $scope.showPRNumber = false;
     } else {
-
-        console.log('uni2', PendingApprovalUniqueId);
         /* If Some one click on a link from `Pending Approval` list */
         const base = getApiEndpoint("PendingApproval");
         const filter = `$filter=substringof('${PendingApprovalUniqueId}',RequestLink)`;
@@ -292,7 +291,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                          * @type {number}
                          */
                         const TotalExpectedExpense = $scope.FormData.TotalExpectedExpense;
-                        console.log('OLA OLA', RequesterInfo.DeptID);
+
                         /* Getting the `ApprovalChain` based on the `DeptID`, `Location` and `Department` */
                         getApproverInfo(RequesterInfo.DeptID)
                             .then(() => {
@@ -300,24 +299,30 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 DEV_ENV && console.log(ApprovalChain);
 
                                 /* -Start----------------------------------------------APPROVAL FLOW-------------------------------------------------- */
-                                if (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM || CurrentPendingWith === ApprovalChain.SOIC) { /* CMO*/
-                                    NextPendingWith = ApprovalChain.CMO;
+                                if (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM || CurrentPendingWith === ApprovalChain.SOIC) { /* HOD*/
+                                    NextPendingWith = ApprovalChain.HOD;
                                     if (RequesterInfo.location === 'Corporate' && CurrentPendingWith === ApprovalChain.OPM) {
                                         StatusOnApprove = ApprovalStatus.OPMApproved;
                                     } else {
                                         StatusOnApprove = ApprovalStatus.SOICApproved;
                                     }
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved && CurrentPendingWith === ApprovalChain.CMO) { /* COO / Final */
-                                    NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.FinalApprovar;
-                                    StatusOnApprove = ApprovalStatus.CMOApproved;
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.COO) { /* COO */
-                                    NextPendingWith = ApprovalChain.FinalApprovar;
+                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved && CurrentPendingWith === ApprovalChain.HOD) { /* COO / Final */
+                                    NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.MarketingSupport;
+                                    StatusOnApprove = ApprovalStatus.HODApproved;
+                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.HODApproved && CurrentPendingWith === ApprovalChain.COO) { /* COO */
+                                    NextPendingWith = CurrentRequesterId;
                                     StatusOnApprove = ApprovalStatus.COOApproved;
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved || CurrentStatus === ApprovalStatus.COOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) { /* Requester */
-                                    NextPendingWith = CURRENT_USER_ID;
-                                    StatusOnApprove = ApprovalStatus.FinalApproved;
                                     $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
-                                } else if (CurrentStatus === ApprovalStatus.FinalApproved && CurrentPendingWith === CURRENT_USER_ID) { /* Closed */
+                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.HODApproved || CurrentStatus === ApprovalStatus.COOApproved && CurrentPendingWith === ApprovalChain.MarketingSupport) { /* Requester */
+                                    NextPendingWith = CURRENT_USER_ID;
+                                    StatusOnApprove = ApprovalStatus.MarketingSupportApproved;
+                                    $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
+                                } else if (CurrentStatus === ApprovalStatus.MarketingSupportApproved && CurrentPendingWith === CURRENT_USER_ID) { /* Closed */
+                                    NextPendingWith = null;
+                                    StatusOnApprove = ApprovalStatus.Closed;
+                                    $scope.showCloseBtn = true;
+                                }
+                                else if (CurrentStatus === ApprovalStatus.COOApproved && CurrentPendingWith === CURRENT_USER_ID) { /* Closed */
                                     NextPendingWith = null;
                                     StatusOnApprove = ApprovalStatus.Closed;
                                     $scope.showCloseBtn = true;
@@ -325,7 +330,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 /* -End-----------------------------------------------APPROVAL FLOW-------------------------------------------------- */
 
                                 /* Approve, Reject, Change buttons configuration */
-                                if (CURRENT_USER_ID === CurrentPendingWith && CurrentStatus !== ApprovalStatus.FinalApproved || DEV_ENV) {
+                                if (CURRENT_USER_ID === CurrentPendingWith && CurrentStatus !== ApprovalStatus.MarketingSupportApproved || DEV_ENV) {
                                     if (CurrentStatus !== ApprovalStatus.Rejected
                                         && CurrentStatus !== ApprovalStatus.ChangeRequested
                                         && CurrentStatus !== ApprovalStatus.Closed) {
@@ -408,6 +413,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                     AddToLog(`MP-${RequestId}`, 'Updated', $scope.actionComment, RequestId);
                 })
                 .catch((e) => { console.log("Error getting information", e) })
+                .finally(() => {
+                    //window.location.href = RedirectOnSubmit;
+                });
             return;
         }
         if (StatusOnApprove === ApprovalStatus.Closed) {
@@ -415,9 +423,12 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             UpddatePendingApproval(data, NextPendingWith)
                 .then(() => {
                     UpdateActivityMaster($scope.FormData, NextPendingWith, StatusOnApprove)
-                    AddToLog(`MP-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
+                    AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
                 })
                 .catch((e) => { console.log("Error getting information", e) })
+                .finally(() => {
+                    // window.location.href = RedirectOnSubmit;
+                });
             return;
         }
 
@@ -432,8 +443,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             'PendingWithId': ApprovalChain.SOIC ?? ApprovalChain.OPM,
             '__metadata': { "type": "SP.Data.MarketingPromotionalMasterListItem" }
         };
-
-        console.log('hehe', marketingPromotionalMasterData);
 
         /** Saves/Submit the request to a SharePoint list `MarketingActivityMaster` */
         $scope.IsLoading = true;
@@ -459,9 +468,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 SendEmail(InitiatorRequesterTemplate, CURRENT_USER_ID, [], RequesterInfo.name, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
             })
             .catch(function (message) {
-                DEV_ENV && console.log(`Error saving data: ${JSON.stringify(message)}`);
+                DEV_ENV && console.log(`Error saving data: ${message}`);
             })
             .finally(() => {
+                //window.location.href = RedirectOnSubmit;
                 $scope.IsLoading = false;
             });
     }
@@ -500,7 +510,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 DEV_ENV && console.log(`Invalid action: ${Action}`);
                 return;
         }
-        if (Action === "Approved" && CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRNumber === null || $scope.FormData.PRNumber === '') {
+        if (Action === "Approved" && CurrentPendingWith === ApprovalChain.MarketingSupport && $scope.FormData.PRNumber === null || $scope.FormData.PRNumber === '') {
             $scope.errors.PRNumber = 'Please fill up PR Number'
             return;
         }
@@ -508,8 +518,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         $scope.IsLoading = true;
         UpddatePendingApproval(data, setPendingWith)
             .then((res) => {
-                if (CurrentPendingWith === ApprovalChain.FinalApprovar && Action === 'Approved') {
-                    data = { ...data, 'PRNumber': $scope.FormData.PRNumber, 'Reamarks': $scope.FormData.Reamarks };
+                if (CurrentPendingWith === ApprovalChain.MarketingSupport && Action === 'Approved' || CurrentPendingWith === ApprovalChain.COO && Action === 'Approved') {
+                    data = { ...data, 'PRNumber': $scope.FormData.PRNumber };
                 }
                 UpdateActivityMaster(data, setPendingWith, StatusOnApprove);
                 AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
@@ -517,6 +527,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .catch((e) => { DEV_ENV && console.log(e); })
             .finally(() => {
                 $scope.IsLoading = false;
+                //window.location.href = RedirectOnApprove;
             });
     }
 
@@ -527,7 +538,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             url: `${getApiEndpoint("PendingApproval")}(${PendingApprovalId})`,
             data: {
                 ...data,
-                'PendingWith': { 'results': StatusOnApprove === ApprovalStatus.Rejected || StatusOnApprove === ApprovalStatus.Closed ? [] : [setPendingWith] }, /* if rejected or closed then sending empty array (pending with no one)*/
+                'PendingWithId': { 'results': StatusOnApprove === ApprovalStatus.Rejected || StatusOnApprove === ApprovalStatus.Closed ? [] : [setPendingWith] }, /* if rejected or closed then sending empty array (pending with no one)*/
                 '__metadata': { "type": "SP.Data.PendingApprovalListItem" }
             }
         })
@@ -570,7 +581,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      * @param {String} Title MA-{RequestId}
      * @param {String} Status Current Status
      * @param {String} Comment from comment box
-     * @param {number} MarketingPromotionID `RequestId`
+     * @param {number} MarketingActivityID `RequestId`
      */
     const AddToLog = (Title, Status, Comment, MarketingPromotionID) => {
         const url = getApiEndpoint("MarketingPromotionalLog");
@@ -767,11 +778,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             isValid = false;
         }
 
-        if (formData.ServiceName === undefined || formData.ServiceName === '') {
-            $scope.errors.ServiceName = 'Please Select a Service Name';
-            isValid = false;
-        }
-
         if (formData.ActivityName === undefined || formData.ActivityName === '') {
             $scope.errors.ActivityName = 'Please Select an Activity Name';
             isValid = false;
@@ -796,30 +802,25 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             isValid = false;
         }
 
-        if (formData.ExpectedReceivingDate === undefined) {
-            $scope.errors.ExpectedDeliveryDate = 'Please Select a valid Expected Delivery Date';
-            isValid = false;
-        }
+        // if (formData.ExpectedReceivingDate === undefined) {
+        //                 $scope.errors.ExpectedDeliveryDate = 'Please Select a valid Expected Delivery Date';
+        //     isValid = false;
+        // }
 
-        if (activityStartDate > expectedDeliveryDate) {
-            $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Expected Delivery Date';
-            isValid = false;
-        }
+        // if (activityStartDate > expectedDeliveryDate) {
+        //     $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Expected Delivery Date';
+        //     isValid = false;
+        // }
 
-        if (activityStartDate > serviceReceivingDate) {
-            $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Service Receiving Date';
-            isValid = false;
-        }
+        // if (activityStartDate > serviceReceivingDate) {
+        //     $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Service Receiving Date';
+        //     isValid = false;
+        // }
 
-        if (expectedDeliveryDate > serviceReceivingDate) {
-            $scope.errors.ExpectedDeliveryDate = 'Expected Delivery Date can\'t be greater than Service Receiving Date';
-            isValid = false;
-        }
-
-        if (serviceReceivingDate === 'Invalid Date') {
-            $scope.errors.ServiceReceivingDate = 'Please Select a valid Service Receiving Date';
-            isValid = false;
-        }
+        // if (expectedDeliveryDate > serviceReceivingDate) {
+        //     $scope.errors.ExpectedDeliveryDate = 'Expected Delivery Date can\'t be greater than Service Receiving Date';
+        //     isValid = false;
+        // }
 
         if (formData.VendorNumber === undefined || formData.VendorNumber === '') {
             $scope.errors.VendorNumber = 'Please fill up Required Vendor Quotation';
@@ -836,16 +837,11 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             isValid = false;
         }
 
-        if (formData.BudgetType === undefined || formData.BudgetType === '') {
-            $scope.errors.BudgetType = 'Please fill up Budget Type';
-            isValid = false;
-        }
-
         if (formData.TotalExpectedExpense === undefined || formData.TotalExpectedExpense === '') {
             $scope.errors.TotalExpectedExpense = 'Please fill up Total Expected Expense';
             isValid = false;
         }
-        // isValid ? null : alert('Please fill up all the required fields');
+        isValid ? null : alert('Please fill up all the required fields');
         return true;
     };
 
