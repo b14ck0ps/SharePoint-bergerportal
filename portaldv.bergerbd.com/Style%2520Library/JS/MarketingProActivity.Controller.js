@@ -253,7 +253,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
                 const base = getApiEndpoint("MarketingPromotionalMaster");
                 const filter = `$filter=ID eq '${RequestId}'`;
-                const query = `$select=Title,ProjectName,ActivityName,PromotionalItemName,ActivityType,TypeofExpense,AvaiableBudget,CostHead,BrandDescription,CommitmentItem,Quantity,ExpectedPricePerUnit,TotalExpectedExpense,SpecificationMaterial,ActivityStartDate,ExpectedReceivingDate,ExpenseReceivingDate,ConsumingDate,VendorNumber,Status,PendingWith/Id,PendingWith/Title,PRNumber,PRDate&$expand=PendingWith&$top=1`;
+                const query = `$select=Id,ProjectName,ActivityName,PromotionalItemName,ActivityType,TypeofExpense,AvaiableBudget,CostHead,BrandDescription,CommitmentItem,Quantity,ExpectedPricePerUnit,TotalExpectedExpense,SpecificationMaterial,ActivityStartDate,ExpectedReceivingDate,ExpenseReceivingDate,ConsumingDate,VendorNumber,Status,PendingWith/Id,PendingWith/Title,PRNumber,PRDate&$expand=PendingWith&$top=1`;
 
                 /* Getting the request data from `MarketingActivityMaster` list */
                 $http({
