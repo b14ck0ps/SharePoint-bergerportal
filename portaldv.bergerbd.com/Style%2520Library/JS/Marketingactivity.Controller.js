@@ -260,7 +260,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
                 const base = getApiEndpoint("MarketingActivityMaster");
                 const filter = `$filter=ID eq '${RequestId}'`;
-                const query = `$select=PendingWith/Id,PendingWith/Title,ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,PRNumber,Reamarks,AuthorId&$expand=PendingWith&$top=1`;
+                const query = `$select=PendingWith/Id,PendingWith/Title,ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,PRNumber,PRDate,Reamarks,AuthorId&$expand=PendingWith&$top=1`;
 
                 /* Getting the request data from `MarketingActivityMaster` list */
                 $http({
@@ -327,6 +327,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                     NextPendingWith = null;
                                     StatusOnApprove = ApprovalStatus.Closed;
                                     $scope.showCloseBtn = true;
+                                    $scope.showPRNumber = true;
                                 }
                                 /* -End-----------------------------------------------APPROVAL FLOW-------------------------------------------------- */
 
@@ -557,12 +558,16 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             $scope.errors.PRNumber = 'Please fill up PR Number'
             return;
         }
+        if (Action === "Approved" && CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRDate === null || $scope.FormData.PRDate === '') {
+            $scope.errors.PRDate = 'Please fill up PR Date'
+            return;
+        }
 
         $scope.IsLoading = true;
         UpddatePendingApproval(data, setPendingWith)
             .then((res) => {
                 if (CurrentPendingWith === ApprovalChain.FinalApprovar && Action === 'Approved') {
-                    data = { ...data, 'PRNumber': $scope.FormData.PRNumber, 'Reamarks': $scope.FormData.Reamarks };
+                    data = { ...data, 'PRNumber': $scope.FormData.PRNumber, 'PRDate': $scope.FormData.PRDate };
                 }
                 UpdateActivityMaster(data, setPendingWith, StatusOnApprove);
                 AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);

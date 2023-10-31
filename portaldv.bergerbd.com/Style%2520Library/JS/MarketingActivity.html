@@ -355,159 +355,175 @@
                   </div>
                </div>
                <div class="row">
-                  <div class="col-sm-2 labelHeader">Remarks: <span ng-bind-html="FormData.Reamarks"
-                        ng-show="IsDataReadOnly && !EditMode"></span>
-                  </div>
-                  <div class="col-sm-4">
-                     <textarea ng-hide="IsDataReadOnly && !EditMode" name="Remarks" type="text"
-                        ng-model="FormData.Reamarks" cols="36" rows="3"></textarea>
-                  </div>
                   <div ng-show="showPRNumber">
                      <div class="col-sm-2 labelHeader">PR Number:</div>
                      <div class="col-sm-2">
                         <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PRNumber}}</span>
                      </div>
                   </div>
+                  <div ng-show="showPRNumber">
+                     <div class="col-sm-2 labelHeader">PR Date:</div>
+                     <div class="col-sm-2">
+                        <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PRDate | date}}</span>
+                     </div>
+                  </div>
                </div>
+            </div>
+            <div class="row">
+               <div class="col-sm-2 labelHeader">Remarks: <span ng-bind-html="FormData.Reamarks"
+                     ng-show="IsDataReadOnly && !EditMode"></span>
+               </div>
+               <div class="col-sm-4">
+                  <textarea ng-hide="IsDataReadOnly && !EditMode" name="Remarks" type="text"
+                     ng-model="FormData.Reamarks" cols="36" rows="3"></textarea>
+               </div>
+            </div>
 
-               <div ng-hide="IsRejectedOrCompleted">
-                  <div class="row panel-body">
-                     <h4 class="panel-body">Attachments/Receipts:</h4>
+            <div ng-hide="IsRejectedOrCompleted">
+               <div class="row panel-body">
+                  <h4 class="panel-body">Attachments/Receipts:</h4>
+               </div>
+               <div id="divChooseAttachmentFile" class="row panel-body">
+                  <div class="col-sm-2 labelHeader">
+                     <h6>Select All Attachments:</h6>
                   </div>
-                  <div id="divChooseAttachmentFile" class="row panel-body">
-                     <div class="col-sm-2 labelHeader">
-                        <h6>Select All Attachments:</h6>
-                     </div>
-                     <div class="files col-sm-6 row" id="attachFilesContainer" ng-model="attachment1">
-                        <input id="infringementFiles" type="file" class="multi browsebtn textBoxBGColor"
-                           title="Any attachment name including any special charecter like ' & . will not be uploded" />
-                     </div>
-                     <div class="col-sm-4" ng-show='vm.uniqueId !=""'>
-                        <span class='et-right et-style-night'>N.B. Any attachment name including any special
-                           charecter
-                           e.g.<label class='redStar'>" ', . @ ` ~ " </label>will not be uploded.</span>
-                     </div>
+                  <div class="files col-sm-6 row" id="attachFilesContainer" ng-model="attachment1">
+                     <input id="infringementFiles" type="file" class="multi browsebtn textBoxBGColor"
+                        title="Any attachment name including any special charecter like ' & . will not be uploded" />
+                  </div>
+                  <div class="col-sm-4" ng-show='vm.uniqueId !=""'>
+                     <span class='et-right et-style-night'>N.B. Any attachment name including any special
+                        charecter
+                        e.g.<label class='redStar'>" ', . @ ` ~ " </label>will not be uploded.</span>
                   </div>
                </div>
-               <div id="divAttachmentDisplayTbl" class="row" style="padding-left: 15px; overflow:hidden;"
-                  ng-hide='uId == ""||status==""||hideAttachmentDiv = "true"'>
-                  <div class="table-responsive panel-body" style="overflow-x:auto;">
-                     <table id="tblReceipt" class="table css-serial">
-                        <tbody>
-                           <tr>
-                              <th id="">SL#</th>
-                              <th id="thReceipt">View Attachment</th>
-                              <th id="thAttachted">Attached By</th>
-                              <th id="thDate">Attachment Date</th>
-                              <th id="thDelete" ng-hide="readMode == 'read' || status=='Completed'"></th>
-                           </tr>
-                        </tbody>
-                        <tbody>
-                           <tr ng-repeat="(i,receiptRow) in receiptRows">
-                              <td id="tdSlNo"></td>
-                              <td id="tdReceipt"><a
-                                    href="{{receiptRow.AttachmentFiles.results[0].ServerRelativeUrl}}">{{receiptRow.AttachmentFiles.results[0].FileName}}</a>
-                              </td>
-                              <td id="tdAttachted">{{receiptRow.Author.Title}}</td>
-                              <td id="tdDate">{{receiptRow.Created | date}}</td>
-                           </tr>
-                        </tbody>
-                     </table>
-                     <strong style="text-align: center;" ng-show="receiptRows.length === 0">No Attachment</strong>
-                  </div>
+            </div>
+            <div id="divAttachmentDisplayTbl" class="row" style="padding-left: 15px; overflow:hidden;"
+               ng-hide='uId == ""||status==""||hideAttachmentDiv = "true"'>
+               <div class="table-responsive panel-body" style="overflow-x:auto;">
+                  <table id="tblReceipt" class="table css-serial">
+                     <tbody>
+                        <tr>
+                           <th id="">SL#</th>
+                           <th id="thReceipt">View Attachment</th>
+                           <th id="thAttachted">Attached By</th>
+                           <th id="thDate">Attachment Date</th>
+                           <th id="thDelete" ng-hide="readMode == 'read' || status=='Completed'"></th>
+                        </tr>
+                     </tbody>
+                     <tbody>
+                        <tr ng-repeat="(i,receiptRow) in receiptRows">
+                           <td id="tdSlNo"></td>
+                           <td id="tdReceipt"><a
+                                 href="{{receiptRow.AttachmentFiles.results[0].ServerRelativeUrl}}">{{receiptRow.AttachmentFiles.results[0].FileName}}</a>
+                           </td>
+                           <td id="tdAttachted">{{receiptRow.Author.Title}}</td>
+                           <td id="tdDate">{{receiptRow.Created | date}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <strong style="text-align: center;" ng-show="receiptRows.length === 0">No Attachment</strong>
                </div>
-               <div id="divActionButtonPanel" class="panel panel-default" ng-hide="IsRejectedOrCompleted">
-                  <div class="panel-body">
-                     <!-- Final Approver Fields -->
-                     <div ng-show="isFinalApprover">
-                        <div class="row">
-                        </div>
-                        <div class="row">
-                           <div class="col-sm-1 labelHeader">PR Number: <span style="color: red;">*</span></div>
-                           <div class="col-sm-2">
-                              <input name="PRNumber" type="number" ng-model="FormData.PRNumber" required></input>
-                           </div>
-                           <span class="error" ng-show="errors.PRNumber"> {{errors.PRNumber}} </span>
-                        </div>
+            </div>
+            <div id="divActionButtonPanel" class="panel panel-default" ng-hide="IsRejectedOrCompleted">
+               <div class="panel-body">
+                  <!-- Final Approver Fields -->
+                  <div ng-show="isFinalApprover">
+                     <div class="row">
                      </div>
                      <div class="row">
-                        <div class="col-sm-1 labelHeader comment">Comment:</div>
-                        <div class="col-sm-4">
-                           <textarea name="actionComment" ng-model="actionComment" cols="36" rows="3"></textarea>
+                        <div class="col-sm-1 labelHeader">PR Number: <span style="color: red;">*</span></div>
+                        <div class="col-sm-2">
+                           <input name="PRNumber" type="number" ng-model="FormData.PRNumber" required></input>
                         </div>
-                        <div class="col-sm-7">
-                           <div class=" row">
-                              <div class="col-sm-2">
-                                 <input type="button" id="btnsubmit" value="Submit" ng-show="showSaveOrSubmitBtn"
-                                    ng-click="clickSaveOrSubmit('Submitted')" ng-disabled="form.$invalid" />
-                              </div>
-                              <div class="col-sm-2">
-                                 <input type="button" id="btnClosed" value="Closed" ng-show="showCloseBtn"
-                                    ng-click="clickSaveOrSubmit('Closed')" />
-                              </div>
+                        <span class="error" ng-show="errors.PRNumber"> {{errors.PRNumber}} </span>
+                     </div>
+                     <div class="row">
+                        <div class="col-sm-1 labelHeader">PR Date: <span style="color: red;">*</span></div>
+                        <div class="col-sm-2">
+                           <input name="PRDate" type="date" ng-model="FormData.PRDate" required></input>
+                        </div>
+                        <span class="error" ng-show="errors.PRDate"> {{errors.PRDate}} </span>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-sm-1 labelHeader comment">Comment:</div>
+                     <div class="col-sm-4">
+                        <textarea name="actionComment" ng-model="actionComment" cols="36" rows="3"></textarea>
+                     </div>
+                     <div class="col-sm-7">
+                        <div class=" row">
+                           <div class="col-sm-2">
+                              <input type="button" id="btnsubmit" value="Submit" ng-show="showSaveOrSubmitBtn"
+                                 ng-click="clickSaveOrSubmit('Submitted')" ng-disabled="form.$invalid" />
                            </div>
-                           <div class="row">
-                              <div class="col-sm-2">
-                                 <input type="button" id="btnApprove" value="Approve"
-                                    ng-click="ApproverAction('Approved')" ng-show="showApproveBtn" />
-                              </div>
-                              <div class="col-sm-2">
-                                 <input type="button" id="btnReject" value="Reject"
-                                    ng-click="ApproverAction('Rejected')" ng-show="showRejectBtn">
-                              </div>
-                              <div class="col-sm-2">
-                                 <input type="button" id="btnChange" value="Request Change"
-                                    ng-click="ApproverAction('Changed')" ng-show="showChangeBtn" />
-                              </div>
+                           <div class="col-sm-2">
+                              <input type="button" id="btnClosed" value="Closed" ng-show="showCloseBtn"
+                                 ng-click="clickSaveOrSubmit('Closed')" />
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-sm-2">
+                              <input type="button" id="btnApprove" value="Approve" ng-click="ApproverAction('Approved')"
+                                 ng-show="showApproveBtn" />
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="button" id="btnReject" value="Reject" ng-click="ApproverAction('Rejected')"
+                                 ng-show="showRejectBtn">
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="button" id="btnChange" value="Request Change"
+                                 ng-click="ApproverAction('Changed')" ng-show="showChangeBtn" />
                            </div>
                         </div>
                      </div>
                   </div>
                </div>
-               <div class="panel panel-default" id="divErrorPanel" ng-show="showStatus">
-                  <div class="panel-body">
-                     <div id="status" ng-style="{'font-weight': bold, 'color': textColor}" ng-bind="statusText">
-                     </div>
+            </div>
+            <div class="panel panel-default" id="divErrorPanel" ng-show="showStatus">
+               <div class="panel-body">
+                  <div id="status" ng-style="{'font-weight': bold, 'color': textColor}" ng-bind="statusText">
                   </div>
                </div>
-               <div class="panel-body" id="divAuditPanel" ng-hide='status==""'>
-                  <div class="row">
-                     <h4>Approval History</h4>
+            </div>
+            <div class="panel-body" id="divAuditPanel" ng-hide='status==""'>
+               <div class="row">
+                  <h4>Approval History</h4>
+               </div>
+               <div class="row">
+                  <div class="col-sm-2 labelHeader">Pending With:</div>
+                  <div class="col-sm-2">
+                     <label id="lblPendingWith">{{pendingWithName}}</label>
                   </div>
-                  <div class="row">
-                     <div class="col-sm-2 labelHeader">Pending With:</div>
-                     <div class="col-sm-2">
-                        <label id="lblPendingWith">{{pendingWithName}}</label>
-                     </div>
-                  </div>
-                  <div class="table-responsive" style="overflow-x:auto;">
-                     <table id="tblAudit" class="table css-serial">
-                        <tbody>
-                           <tr>
-                              <th>SL#</th>
-                              <th>Approval Date</th>
-                              <th>Status</th>
-                              <th>Action By</th>
-                              <th>Comment</th>
-                           </tr>
-                        </tbody>
-                        <tbody>
-                           <tr ng-repeat="(i,audit) in auditHistory">
-                              <td></td>
-                              <td>{{audit.Created | date}}</td>
-                              <td>{{audit.Status}}</td>
-                              <td>{{audit.Author.Title}}</td>
-                              <td>
-                                 <p ng-bind-html="audit.Comment"></p>
-                              </td>
-                           </tr>
-                        </tbody>
-                     </table>
-                  </div>
+               </div>
+               <div class="table-responsive" style="overflow-x:auto;">
+                  <table id="tblAudit" class="table css-serial">
+                     <tbody>
+                        <tr>
+                           <th>SL#</th>
+                           <th>Approval Date</th>
+                           <th>Status</th>
+                           <th>Action By</th>
+                           <th>Comment</th>
+                        </tr>
+                     </tbody>
+                     <tbody>
+                        <tr ng-repeat="(i,audit) in auditHistory">
+                           <td></td>
+                           <td>{{audit.Created | date}}</td>
+                           <td>{{audit.Status}}</td>
+                           <td>{{audit.Author.Title}}</td>
+                           <td>
+                              <p ng-bind-html="audit.Comment"></p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
                </div>
             </div>
          </div>
       </div>
-      <!-- #endregion APP FormController end -->
    </div>
+   <!-- #endregion APP FormController end -->
+</div>
 </div>
