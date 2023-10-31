@@ -96,6 +96,7 @@ let RequestId = null;
  * @type {boolean}
  */
 let EditMode = false;
+let CurrentRequesterId = null;
 
 
 
@@ -109,7 +110,6 @@ MarketingActivityModule.run(($rootScope) => $rootScope.spinnerActive = true); /*
 MarketingActivityModule.controller('UserController', ['$scope', '$http', function ($scope, $http) {
     $scope.today = new Date();
     $scope.UserInfo = {};
-    let CurrentRequesterId = null;
 
     const P_base = getApiEndpoint("PendingApproval");
     const P_filter = `$filter=substringof('${PendingApprovalUniqueId}',RequestLink)`;
@@ -320,7 +320,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                     NextPendingWith = ApprovalChain.FinalApprovar;
                                     StatusOnApprove = ApprovalStatus.COOApproved;
                                 } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved || CurrentStatus === ApprovalStatus.COOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) { /* Requester */
-                                    NextPendingWith = CURRENT_USER_ID;
+                                    NextPendingWith = CurrentRequesterId;
                                     StatusOnApprove = ApprovalStatus.FinalApproved;
                                     $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
                                 } else if (CurrentStatus === ApprovalStatus.FinalApproved && CurrentPendingWith === CURRENT_USER_ID) { /* Closed */
