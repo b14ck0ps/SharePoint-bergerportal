@@ -267,9 +267,14 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                         $scope.requestCode = `MP-${Row.ID}`;
                         $scope.FormData = {
                             ...Row,
-                            // ActivityStartDate: new Date(Row.ActivityStartDate),
-                            // ExpectedReceivingDate: new Date(Row.ExpectedReceivingDate),
+                            PromotionalItemName: EditMode ? JSON.parse(Row.PromotionalItemName) : JSON.parse(Row.PromotionalItemName).join(', '),
+                            ActivityStartDate: new Date(Row.ActivityStartDate),
+                            ExpenseReceivingDate: new Date(Row.ExpenseReceivingDate),
+                            ConsumingDate: new Date(Row.ConsumingDate),
+                            ExpectedReceivingDate: new Date(Row.ExpectedReceivingDate),
                         };
+                        // PromotionalItemName: EditMode ? JSON.parse(Row.PromotionalItemName) : JSON.parse(Row.PromotionalItemName).join(', '),
+                        //$scope.FormData.PromotionalItemName = EditMode ? JSON.parse(Row.PromotionalItemName) : JSON.parse(Row.PromotionalItemName).join(', ');
 
                         $scope.IsDataReadOnly = true; /* Hide all the input fields & Shows `MarketingActivityMaster` list data */
                         DEV_ENV && console.log(Row);
@@ -365,9 +370,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                     .catch((e) => DEV_ENV && console.log("Error getting user information", e))
 
                                 if (EditMode) {
-                                    $scope.MapActivityName(EditMode);
-                                    $scope.MapCostHead(EditMode);
-
                                     /* Button Config */
                                     $scope.showSaveOrSubmitBtn = $scope.EditMode = true;
                                     $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = false;
@@ -411,7 +413,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             const data = { 'Status': ApprovalStatus.Submitted };
             UpddatePendingApproval(data, NextPendingWith)
                 .then(() => {
-                    UpdateActivityMaster($scope.FormData, NextPendingWith, ApprovalStatus.Submitted)
+                    $scope.FormData.PromotionalItemName = JSON.stringify($scope.FormData.PromotionalItemName);
+                    UpdateActivityMaster($scope.FormData, NextPendingWith, ApprovalStatus.Submitted);
                     AddToLog(`MP-${RequestId}`, 'Updated', $scope.actionComment, RequestId);
                 })
                 .catch((e) => { console.log("Error getting information", e) })
@@ -434,13 +437,12 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
         const url = getApiEndpoint("MarketingPromotionalMaster");
 
-        // $scope.FormData.PromotionalItemName = JSON.stringify(selectedOptions.options)
-        console.log("ula", $scope.FormData);
         /* Spreding the FormData and adding the metadata */
         const marketingPromotionalMasterData = {
             ...$scope.FormData,
             'Status': status,
             'PendingWithId': ApprovalChain.SOIC ?? ApprovalChain.OPM,
+            'PromotionalItemName': JSON.stringify($scope.FormData.PromotionalItemName),
             '__metadata': { "type": "SP.Data.MarketingPromotionalMasterListItem" }
         };
 
@@ -845,7 +847,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             isValid = false;
         }
         isValid ? null : alert('Please fill up all the required fields');
-        return true;
+        return isValid;
     };
 
 }]);
