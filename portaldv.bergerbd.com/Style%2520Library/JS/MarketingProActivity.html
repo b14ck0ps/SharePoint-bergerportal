@@ -504,6 +504,21 @@
 
 
             </div>
+
+            <div class="row">
+               <div ng-show="showPRNumber">
+                  <div class="col-sm-2 labelHeader">PR Number:</div>
+                  <div class="col-sm-2">
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PRNumber}}</span>
+                  </div>
+               </div>
+               <div ng-show="showPRNumber">
+                  <div class="col-sm-2 labelHeader">PR Date:</div>
+                  <div class="col-sm-2">
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PRDate | date}}</span>
+                  </div>
+               </div>
+            </div>
             <div class="row">
                <div class="col-sm-2 labelHeader">Remarks: <span ng-bind-html="FormData.Reamarks"
                      ng-show="IsDataReadOnly && !EditMode"></span>
@@ -511,12 +526,6 @@
                <div class="col-sm-4">
                   <textarea ng-hide="IsDataReadOnly && !EditMode" name="Remarks" type="text"
                      ng-model="FormData.Reamarks" cols="36" rows="3"></textarea>
-               </div>
-               <div ng-show="showPRNumber">
-                  <div class="col-sm-2 labelHeader">PR Number:</div>
-                  <div class="col-sm-2">
-                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PRNumber}}</span>
-                  </div>
                </div>
             </div>
 
@@ -578,6 +587,13 @@
                            <input name="PRNumber" type="number" ng-model="FormData.PRNumber" required></input>
                         </div>
                         <span class="error" ng-show="errors.PRNumber"> {{errors.PRNumber}} </span>
+                     </div>
+                     <div class="row">
+                        <div class="col-sm-1 labelHeader">PR Date: <span style="color: red;">*</span></div>
+                        <div class="col-sm-2">
+                           <input name="PRDate" type="date" ng-model="FormData.PRDate" required></input>
+                        </div>
+                        <span class="error" ng-show="errors.PRDate"> {{errors.PRDate}} </span>
                      </div>
                   </div>
                   <div class="row">
