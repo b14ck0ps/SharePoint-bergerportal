@@ -349,8 +349,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 DEV_ENV && console.log(`CurrentPendingWith: ${CurrentPendingWith}, Total Expected Expenses : ${TotalExpectedExpense}, NextPendingWith: ${NextPendingWith}, CurrentStatus: ${CurrentStatus}, StatusOnApprove: ${StatusOnApprove}`);
 
                                 /*Get The Attachments from `MarketingActivityAttachment` list */
-                                const baseAttachment = getApiEndpoint("MarketingPromomtionalAttachment");
-                                const filterAttachment = `$filter=MarketingPromotionID eq '${RequestId}'`;
+                                const baseAttachment = getApiEndpoint("MarketingPromotionalAttachment");
+                                const filterAttachment = `$filter=MarketingActivityID eq '${RequestId}'`;
                                 const queryAttachment = `$select=ID,Title,AttachmentFiles,Created,Author/Title&$expand=AttachmentFiles,Author`;
 
                                 $http({
@@ -416,7 +416,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 })
                 .catch((e) => { console.log("Error getting information", e) })
                 .finally(() => {
-                    //window.location.href = RedirectOnSubmit;
                 });
             return;
         }
@@ -429,7 +428,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 })
                 .catch((e) => { console.log("Error getting information", e) })
                 .finally(() => {
-                    // window.location.href = RedirectOnSubmit;
                 });
             return;
         }
@@ -473,7 +471,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 DEV_ENV && console.log(`Error saving data: ${message}`);
             })
             .finally(() => {
-                //window.location.href = RedirectOnSubmit;
+                // window.location.href = RedirectOnSubmit;
                 $scope.IsLoading = false;
             });
     }
@@ -533,7 +531,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .catch((e) => { DEV_ENV && console.log(e); })
             .finally(() => {
                 $scope.IsLoading = false;
-                //window.location.href = RedirectOnApprove;
             });
     }
 
@@ -625,7 +622,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .filter((file) => file);
 
         if (filesToUpload.length === 0) {
-            if (StatusOnApprove === ApprovalStatus.Submitted)
+            if (StatusOnApprove === ApprovalStatus.Submitted || StatusOnApprove === ApprovalStatus.Closed)
                 window.location.href = RedirectOnSubmit;
             else
                 window.location.href = RedirectOnApprove;
@@ -635,7 +632,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         try {
             filesToUpload.forEach(async (file) => await AddReceiptInitial(file));
             $scope.IsLoading = true;
-            if (StatusOnApprove === ApprovalStatus.Submitted)
+            if (StatusOnApprove === ApprovalStatus.Submitted || StatusOnApprove === ApprovalStatus.Closed)
                 window.location.href = RedirectOnSubmit;
             else
                 window.location.href = RedirectOnApprove;
@@ -664,7 +661,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             url: url,
             data: {
                 'Title': `MP-${RequestId}`,
-                'MarketingPromotionID': RequestId,
+                'MarketingActivityID': RequestId,
                 '__metadata': { "type": "SP.Data.MarketingPromotionalAttachmentListItem" },
             }
         })
