@@ -457,7 +457,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 const MarketingPromotionalID = response.data.d.ID;
                 RequestId = MarketingPromotionalID;
                 const Title = `MP-${MarketingPromotionalID}`;
-                const UniqueUrl = `${ABS_URL}/SitePages/MarketingActivity.aspx?UniqueId=${crypto.randomUUID()}`;
+                const UniqueUrl = `${ABS_URL}/SitePages/MarketingPromotional.aspx?UniqueId=${crypto.randomUUID()}`;
 
                 /** Saves the request to a SharePoint list `PendingApproval`. @file constants.js */
                 saveAtMyTask(Title, 'MarketingPromotionalActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, ApprovalChain.SOIC ?? ApprovalChain.OPM, UniqueUrl);
