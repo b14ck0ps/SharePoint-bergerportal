@@ -1,0 +1,679 @@
+<link href="../../SiteAssets/MasterPage/bootstrap/css/bootstrap.css" rel="stylesheet" />
+<link href="../../Style Library/CSS/jquery-ui.css" rel="stylesheet" />
+<link href="../../Style Library/CSS/BergerPaintsWorkflow.css" rel="stylesheet" />
+<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<link
+   href="http://www.jqueryscript.net/demo/jQuery-Plugin-For-Multi-Select-List-with-Checkboxes-MultiSelect/jquery.multiselect.css"
+   rel="stylesheet" type="text/css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<script
+   src="http://www.jqueryscript.net/demo/jQuery-Plugin-For-Multi-Select-List-with-Checkboxes-MultiSelect/jquery.multiselect.js"></script>
+
+<script src="../../Style Library/JS/jquery-ui.js" type="text/javascript"></script>
+<script type="text/javascript" src="../../Style Library/JS/jquery.MultiFile.js"></script>
+<script type="text/javascript" src="../../Style Library/JS/angular.min.js"></script>
+<script type="text/javascript" src="../../Style Library/JS/angular-sanitize.js"></script>
+<script src="../../Style Library/JS/constants.js" type="text/javascript"></script>
+<script src="../../Style Library/JS/designationJSON.js" type="text/javascript"></script>
+<script type="text/javascript" src="../../Style Library/JS/MarketingProActivity.Controller.js"></script>
+<script type="text/javascript" src="../../Style Library/JS/multiselect.js"></script>
+
+
+
+<style>
+   .textBoxBGColor {
+      background-color: aliceblue !important;
+   }
+
+   #ui-datepicker-div {
+      width: 21% !important;
+   }
+
+   input[type="date"] {
+      border: 1px solid #ccc;
+      background-color: #f2f2f2;
+      width: 100%;
+      height: 28px;
+      padding: 0px 5px;
+   }
+
+   .spinner-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      /* Center the spinner vertically on the page */
+      position: fixed;
+      /* Position the spinner relative to the viewport */
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.7);
+      /* Add a semi-transparent background to overlay everything */
+      z-index: 9999;
+      /* Set a high z-index value to place it in front */
+   }
+
+
+   .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.3);
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+   }
+
+   input[type=submit] {
+      font-size: 14px;
+      font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+      border-radius: 4px 4px 4px 4px;
+      padding: 5px 10px;
+      background-color: navy !important;
+      color: white;
+      min-width: 110px;
+   }
+
+   input[type=number] {
+      width: 100%;
+      padding: 2px 5px;
+      font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+      border: 1px solid #ABABAB;
+      color: #444;
+      background-color: aliceblue !important;
+      font-size: inherit;
+      line-height: inherit;
+   }
+
+   .error {
+      color: red;
+      font-weight: bold;
+      font-size: small;
+   }
+
+   @keyframes spin {
+      0% {
+         transform: rotate(0deg);
+      }
+
+      100% {
+         transform: rotate(360deg);
+      }
+   }
+</style>
+<!--#region APP MarketingActivityApp Start -->
+<div ng-app="MarketingActivityApp" class="container BlockStockRequest">
+   <div ng-controller="UserController">
+      <div ng-show="IsLoading" ng-class="{ 'spinner-container': spinnerActive  }">
+         <div ng-class="{ 'spinner': spinnerActive  }"></div>
+      </div>
+      <h2>Marketing Promotional Activity</h2>
+      <div ng-hide="IsLoading" class="panel panel-default" id="divRequestorPanel">
+         <div class="panel-body">
+            <div class="row">
+               <h4>Requestor Information</h4>
+            </div>
+            <div class="row">
+               <div class="col-sm-2 labelHeader">Employee Name:</div>
+               <div class="col-sm-2">
+                  <label id="lblEmployeeName">{{UserInfo.EmployeeName}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Employee ID:</div>
+               <div class="col-sm-2">
+                  <label id="lblEmployeeId">{{UserInfo.EmployeeId}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Position:</div>
+               <div class="col-sm-2">
+                  <label id="lblPosition">{{UserInfo.Designation}}</label>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-sm-2 labelHeader">Department:</div>
+               <div class="col-sm-2">
+                  <label id="lblDepartment">{{UserInfo.Department}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Location:</div>
+               <div class="col-sm-2">
+                  <label id="lblLocation">{{UserInfo.OfficeLocation}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Mobile :</div>
+               <div class="col-sm-2">
+                  <label id="lblMobileNo">{{UserInfo.Mobile}}</label>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-sm-2 labelHeader">Email:</div>
+               <div class="col-sm-2">
+                  <label id="lblEmail">{{UserInfo.Email.EMail}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Job Grade:</div>
+               <div class="col-sm-2">
+                  <label ng-model="jobGrade" id="lblJobGrade">{{UserInfo.EmployeeGrade}}</label>
+               </div>
+               <div class="col-sm-2 labelHeader">Request Date:</div>
+               <div class="col-sm-2">
+                  <label id="lblRequestDate"> {{ today | date }}</label>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!--#endregion APP MarketingActivityApp End -->
+
+
+   <!-- #region APP FormController Start -->
+   <div ng-controller="FormController">
+      <div class='row' id="wpiToggleControlBtnDiv">
+         <div class='row col-md-4' ng-If="uniqueId == '' ">
+            <h6 style="color:red">(All fields marked
+               <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label> are mandatory.)
+            </h6>
+         </div>
+         <div class='row col-md-4' ng-If="uniqueId != '' ">
+            <h3 style="color:white">Ref ID # {{requestCode}}</h3>
+         </div>
+      </div>
+      <div class="panel panel-default">
+         <div class="panel-body">
+            <div ng-show="IsLoading" ng-class="{ 'spinner-container': spinnerActive  }">
+               <div ng-class="{ 'spinner': spinnerActive  }"></div>
+            </div>
+            <div id="divInput">
+               <div class="row" style="margin-left: -16px;">
+                  <div class="col-sm-2 labelHeader">Project Name:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="text" ng-model="FormData.ProjectName"
+                        class="textBoxBGColor" id="projectName" name="pName" required />
+                     <span class="error" ng-show="errors.ProjectName"> {{errors.ProjectName}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ProjectName}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">Activity Name:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="activitySelect" ng-model="FormData.ActivityName"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option value="">-- Select Activity Name --</option>
+                        <option value="Shade Card Distribution">Shade Card Distribution</option>
+                        <option value="Executive Diary Purchase">Executive Diary Purchase</option>
+                        <option value="Mass Calender Purchase">Mass Calender Purchase</option>
+                        <option value="Small diary Purchase">Small diary Purchase</option>
+                        <option value="POS materials Purchase">POS materials Purchase</option>
+                        <option value="Painters Training Institute">Painters Training Institute</option>
+                        <option value="On Invoice Painter Scheme Gift">On Invoice Painter Scheme Gift</option>
+                        <option value="Con Promo Gift">Con Promo Gift</option>
+                        <option value="Shade Card Purchase">Shade Card Purchase</option>
+                        <option value="Scratch Card Purchase">Scratch Card Purchase</option>
+                        <option value="Product Demonstrat">Product Demonstrat</option>
+                     </select>
+                     <span class="error" ng-show="errors.ActivityName"> {{errors.ActivityName}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityName}}</span>
+                  </div>
+
+
+                  <div class="col-sm-2 labelHeader">Promotional Item Name:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="promoItemSelect"
+                        ng-model="FormData.PromotionalItemName" class='form-control' required>
+                        <option value="Shade Card Local">Shade Card Local</option>
+                        <option value="Executive Diary">Executive Diary</option>
+                        <option value="Mass Calender">Mass Calender</option>
+                        <option value="Small diary">Small diary</option>
+                        <option value="POSM Production">POSM Production</option>
+                        <option value="PTI Gift">PTI Gift</option>
+                        <option value="Polo T-Shirt">Polo T-Shirt</option>
+                        <option value="Umbrella">Umbrella</option>
+                        <option value="Jacket">Jacket</option>
+                        <option value="Mug">Mug</option>
+                        <option value="Bowl Set">Bowl Set</option>
+                        <option value="Round Neck T-Shirt">Round Neck T-Shirt</option>
+                        <option value="PTI Note pad">PTI Note pad</option>
+                        <option value="Sweater">Sweater</option>
+                        <option value="Gift Box">Gift Box</option>
+                        <option value="Shade Card L/C">Shade Card L/C</option>
+                        <option value="Scratch Card">Scratch Card</option>
+                        <option value="Demo Kit">Demo Kit</option>
+                     </select>
+                     <span class="error" ng-show="errors.PromotionalItemName"> {{errors.PromotionalItemName}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PromotionalItemName}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">Activity Type:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="activityTypeSelect"
+                        ng-model="FormData.ActivityType"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option value="">-- Select Activity Type --</option>
+                        <option value="One time">One time</option>
+                        <option value="Monthly recurring">Monthly recurring</option>
+                     </select>
+                     <span class="error" ng-show="errors.ActivityType"> {{errors.ActivityType}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityType}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">Expense Type:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="expenseTypeSelect"
+                        ng-model="FormData.TypeofExpense"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option value="">-- Select Expense Type --</option>
+                        <option value="EXPENSE">EXPENSE</option>
+                        <option value="INVENTORY">INVENTORY</option>
+                     </select>
+                     <span class="error" ng-show="errors.TypeofExpense"> {{errors.TypeofExpense}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.TypeofExpense}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">Budget Type:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="expenseTypeSelect"
+                        ng-model="FormData.AvaiableBudget"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option value="">-- Select Budget Type --</option>
+                        <option value="Available Budget">Available Budget</option>
+                        <option value="Need to transfer">Need to transfer</option>
+                        <option value="Supplementary">Supplementary</option>
+                     </select>
+                     <span class="error" ng-show="errors.AvaiableBudget"> {{errors.AvaiableBudget}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.AvaiableBudget}}</span>
+                  </div>
+                  <div class="col-sm-2 labelHeader">Cost Head(GL):
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="costHeadSelect" ng-model="FormData.CostHead"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option value="">-- Select Cost Head --</option>
+                        <option value="Consumer promotions - Activation Program">Consumer promotions - Activation
+                           Program</option>
+                        <option value="Consumer promotions - gift & other Benfit">Consumer promotions - gift & other
+                           Benfit</option>
+                        <option value="Consumption Promo - IMP">Consumption Promo - IMP</option>
+                        <option value="Consumption Promo - IND">Consumption Promo - IND</option>
+                        <option value="Corporate - Executive Diary">Corporate - Executive Diary</option>
+                        <option value="Corporate - mass calender">Corporate - mass calender</option>
+                        <option value="Corporate - small diary">Corporate - small diary</option>
+                        <option value="Painter promotion - Loyalty & Target Based">Painter promotion - Loyalty & Target
+                           Based</option>
+                        <option value="Painter promotion - scratch card">Painter promotion - scratch card</option>
+                        <option value="Painters Training Institute">Painters Training Institute</option>
+                        <option value="Printed materials - manual">Printed materials - manual</option>
+                        <option value="Printed materials - POS materials">Printed materials - POS materials</option>
+                        <option value="Shade Card">Shade Card</option>
+                        <option value="Shade Card - industrial">Shade Card - industrial</option>
+                        <option value="Shade Card - marine">Shade Card - marine</option>
+                        <option value="Shade Card - PC & PTC">Shade Card - PC & PTC</option>
+                     </select>
+                     <span class="error" ng-show="errors.CostHead"> {{errors.CostHead}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CostHead}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">Brand Description (IO):
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="costHeadSelect"
+                        ng-model="FormData.BrandDescription"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option value="">-- Select Brand Description --</option>
+                        <option value="Adhesive - Power Bond">Adhesive - Power Bond</option>
+                        <option value="Adhesive - Tex Bond">Adhesive - Tex Bond</option>
+                        <option value="APE">APE</option>
+                        <option value="Auto Refinish">Auto Refinish</option>
+                        <option value="Berger Experience Zone (Decorative)">Berger Experience Zone (Decorative)</option>
+                        <option value="BREATHE EASY">BREATHE EASY</option>
+                        <option value="BREATHE EASY - Ena">BREATHE EASY - Ena</option>
+                        <option value="Color Bank">Color Bank</option>
+                        <option value="Coporate Brand">Coporate Brand</option>
+                        <option value="Damp Guard">Damp Guard</option>
+                        <option value="Decorative">Decorative</option>
+                        <option value="DUROCEM">DUROCEM</option>
+                        <option value="EASY CLEAN">EASY CLEAN</option>
+                        <option value="Home Decor Branding">Home Decor Branding</option>
+                        <option value="Industrial Paints">Industrial Paints</option>
+                        <option value="INNOVA">INNOVA</option>
+                        <option value="JHILIK">JHILIK</option>
+                        <option value="LS. Metallic Finish">LS. Metallic Finish</option>
+                        <option value="LSE">LSE</option>
+                        <option value="Marine Paints">Marine Paints</option>
+                        <option value="Mr. EXPERT DAMP GUARD">Mr. EXPERT DAMP GUARD</option>
+                        <option value="Painters App">Painters App</option>
+                        <option value="Powder Coating">Powder Coating</option>
+                        <option value="PRE TREATMENT CHEM">PRE TREATMENT CHEM</option>
+                        <option value="Printing Ink">Printing Ink</option>
+                        <option value="REX">REX</option>
+                        <option value="RIN">RIN</option>
+                        <option value="RIN">RIN</option>
+                        <option value="ROBB WALL PUTTY">ROBB WALL PUTTY</option>
+                        <option value="ROBB WATER SEALER">ROBB WATER SEALER</option>
+                        <option value="RSE">RSE</option>
+                        <option value="Salt Safe">Salt Safe</option>
+                        <option value="SPD">SPD</option>
+                        <option value="Touch Putty (Decorative)">Touch Putty (Decorative)</option>
+                        <option value="Value Club App, LMS, Happy Wallet, MR/VR">Valye Club App, LMS, Happy Wallet,
+                           MR/VR</option>
+                        <option value="Vehicle Refinish">Vehicle Refinish</option>
+                        <option value="W/C ANTIDIRT">W/C ANTIDIRT</option>
+                        <option value="W/C ANTIDIRT LONGIF">W/C ANTIDIRT LONGIF</option>
+                        <option value="W/C ANTIDIRT LONGLIFE(F167)">W/C ANTIDIRT LONGLIFE(F167)</option>
+                        <option value="W/C Antidirt Supreme">W/C Antidirt Supreme</option>
+                        <option value="W/C EXTERIOR SEALER">W/C EXTERIOR SEALER</option>
+                        <option value="W/C SMOOTH">W/C SMOOTH</option>
+                        <option value="W/C GLOW">W/C GLOW</option>
+                        <option value="WEATHER COAT EXTERIOR SEALER">WEATHER COAT EXTERIOR SEALER</option>
+                        <option value="Wood Coating / Innova">Wood Coating / Innova</option>
+                        <option value="WOOD KEEPER">WOOD KEEPER</option>
+                        <option value="Xpress Sealer (Decorative)">Xpress Sealer (Decorative)</option>
+                     </select>
+                     <span class="error" ng-show="errors.BrandDescription"> {{errors.BrandDescription}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BrandDescription}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">Commitment Item Descqription:
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                     <span class="error" ng-show="errors.BrandDescription"> {{errors.BrandDescription}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BrandDescription}}</span>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="expenseTypeSelect"
+                        ng-model="FormData.CommitmentItem"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option value="">-- Select Commitment Item --</option>
+                        <option value="Con Pro_campaign Actv Cost">Con Pro_campaign Actv Cost</option>
+                        <option value="Corporate - Other">Corporate - Other</option>
+                        <option value="PTI Gift">PTI Gift</option>
+                        <option value="SC Production Cost">SC Production Cost</option>
+                        <option value="Shomporko Scheme_On Invoice">Shomporko Scheme_On Invoice</option>
+                        <option value="Mass Calender Production">Mass Calender Production</option>
+                        <option value="Exec. Diary Prod.">Exec. Diary Prod.</option>
+                        <option value="Small Diary Prod.">Small Diary Prod.</option>
+                        <option value="Shade Card Mgt">Shade Card Mgt</option>
+                        <option value="POSM Print">POSM Print</option>
+                     </select>
+                     <span class="error" ng-show="errors.CommitmentItem"> {{errors.CommitmentItem}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CommitmentItem}}</span>
+                  </div>
+               </div>
+               <div class="col-sm-2 labelHeader">Quantity: pcs
+                  <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input ng-hide="IsDataReadOnly && !EditMode" type="number" ng-model="FormData.Quantity"
+                     class="textBoxBGColor" valid-number title="Please Fill in with a numerical value only"
+                     ng-init="Quantity='0'" id="Quantity" required />
+                  <span class="error" ng-show="errors.Quantity"> {{errors.Quantity}} </span>
+                  <span ng-show="IsDataReadOnly && !EditMode">{{FormData.Quantity}}</span>
+               </div>
+               <div class="col-sm-2 labelHeader">Expected Price Per Unit:
+                  <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input ng-hide="IsDataReadOnly && !EditMode" type="number" ng-model="FormData.ExpectedPricePerUnit"
+                     class="textBoxBGColor" valid-number title="Please Fill in with a numerical value only"
+                     ng-init="ExpectedPricePerUnit='0'" id="ExpectedPricePerUnit" required />
+                  <span class="error" ng-show="errors.ExpectedPricePerUnit"> {{errors.ExpectedPricePerUnit}} </span>
+                  <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ExpectedPricePerUnit |
+                     currency:"৳"}}</span>
+               </div>
+
+               <div class="col-sm-2 labelHeader">Total Expected Expenses:
+                  <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input ng-hide="IsDataReadOnly && !EditMode" type="number" ng-model="FormData.TotalExpectedExpense"
+                     class="textBoxBGColor" valid-number title="Please Fill in with a numerical value only"
+                     ng-init="TotalExpectedExpense='0'" id="TotalExpectedExpense" required />
+                  <span class="error" ng-show="errors.TotalExpectedExpense"> {{errors.TotalExpectedExpense}} </span>
+                  <span ng-show="IsDataReadOnly && !EditMode">{{FormData.TotalExpectedExpense |
+                     currency:"৳"}}</span>
+               </div>
+            </div>
+
+            <div class="row">
+               <div class="col-sm-2 labelHeader">Activity Start Date:
+                  <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ActivityStartDate"
+                     class="textBoxBGColor" id="activityStartDate" required />
+                  <span class="error" ng-show="errors.ActivityStartDate"> {{errors.ActivityStartDate}} </span>
+                  <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityStartDate | date}}</span>
+               </div>
+
+               <div class="col-sm-2 labelHeader">Expected Material receiving Date:
+                  <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input ng-hide="IsDataReadOnly && !EditMode" type="date" ng-model="FormData.ExpectedReceivingDate"
+                     class="textBoxBGColor" id="ExpectedReceivingDate" required />
+                  <span class="error" ng-show="errors.ExpectedReceivingDate"> {{errors.ExpectedReceivingDate}} </span>
+                  <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ExpectedReceivingDate | date}}</span>
+               </div>
+            </div>
+
+            <div class="row">
+
+               <div class="col-sm-2 labelHeader">Expenses Receiving Month:
+                  <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input ng-hide="IsDataReadOnly && !EditMode" type="month" ng-model="FormData.ExpenseReceivingDate"
+                     class="textBoxBGColor" id="expensesReceivingMonth" required />
+                  <span class="error" ng-show="errors.ExpenseReceivingDate"> {{errors.ExpenseReceivingDate}} </span>
+                  <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ExpenseReceivingDate | date}}</span>
+               </div>
+
+               <div class="col-sm-2 labelHeader">Consuming Month:
+                  <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <input ng-hide="IsDataReadOnly && !EditMode" type="month" ng-model="FormData.ConsumingDate"
+                     class="textBoxBGColor" id="consumingMonth" required />
+                  <span class="error" ng-show="errors.ConsumingDate"> {{errors.ConsumingDate}} </span>
+                  <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ConsumingDate | date}}</span>
+               </div>
+
+               <div class="col-sm-2 labelHeader">Number of vendor require for Quotation:
+                  <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+               </div>
+               <div class="col-sm-2">
+                  <select ng-hide="IsDataReadOnly && !EditMode" name="requiredVendorQuotation"
+                     id="selectRequiredVendorQuotation" ng-model="FormData.VendorNumber"
+                     class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                     <option value="">-- Select vendor for Quotation --</option>
+                     <option value="Minimum 3 parties">Minimum 3 parties</option>
+                     <option value="Single Vendor">Single Vendor</option>
+                  </select>
+                  <span class="error" ng-show="errors.VendorNumber"> {{errors.VendorNumber}}
+                  </span>
+                  <span ng-show="IsDataReadOnly && !EditMode">{{FormData.VendorNumber}}</span>
+               </div>
+
+
+            </div>
+
+            <div class="row">
+               <div ng-show="showPRNumber">
+                  <div class="col-sm-2 labelHeader">PR Number:</div>
+                  <div class="col-sm-2">
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PRNumber}}</span>
+                  </div>
+               </div>
+               <div ng-show="showPRNumber">
+                  <div class="col-sm-2 labelHeader">PR Date:</div>
+                  <div class="col-sm-2">
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PRDate | date}}</span>
+                  </div>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-sm-2 labelHeader">Remarks: <span ng-bind-html="FormData.Reamarks"
+                     ng-show="IsDataReadOnly && !EditMode"></span>
+               </div>
+               <div class="col-sm-4">
+                  <textarea ng-hide="IsDataReadOnly && !EditMode" name="Remarks" type="text"
+                     ng-model="FormData.Reamarks" cols="36" rows="3"></textarea>
+               </div>
+            </div>
+
+            <div ng-hide="IsRejectedOrCompleted">
+               <div class="row panel-body">
+                  <h4 class="panel-body">Attachments/Receipts:</h4>
+               </div>
+               <div id="divChooseAttachmentFile" class="row panel-body">
+                  <div class="col-sm-2 labelHeader">
+                     <h6>Select All Attachments:</h6>
+                  </div>
+                  <div class="files col-sm-6 row" id="attachFilesContainer" ng-model="attachment1">
+                     <input id="infringementFiles" type="file" class="multi browsebtn textBoxBGColor"
+                        title="Any attachment name including any special charecter like ' & . will not be uploded" />
+                  </div>
+                  <div class="col-sm-4" ng-show='vm.uniqueId !=""'>
+                     <span class='et-right et-style-night'>N.B. Any attachment name including any special
+                        charecter
+                        e.g.<label class='redStar'>" ', . @ ` ~ " </label>will not be uploded.</span>
+                  </div>
+               </div>
+            </div>
+            <div id="divAttachmentDisplayTbl" class="row" style="padding-left: 15px; overflow:hidden;"
+               ng-hide='uId == ""||status==""||hideAttachmentDiv = "true"'>
+               <div class="table-responsive panel-body" style="overflow-x:auto;">
+                  <table id="tblReceipt" class="table css-serial">
+                     <tbody>
+                        <tr>
+                           <th id="">SL#</th>
+                           <th id="thReceipt">View Attachment</th>
+                           <th id="thAttachted">Attached By</th>
+                           <th id="thDate">Attachment Date</th>
+                           <th id="thDelete" ng-hide="readMode == 'read' || status=='Completed'"></th>
+                        </tr>
+                     </tbody>
+                     <tbody>
+                        <tr ng-repeat="(i,receiptRow) in receiptRows">
+                           <td id="tdSlNo"></td>
+                           <td id="tdReceipt"><a
+                                 href="{{receiptRow.AttachmentFiles.results[0].ServerRelativeUrl}}">{{receiptRow.AttachmentFiles.results[0].FileName}}</a>
+                           </td>
+                           <td id="tdAttachted">{{receiptRow.Author.Title}}</td>
+                           <td id="tdDate">{{receiptRow.Created | date}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <strong style="text-align: center;" ng-show="receiptRows.length === 0">No Attachment</strong>
+               </div>
+            </div>
+            <div id="divActionButtonPanel" class="panel panel-default" ng-hide="IsRejectedOrCompleted">
+               <div class="panel-body">
+                  <!-- Final Approver Fields -->
+                  <div ng-show="isFinalApprover">
+                     <div class="row">
+                     </div>
+                     <div class="row">
+                        <div class="col-sm-1 labelHeader">PR Number: <span style="color: red;">*</span></div>
+                        <div class="col-sm-2">
+                           <input name="PRNumber" type="number" ng-model="FormData.PRNumber" required></input>
+                        </div>
+                        <span class="error" ng-show="errors.PRNumber"> {{errors.PRNumber}} </span>
+                     </div>
+                     <div class="row">
+                        <div class="col-sm-1 labelHeader">PR Date: <span style="color: red;">*</span></div>
+                        <div class="col-sm-2">
+                           <input name="PRDate" type="date" ng-model="FormData.PRDate" required></input>
+                        </div>
+                        <span class="error" ng-show="errors.PRDate"> {{errors.PRDate}} </span>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-sm-1 labelHeader comment">Comment:</div>
+                     <div class="col-sm-4">
+                        <textarea name="actionComment" ng-model="actionComment" cols="36" rows="3"></textarea>
+                     </div>
+                     <div class="col-sm-7">
+                        <div class=" row">
+                           <div class="col-sm-2">
+                              <input type="button" id="btnsubmit" value="Submit" ng-show="showSaveOrSubmitBtn"
+                                 ng-click="clickSaveOrSubmit('Submitted')" ng-disabled="form.$invalid" />
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="button" id="btnClosed" value="Closed" ng-show="showCloseBtn"
+                                 ng-click="clickSaveOrSubmit('Closed')" />
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-sm-2">
+                              <input type="button" id="btnApprove" value="Approve" ng-click="ApproverAction('Approved')"
+                                 ng-show="showApproveBtn" />
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="button" id="btnReject" value="Reject" ng-click="ApproverAction('Rejected')"
+                                 ng-show="showRejectBtn">
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="button" id="btnChange" value="Request Change"
+                                 ng-click="ApproverAction('Changed')" ng-show="showChangeBtn" />
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="panel panel-default" id="divErrorPanel" ng-show="showStatus">
+               <div class="panel-body">
+                  <div id="status" ng-style="{'font-weight': bold, 'color': textColor}" ng-bind="statusText">
+                  </div>
+               </div>
+            </div>
+            <div class="panel-body" id="divAuditPanel" ng-hide='status==""'>
+               <div class="row">
+                  <h4>Approval History</h4>
+               </div>
+               <div class="row">
+                  <div class="col-sm-2 labelHeader">Pending With:</div>
+                  <div class="col-sm-2">
+                     <label id="lblPendingWith">{{pendingWithName}}</label>
+                  </div>
+               </div>
+               <div class="table-responsive" style="overflow-x:auto;">
+                  <table id="tblAudit" class="table css-serial">
+                     <tbody>
+                        <tr>
+                           <th>SL#</th>
+                           <th>Approval Date</th>
+                           <th>Status</th>
+                           <th>Action By</th>
+                           <th>Comment</th>
+                        </tr>
+                     </tbody>
+                     <tbody>
+                        <tr ng-repeat="(i,audit) in auditHistory">
+                           <td></td>
+                           <td>{{audit.Created | date}}</td>
+                           <td>{{audit.Status}}</td>
+                           <td>{{audit.Author.Title}}</td>
+                           <td>
+                              <p ng-bind-html="audit.Comment"></p>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- #endregion APP FormController end -->
+</div>
+</div>
