@@ -426,8 +426,7 @@
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input ng-hide="IsDataReadOnly && !EditMode" type="number"
-                      ng-model="FormData.TotalExpectedExpense"
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="number" ng-model="FormData.TotalExpectedExpense"
                         class="textBoxBGColor" valid-number title="Please Fill in with a numerical value only"
                         ng-init="TotalExpectedExpense='0'" id="TotalExpectedExpense" readonly />
                      <span class="error" ng-show="errors.TotalExpectedExpense"> {{errors.TotalExpectedExpense}} </span>
@@ -511,6 +510,27 @@
                      </div>
                   </div>
                </div>
+
+               <div class="row">
+                  <div ng-hide="IsDataReadOnly" style="display: flex; flex-direction: column-reverse;">
+                     <div>
+                        <div class="col-sm-2 labelHeader">
+                           <h6>Select All Attachments:</h6>
+                        </div>
+                        <div class="files col-sm-6 row" id="ReqAttachFilesContainer" ng-model="attachment1">
+                           <input style=" margin-left: 18px" id="RecInfringementFiles" type="file"
+                              class="multi browsebtn textBoxBGColor"
+                              title="Any attachment name including any special charecter like ' & . will not be uploded" />
+                        </div>
+                     </div>
+                     <div style="color: red; font-size: small; margin-left: 310px;"><strong>Attention:</strong> Attach
+                        additional
+                        information for multiple
+                        Brand
+                        and Commitment Items.</div>
+                  </div>
+               </div>
+
                <div class="row">
                   <div class="col-sm-2 labelHeader">Remarks: <span ng-bind-html="FormData.Reamarks"
                         ng-show="IsDataReadOnly && !EditMode"></span>
@@ -519,7 +539,37 @@
                      <textarea ng-hide="IsDataReadOnly && !EditMode" name="Remarks" type="text"
                         ng-model="FormData.Reamarks" cols="36" rows="3"></textarea>
                   </div>
-
+               </div>
+               <div class="row panel-body">
+                  <h4 class="panel-body">Attachments/Receipts for Multiple Brand and Commitment Items:</h4>
+               </div>
+               <div id="divAttachmentDisplayTbl" class="row" style="padding-left: 15px; overflow:hidden;"
+                  ng-hide='uId == ""||status==""||hideAttachmentDiv = "true"'>
+                  <div class="table-responsive panel-body" style="overflow-x:auto;">
+                     <table id="tblReceipt" class="table css-serial">
+                        <tbody>
+                           <tr>
+                              <th id="">SL#</th>
+                              <th id="thReceipt">View Attachment</th>
+                              <th id="thAttachted">Attached By</th>
+                              <th id="thDate">Attachment Date</th>
+                              <th id="thDelete" ng-hide="readMode == 'read' || status=='Completed'"></th>
+                           </tr>
+                        </tbody>
+                        <tbody>
+                           <tr ng-repeat="(i,receiptRow) in receiptRows"
+                              ng-if="receiptRow.AttachmentType === 'requester' ">
+                              <td id="tdSlNo"></td>
+                              <td id="tdReceipt"><a
+                                    href="{{receiptRow.AttachmentFiles.results[0].ServerRelativeUrl}}">{{receiptRow.AttachmentFiles.results[0].FileName}}</a>
+                              </td>
+                              <td id="tdAttachted">{{receiptRow.Author.Title}}</td>
+                              <td id="tdDate">{{receiptRow.Created | date}}</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <strong style="text-align: center;" ng-show="receiptRows.length === 0">No Attachment</strong>
+                  </div>
                </div>
 
                <div ng-hide="IsRejectedOrCompleted">
@@ -555,7 +605,8 @@
                            </tr>
                         </tbody>
                         <tbody>
-                           <tr ng-repeat="(i,receiptRow) in receiptRows">
+                           <tr ng-repeat="(i,receiptRow) in receiptRows"
+                              ng-if="receiptRow.AttachmentType === 'general' ">
                               <td id="tdSlNo"></td>
                               <td id="tdReceipt"><a
                                     href="{{receiptRow.AttachmentFiles.results[0].ServerRelativeUrl}}">{{receiptRow.AttachmentFiles.results[0].FileName}}</a>
