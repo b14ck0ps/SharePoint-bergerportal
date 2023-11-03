@@ -274,7 +274,8 @@
                      <select ng-hide="IsDataReadOnly && !EditMode" name="brandDescription" id="BrandDescription"
                         ng-model="FormData.BrandDescription"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                        <option ng-repeat="brand in brands" value="{{brand.value}}">{{brand.label}}</option>
+                        <option ng-repeat="brand in brands" value="{{brand.value}}">{{brand.label}} - {{brand.number}}
+                        </option>
                      </select>
                      <span class="error" ng-show="errors.BrandDescription"> {{errors.BrandDescription}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BrandDescription}}</span>
@@ -287,7 +288,8 @@
                      <select ng-hide="IsDataReadOnly && !EditMode" name="commitmentItem" id="selectCommitmentItem"
                         ng-model="FormData.CommitmentItem"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                        <option ng-repeat="item in commitmentItems" value="{{item.value}}">{{item.label}}</option>
+                        <option ng-repeat="item in commitmentItems" value="{{item.value}}">{{item.label}} -
+                           {{item.number}} </option>
                      </select>
                      <span class="error" ng-show="errors.CommitmentItem"> {{errors.CommitmentItem}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CommitmentItem}}</span>
