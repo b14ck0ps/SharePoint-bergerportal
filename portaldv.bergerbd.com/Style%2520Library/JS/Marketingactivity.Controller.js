@@ -884,6 +884,11 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             isValid = false;
         }
 
+        if (formData.ActivityStartDate < new Date()) {
+            $scope.errors.ActivityStartDate = 'Please Select a Future Date';
+            isValid = false;
+        }
+
         if (formData.ServiceReceivingDate === undefined) {
             $scope.errors.ServiceReceivingDate = 'Please Select a valid Service Receiving Date';
             isValid = false;
