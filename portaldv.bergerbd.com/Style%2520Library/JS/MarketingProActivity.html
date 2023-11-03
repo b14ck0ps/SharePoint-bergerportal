@@ -205,6 +205,7 @@
                   </div>
                   <div class="col-sm-2">
                      <select ng-hide="IsDataReadOnly && !EditMode" id="activitySelect" ng-model="FormData.ActivityName"
+                        ng-change="MapPromotionalItemName()"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
                         <option value="">-- Select Activity Name --</option>
                         <option value="Shade Card Distribution">Shade Card Distribution</option>
@@ -222,21 +223,44 @@
                      <span class="error" ng-show="errors.ActivityName"> {{errors.ActivityName}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityName}}</span>
                   </div>
-               </div>
-               <div class="row">
-                  <div class="col-sm-2 labelHeader">Activity Type:
+                  <div class="col-sm-2 labelHeader">Promotional Item Name:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly && !EditMode" id="activityTypeSelect"
-                        ng-model="FormData.ActivityType"
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="activitySelect"
+                        ng-model="FormData.PromotionalItemName" ng-change="MapCostHead()"
+                        ng-disabled="PromotionalItemDropdownList == undefined || PromotionalItemDropdownList.length == 0"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                        <option value="">-- Select Activity Type --</option>
-                        <option value="One time">One time</option>
-                        <option value="Monthly recurring">Monthly recurring</option>
+                        <option value="">-- Select Promotional Item Name --</option>
+                        <option ng-repeat="Item in PromotionalItemDropdownList" value="{{Item}}">{{Item}}</option>
                      </select>
-                     <span class="error" ng-show="errors.ActivityType"> {{errors.ActivityType}} </span>
-                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityType}}</span>
+                     <span class="error" ng-show="errors.PromotionalItemName"> {{errors.PromotionalItemName}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PromotionalItemName}}</span>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-2 labelHeader">Cost Head(GL):
+                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
+                  </div>
+                  <div class="col-sm-2">
+                     <select ng-change="GetGLNo()" ng-hide="IsDataReadOnly && !EditMode" id="selectedCostHead"
+                        ng-model="FormData.CostHead"
+                        ng-disabled="costHeadDropdownList == undefined || costHeadDropdownList.length == 0"
+                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
+                        <option value="">-- Select Cost Head --</option>
+                        <option ng-repeat="costHead in costHeadDropdownList" value="{{costHead}}">{{costHead}}
+                        </option>
+                     </select>
+                     <span class="error" ng-show="errors.CostHead"> {{errors.CostHead}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CostHead}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">GL No.:
+                  </div>
+                  <div class="col-sm-2">
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="text" ng-model="GLCode" class="textBoxBGColor"
+                        name="pName" readonly />
+                     <span ng-show="IsDataReadOnly && !EditMode">{{GLCode}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Expense Type:
@@ -254,6 +278,9 @@
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.TypeofExpense}}</span>
                   </div>
 
+
+               </div>
+               <div class="row">
                   <div class="col-sm-2 labelHeader">Budget Type:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
@@ -269,37 +296,19 @@
                      <span class="error" ng-show="errors.AvaiableBudget"> {{errors.AvaiableBudget}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.AvaiableBudget}}</span>
                   </div>
-               </div>
-               <div class="row">
-                  <div class="col-sm-2 labelHeader">Cost Head(GL):
+                  <div class="col-sm-2 labelHeader">Activity Type:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly && !EditMode" id="costHeadSelect" ng-model="FormData.CostHead"
+                     <select ng-hide="IsDataReadOnly && !EditMode" id="activityTypeSelect"
+                        ng-model="FormData.ActivityType"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                        <option value="">-- Select Cost Head --</option>
-                        <option value="Consumer promotions - Activation Program">Consumer promotions - Activation
-                           Program</option>
-                        <option value="Consumer promotions - gift & other Benfit">Consumer promotions - gift & other
-                           Benfit</option>
-                        <option value="Consumption Promo - IMP">Consumption Promo - IMP</option>
-                        <option value="Consumption Promo - IND">Consumption Promo - IND</option>
-                        <option value="Corporate - Executive Diary">Corporate - Executive Diary</option>
-                        <option value="Corporate - mass calender">Corporate - mass calender</option>
-                        <option value="Corporate - small diary">Corporate - small diary</option>
-                        <option value="Painter promotion - Loyalty & Target Based">Painter promotion - Loyalty & Target
-                           Based</option>
-                        <option value="Painter promotion - scratch card">Painter promotion - scratch card</option>
-                        <option value="Painters Training Institute">Painters Training Institute</option>
-                        <option value="Printed materials - manual">Printed materials - manual</option>
-                        <option value="Printed materials - POS materials">Printed materials - POS materials</option>
-                        <option value="Shade Card">Shade Card</option>
-                        <option value="Shade Card - industrial">Shade Card - industrial</option>
-                        <option value="Shade Card - marine">Shade Card - marine</option>
-                        <option value="Shade Card - PC & PTC">Shade Card - PC & PTC</option>
+                        <option value="">-- Select Activity Type --</option>
+                        <option value="One time">One time</option>
+                        <option value="Monthly recurring">Monthly recurring</option>
                      </select>
-                     <span class="error" ng-show="errors.CostHead"> {{errors.CostHead}} </span>
-                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CostHead}}</span>
+                     <span class="error" ng-show="errors.ActivityType"> {{errors.ActivityType}} </span>
+                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityType}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Brand Description (IO):
@@ -363,6 +372,8 @@
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BrandDescription}}</span>
                   </div>
 
+               </div>
+               <div class="row">
                   <div class="col-sm-2 labelHeader">Commitment Item Descqription:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                      <span class="error" ng-show="errors.BrandDescription"> {{errors.BrandDescription}} </span>
@@ -387,8 +398,6 @@
                      <span class="error" ng-show="errors.CommitmentItem"> {{errors.CommitmentItem}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CommitmentItem}}</span>
                   </div>
-               </div>
-               <div class="row">
                   <div class="col-sm-2 labelHeader">Quantity: pcs
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
@@ -410,7 +419,9 @@
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ExpectedPricePerUnit |
                         currency:"৳"}}</span>
                   </div>
+               </div>
 
+               <div class="row">
                   <div class="col-sm-2 labelHeader">Total Expected Expenses:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
@@ -422,9 +433,6 @@
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.TotalExpectedExpense |
                         currency:"৳"}}</span>
                   </div>
-               </div>
-
-               <div class="row">
                   <div class="col-sm-2 labelHeader">Activity Start Date:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
@@ -503,36 +511,6 @@
                   </div>
                </div>
                <div class="row">
-                  <div class="col-sm-2 labelHeader">Promotional Item Name:
-                     <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
-                  </div>
-                  <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly && !EditMode" id="promoItemSelect"
-                        ng-model="FormData.PromotionalItemName"
-                        class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required
-                        multiple>
-                        <option value="Shade Card Local">Shade Card Local</option>
-                        <option value="Executive Diary">Executive Diary</option>
-                        <option value="Mass Calender">Mass Calender</option>
-                        <option value="Small diary">Small diary</option>
-                        <option value="POSM Production">POSM Production</option>
-                        <option value="PTI Gift">PTI Gift</option>
-                        <option value="Polo T-Shirt">Polo T-Shirt</option>
-                        <option value="Umbrella">Umbrella</option>
-                        <option value="Jacket">Jacket</option>
-                        <option value="Mug">Mug</option>
-                        <option value="Bowl Set">Bowl Set</option>
-                        <option value="Round Neck T-Shirt">Round Neck T-Shirt</option>
-                        <option value="PTI Note pad">PTI Note pad</option>
-                        <option value="Sweater">Sweater</option>
-                        <option value="Gift Box">Gift Box</option>
-                        <option value="Shade Card L/C">Shade Card L/C</option>
-                        <option value="Scratch Card">Scratch Card</option>
-                        <option value="Demo Kit">Demo Kit</option>
-                     </select>
-                     <span class="error" ng-show="errors.PromotionalItemName"> {{errors.PromotionalItemName}} </span>
-                     <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PromotionalItemName}}</span>
-                  </div>
                   <div class="col-sm-2 labelHeader">Remarks: <span ng-bind-html="FormData.Reamarks"
                         ng-show="IsDataReadOnly && !EditMode"></span>
                   </div>

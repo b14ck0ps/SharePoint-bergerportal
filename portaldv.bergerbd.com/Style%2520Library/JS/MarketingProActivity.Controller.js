@@ -215,6 +215,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     /** All Concrete Data comming from @file Marketingactivity.Data.js */
 
     $scope.selectedOptions = []
+
+    $scope.MapPromotionalItemName = (e) => getPromotionalItemNames(e);
+    $scope.MapCostHead = (e) => getCostHead(e);
+    $scope.GetGLNo = (e) => GetGLCode(e);
     $scope.ApproverAction = (Action) => { UpdateApproveStatus(Action); }
     $scope.clickSaveOrSubmit = (status) => { saveOrSubmit(status); }
 
@@ -370,10 +374,13 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                     .catch((e) => DEV_ENV && console.log("Error getting user information", e))
 
                                 if (EditMode) {
+                                    $scope.MapCostHead(EditMode);
+                                    $scope.MapPromotionalItemName(EditMode);
                                     /* Button Config */
                                     $scope.showSaveOrSubmitBtn = $scope.EditMode = true;
                                     $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = false;
                                 }
+                                $scope.GetGLNo();
                                 $scope.IsLoading = false
                             });
                     })
@@ -400,6 +407,69 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         }
     };
 
+
+    /**
+     * Retrieves cost head from a SharePoint list `MarketingActivityMapper` based on `$scope.selectedActivity` and populates the `Cost Head` dropdown.
+     * @param {boolean} IsCalledBySystem - If `true` then `Cost Head` will be set to the data comming from the API.
+     * @description IsCalledBySystem `false` means This function is called by the The user. So, `Cost Head` will be set to empty string.
+     * @returns {void}
+     */
+    const getCostHead = (IsCalledBySystem) => {
+
+        const base = getApiEndpoint("MarketingPromotionalMapper");
+        const filter = `$filter=PromotionalItem eq '${$scope.FormData.PromotionalItemName}'`;
+        const query = `$select=CostHead`;
+
+        $scope.IsLoading = true;
+        $http({
+            method: "GET",
+            url: `${base}?${filter}&${query}`,
+            headers: API_GET_HEADERS
+        })
+            .then((response) => {
+                IsCalledBySystem ? null : $scope.FormData.CostHead = '';
+                $scope.costHeadDropdownList = response.data.d.results.map((item) => item.CostHead)
+            })
+            .catch((e) => DEV_ENV && console.log("Error getting user information", e))
+            .finally(() => $scope.IsLoading = false);
+    }
+
+    const getPromotionalItemNames = (IsCalledBySystem) => {
+
+        const base = getApiEndpoint("MarketingPromotionalMapper");
+        const filter = `$filter=ActivityName eq '${$scope.FormData.ActivityName}'`;
+        const query = `$select=PromotionalItem`;
+        $scope.IsLoading = true;
+        $http({
+            method: "GET",
+            url: `${base}?${filter}&${query}`,
+            headers: API_GET_HEADERS
+        })
+            .then((response) => {
+                IsCalledBySystem ? null : $scope.FormData.PromotionalItem = '';
+                $scope.PromotionalItemDropdownList = response.data.d.results.map((item) => item.PromotionalItem)
+            })
+            .catch((e) => DEV_ENV && console.log("Error getting user information", e))
+            .finally(() => $scope.IsLoading = false);
+    }
+    const GetGLCode = (IsCalledBySystem) => {
+
+        const base = getApiEndpoint("MarketingPromotionalMapper");
+        const filter = `$filter=CostHead eq '${$scope.FormData.CostHead}'`;
+        const query = `$select=GLCode`;
+
+        $scope.IsLoading = true;
+        $http({
+            method: "GET",
+            url: `${base}?${filter}&${query}`,
+            headers: API_GET_HEADERS
+        })
+            .then((response) => {
+                $scope.GLCode = response.data.d.results[0].GLCode;
+            })
+            .catch((e) => DEV_ENV && console.log("Error getting user information", e))
+            .finally(() => $scope.IsLoading = false);
+    }
     /**
      * Saves the form data to a SharePoint list `MarketingActivity`.
      * @param {string} status Status of the form (Save or Submit)
