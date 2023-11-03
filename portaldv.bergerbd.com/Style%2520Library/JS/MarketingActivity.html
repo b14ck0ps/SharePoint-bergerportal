@@ -218,7 +218,8 @@
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <select ng-hide="IsDataReadOnly && !EditMode" id="selectedCostHead" ng-model="FormData.CostHead"
+                     <select ng-change="GetGLNo()" ng-hide="IsDataReadOnly && !EditMode" id="selectedCostHead"
+                        ng-model="FormData.CostHead"
                         ng-disabled="costHeadDropdownList == undefined || costHeadDropdownList.length == 0"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
                         <option value="">-- Select Cost Head --</option>
@@ -227,6 +228,14 @@
                      </select>
                      <span class="error" ng-show="errors.CostHead"> {{errors.CostHead}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CostHead}}</span>
+                  </div>
+
+                  <div class="col-sm-2 labelHeader">GL No.:
+                  </div>
+                  <div class="col-sm-2">
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="text" ng-model="GLCode" class="textBoxBGColor"
+                        name="pName" readonly />
+                     <span ng-show="IsDataReadOnly && !EditMode">{{GLCode}}</span>
                   </div>
 
                   <div class="col-sm-2 labelHeader">Activity Type:
@@ -241,6 +250,9 @@
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityType}}</span>
                   </div>
 
+               </div>
+
+               <div class="row">
 
                   <div class="col-sm-2 labelHeader">Budget Type:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
@@ -254,9 +266,7 @@
                      <span class="error" ng-show="errors.BudgetType"> {{errors.BudgetType}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BudgetType}}</span>
                   </div>
-               </div>
 
-               <div class="row">
                   <div class="col-sm-2 labelHeader">Brand Description:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
@@ -283,6 +293,10 @@
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CommitmentItem}}</span>
                   </div>
 
+               </div>
+
+               <div class="row">
+
                   <div class="col-sm-2 labelHeader">Total Expected Expenses:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
@@ -294,9 +308,7 @@
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.TotalExpectedExpense |
                         currency:"৳"}}</span>
                   </div>
-               </div>
 
-               <div class="row">
                   <div class="col-sm-2 labelHeader">Activity Start Date:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>

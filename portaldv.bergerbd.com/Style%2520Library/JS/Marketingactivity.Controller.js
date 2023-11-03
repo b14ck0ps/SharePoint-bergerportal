@@ -222,6 +222,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
     $scope.MapActivityName = (e) => getActivityNames(e);
     $scope.MapCostHead = (e) => getCostHead(e);
+    $scope.GetGLNo = (e) => GetGLCode(e);
     $scope.ApproverAction = (Action) => { UpdateApproveStatus(Action); }
     $scope.clickSaveOrSubmit = (status) => { saveOrSubmit(status); }
 
@@ -372,6 +373,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                     $scope.showSaveOrSubmitBtn = $scope.EditMode = true;
                                     $scope.showApproveBtn = $scope.showChangeBtn = $scope.showRejectBtn = false;
                                 }
+                                $scope.GetGLNo();
                                 $scope.IsLoading = false
                             });
                     })
@@ -445,6 +447,25 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .then((response) => {
                 IsCalledBySystem ? null : $scope.FormData.CostHead = '';
                 $scope.costHeadDropdownList = response.data.d.results.map((item) => item.CostHead)
+            })
+            .catch((e) => DEV_ENV && console.log("Error getting user information", e))
+            .finally(() => $scope.IsLoading = false);
+    }
+
+    const GetGLCode = (IsCalledBySystem) => {
+
+        const base = getApiEndpoint("MarketingActivityMapper");
+        const filter = `$filter=CostHead eq '${$scope.FormData.CostHead}'`;
+        const query = `$select=GLCode`;
+
+        $scope.IsLoading = true;
+        $http({
+            method: "GET",
+            url: `${base}?${filter}&${query}`,
+            headers: API_GET_HEADERS
+        })
+            .then((response) => {
+                $scope.GLCode = response.data.d.results[0].GLCode;
             })
             .catch((e) => DEV_ENV && console.log("Error getting user information", e))
             .finally(() => $scope.IsLoading = false);
