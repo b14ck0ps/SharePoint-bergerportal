@@ -886,33 +886,46 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         }
 
         const activityStartDate = new Date(formData.ActivityStartDate);
-        const serviceReceivingDate = new Date(formData.ServiceReceivingDate);
-        const expectedDeliveryDate = new Date(formData.ExpectedDeliveryDate);
+        const ExpectedReceivingDate = new Date(formData.ExpectedReceivingDate);
+        const ExpenseReceivingDate = new Date(formData.ExpenseReceivingDate);
+        const ConsumingDate = new Date(formData.ConsumingDate);
 
         if (formData.ActivityStartDate === undefined) {
             $scope.errors.ActivityStartDate = 'Please Select a valid Activity Start Date';
             isValid = false;
         }
+        if (formData.ExpectedReceivingDate === undefined) {
+            $scope.errors.ExpectedReceivingDate = 'Please Select a valid Expected Receiving Date';
+            isValid = false;
+        }
+        if (formData.ExpenseReceivingDate === undefined) {
+            $scope.errors.ExpenseReceivingDate = 'Please Select a valid Expense Receiving Date';
+            isValid = false;
+        }
 
-        // if (formData.ExpectedReceivingDate === undefined) {
-        //                 $scope.errors.ExpectedDeliveryDate = 'Please Select a valid Expected Delivery Date';
-        //     isValid = false;
-        // }
+        if (formData.ConsumingDate === undefined) {
+            $scope.errors.ConsumingDate = 'Please Select a valid Consuming Date';
+            isValid = false;
+        }
 
-        // if (activityStartDate > expectedDeliveryDate) {
-        //     $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Expected Delivery Date';
-        //     isValid = false;
-        // }
+        if (activityStartDate < new Date()) {
+            $scope.errors.ActivityStartDate = 'Please Select a Future Date';
+            isValid = false;
+        }
+        if (ExpectedReceivingDate < new Date()) {
+            $scope.errors.ExpectedReceivingDate = 'Please Select a Future Date';
+            isValid = false;
+        }
 
-        // if (activityStartDate > serviceReceivingDate) {
-        //     $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Service Receiving Date';
-        //     isValid = false;
-        // }
+        if (ExpenseReceivingDate < ExpectedReceivingDate) {
+            $scope.errors.ExpenseReceivingDate = 'Expense Receiving Date should be greater than Expected Receiving Date';
+            isValid = false;
+        }
 
-        // if (expectedDeliveryDate > serviceReceivingDate) {
-        //     $scope.errors.ExpectedDeliveryDate = 'Expected Delivery Date can\'t be greater than Service Receiving Date';
-        //     isValid = false;
-        // }
+        if (ConsumingDate < ExpenseReceivingDate) {
+            $scope.errors.ConsumingDate = 'Consuming Date should be greater than Expense Receiving Date';
+            isValid = false;
+        }
 
         if (formData.VendorNumber === undefined || formData.VendorNumber === '') {
             $scope.errors.VendorNumber = 'Please fill up Required Vendor Quotation';
