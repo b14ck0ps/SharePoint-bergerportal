@@ -261,7 +261,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
 
                 const base = getApiEndpoint("MarketingActivityMaster");
                 const filter = `$filter=ID eq '${RequestId}'`;
-                const query = `$select=PendingWith/Id,PendingWith/Title,ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,PRNumber,PRDate,Reamarks,AuthorId&$expand=PendingWith&$top=1`;
+                const query = `$select=PendingWith/Id,PendingWith/Title,ID,ActivityName,ServiceName,ActivityType,BudgetType,CostHead,BrandDescription,CommitmentItem,TotalExpectedExpense,ActivityStartDate,ExpectedDeliveryDate,ServiceReceivingDate,ServiceEndingDate,RequiredVendorQuotation,SingleVendorJustification,ProjectName,Status,PRNumber,PRDate,Reamarks,AuthorId&$expand=PendingWith&$top=1`;
 
                 /* Getting the request data from `MarketingActivityMaster` list */
                 $http({
@@ -277,6 +277,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                             ActivityStartDate: new Date(Row.ActivityStartDate),
                             ExpectedDeliveryDate: new Date(Row.ExpectedDeliveryDate),
                             ServiceReceivingDate: new Date(Row.ServiceReceivingDate),
+                            ServiceEndingDate: new Date(Row.ServiceEndingDate),
                         };
 
                         $scope.IsDataReadOnly = true; /* Hide all the input fields & Shows `MarketingActivityMaster` list data */
@@ -352,7 +353,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 /*Get The Attachments from `MarketingActivityAttachment` list */
                                 const baseAttachment = getApiEndpoint("MarketingActivityAttachment");
                                 const filterAttachment = `$filter=MarketingActivityID eq '${RequestId}'`;
-                                const queryAttachment = `$select=ID,Title,AttachmentFiles,Created,Author/Title&$expand=AttachmentFiles,Author`;
+                                const queryAttachment = `$select=ID,Title,AttachmentFiles,AttachmentType,Created,Author/Title&$expand=AttachmentFiles,Author`;
 
                                 $http({
                                     method: "GET",
@@ -529,7 +530,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 saveAtMyTask(Title, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, ApprovalChain.SOIC ?? ApprovalChain.OPM, UniqueUrl);
 
                 AddToLog(Title, status, $scope.actionComment, MarketingActivityID);
-                SaveAllAttachments();
+                SaveAllAttachments('general')
+                SaveAllAttachments('requester')
                 if ($scope.pendingWithName === undefined) $scope.pendingWithName = OPM_INFO.name;
                 SendEmail(InitiatorRequesterTemplate, CURRENT_USER_ID, [], RequesterInfo.name, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
             })
@@ -638,7 +640,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         })
             .then((res) => {
                 DEV_ENV && console.log(res)
-                SaveAllAttachments();
+                SaveAllAttachments('general');
             })
             .catch((e) => { DEV_ENV && console.log(e) })
             .finally(() => $scope.IsLoading = false);
@@ -680,8 +682,14 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      * @description This create a **new item** in the list **for each file** and set the Attachment.
      * @async
      */
-    const SaveAllAttachments = async () => {
-        const fileInputs = $("#attachFilesContainer input:file");
+    const SaveAllAttachments = async (type) => {
+        let fileInputs;
+        if (type === 'general') {
+            fileInputs = $("#attachFilesContainer input:file");
+        }
+        if (type === 'requester') {
+            fileInputs = $("#ReqAttachFilesContainer input:file");
+        }
         const filesToUpload = Array.from(fileInputs)
             .map((input) => input.files[0])
             .filter((file) => file);
@@ -695,7 +703,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         };
 
         try {
-            filesToUpload.forEach(async (file) => await AddReceiptInitial(file));
+            filesToUpload.forEach(async (file) => await AddReceiptInitial(file, type));
             $scope.IsLoading = true;
             if (StatusOnApprove === ApprovalStatus.Submitted)
                 window.location.href = RedirectOnSubmit;
@@ -715,7 +723,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      * @param {File} file - The file to upload to SharePoint.
      * @returns {Promise<void>}
      */
-    const AddReceiptInitial = async (file) => {
+    const AddReceiptInitial = async (file, type) => {
         const ListName = "MarketingActivityAttachment";
         var url = getApiEndpoint(ListName);
         $scope.IsLoading = true;
@@ -727,6 +735,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             data: {
                 'Title': `MA-${RequestId}`,
                 'MarketingActivityID': RequestId,
+                'AttachmentType': type,
                 '__metadata': { "type": "SP.Data.MarketingActivityAttachmentListItem" },
             }
         })
