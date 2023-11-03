@@ -213,7 +213,7 @@ const getApproverInfo = (DeptID) => {
 MarketingActivityModule.controller('FormController', ['$scope', '$http', function ($scope, $http) {
 
     /** All Concrete Data comming from @file Marketingactivity.Data.js */
-
+    $scope.FormData = {}
     $scope.selectedOptions = []
 
     $scope.MapPromotionalItemName = (e) => getPromotionalItemNames(e);
@@ -221,6 +221,14 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     $scope.GetGLNo = (e) => GetGLCode(e);
     $scope.ApproverAction = (Action) => { UpdateApproveStatus(Action); }
     $scope.clickSaveOrSubmit = (status) => { saveOrSubmit(status); }
+
+
+    /* Total Expected Expenses Calulation */
+    $scope.FormData.Quantity = 0;
+    $scope.FormData.ExpectedPricePerUnit = 0;
+    $scope.FormData.TotalExpectedExpense = 0;
+    $scope.$watchGroup(['FormData.Quantity', 'FormData.ExpectedPricePerUnit'], (newValues) => $scope.FormData.TotalExpectedExpense = newValues[0] * newValues[1]);
+
 
     $scope.errors = {};
     if (!PendingApprovalUniqueId) {

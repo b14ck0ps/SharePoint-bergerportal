@@ -426,9 +426,10 @@
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
-                     <input ng-hide="IsDataReadOnly && !EditMode" type="number" ng-model="FormData.TotalExpectedExpense"
+                     <input ng-hide="IsDataReadOnly && !EditMode" type="number"
+                      ng-model="FormData.TotalExpectedExpense"
                         class="textBoxBGColor" valid-number title="Please Fill in with a numerical value only"
-                        ng-init="TotalExpectedExpense='0'" id="TotalExpectedExpense" required />
+                        ng-init="TotalExpectedExpense='0'" id="TotalExpectedExpense" readonly />
                      <span class="error" ng-show="errors.TotalExpectedExpense"> {{errors.TotalExpectedExpense}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.TotalExpectedExpense |
                         currency:"৳"}}</span>
