@@ -216,6 +216,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     $scope.FormData = {}
     $scope.selectedOptions = []
 
+    $scope.Brands = Brands;
+    $scope.CommitmentItemDescription = CommitmentItemDescription;
+
     $scope.MapPromotionalItemName = (e) => getPromotionalItemNames(e);
     $scope.MapCostHead = (e) => getCostHead(e);
     $scope.GetGLNo = (e) => GetGLCode(e);

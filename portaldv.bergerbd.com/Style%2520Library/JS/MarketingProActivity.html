@@ -16,6 +16,7 @@
 <script type="text/javascript" src="../../Style Library/JS/angular-sanitize.js"></script>
 <script src="../../Style Library/JS/constants.js" type="text/javascript"></script>
 <script src="../../Style Library/JS/designationJSON.js" type="text/javascript"></script>
+<script type="text/javascript" src="../../Style Library/JS/MarketingProActivity.Data.js"></script>
 <script type="text/javascript" src="../../Style Library/JS/MarketingProActivity.Controller.js"></script>
 <script type="text/javascript" src="../../Style Library/JS/multiselect.js"></script>
 
@@ -319,54 +320,8 @@
                         ng-model="FormData.BrandDescription"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
                         <option value="">-- Select Brand Description --</option>
-                        <option value="Adhesive - Power Bond">Adhesive - Power Bond</option>
-                        <option value="Adhesive - Tex Bond">Adhesive - Tex Bond</option>
-                        <option value="APE">APE</option>
-                        <option value="Auto Refinish">Auto Refinish</option>
-                        <option value="Berger Experience Zone (Decorative)">Berger Experience Zone (Decorative)</option>
-                        <option value="BREATHE EASY">BREATHE EASY</option>
-                        <option value="BREATHE EASY - Ena">BREATHE EASY - Ena</option>
-                        <option value="Color Bank">Color Bank</option>
-                        <option value="Coporate Brand">Coporate Brand</option>
-                        <option value="Damp Guard">Damp Guard</option>
-                        <option value="Decorative">Decorative</option>
-                        <option value="DUROCEM">DUROCEM</option>
-                        <option value="EASY CLEAN">EASY CLEAN</option>
-                        <option value="Home Decor Branding">Home Decor Branding</option>
-                        <option value="Industrial Paints">Industrial Paints</option>
-                        <option value="INNOVA">INNOVA</option>
-                        <option value="JHILIK">JHILIK</option>
-                        <option value="LS. Metallic Finish">LS. Metallic Finish</option>
-                        <option value="LSE">LSE</option>
-                        <option value="Marine Paints">Marine Paints</option>
-                        <option value="Mr. EXPERT DAMP GUARD">Mr. EXPERT DAMP GUARD</option>
-                        <option value="Painters App">Painters App</option>
-                        <option value="Powder Coating">Powder Coating</option>
-                        <option value="PRE TREATMENT CHEM">PRE TREATMENT CHEM</option>
-                        <option value="Printing Ink">Printing Ink</option>
-                        <option value="REX">REX</option>
-                        <option value="RIN">RIN</option>
-                        <option value="RIN">RIN</option>
-                        <option value="ROBB WALL PUTTY">ROBB WALL PUTTY</option>
-                        <option value="ROBB WATER SEALER">ROBB WATER SEALER</option>
-                        <option value="RSE">RSE</option>
-                        <option value="Salt Safe">Salt Safe</option>
-                        <option value="SPD">SPD</option>
-                        <option value="Touch Putty (Decorative)">Touch Putty (Decorative)</option>
-                        <option value="Value Club App, LMS, Happy Wallet, MR/VR">Valye Club App, LMS, Happy Wallet,
-                           MR/VR</option>
-                        <option value="Vehicle Refinish">Vehicle Refinish</option>
-                        <option value="W/C ANTIDIRT">W/C ANTIDIRT</option>
-                        <option value="W/C ANTIDIRT LONGIF">W/C ANTIDIRT LONGIF</option>
-                        <option value="W/C ANTIDIRT LONGLIFE(F167)">W/C ANTIDIRT LONGLIFE(F167)</option>
-                        <option value="W/C Antidirt Supreme">W/C Antidirt Supreme</option>
-                        <option value="W/C EXTERIOR SEALER">W/C EXTERIOR SEALER</option>
-                        <option value="W/C SMOOTH">W/C SMOOTH</option>
-                        <option value="W/C GLOW">W/C GLOW</option>
-                        <option value="WEATHER COAT EXTERIOR SEALER">WEATHER COAT EXTERIOR SEALER</option>
-                        <option value="Wood Coating / Innova">Wood Coating / Innova</option>
-                        <option value="WOOD KEEPER">WOOD KEEPER</option>
-                        <option value="Xpress Sealer (Decorative)">Xpress Sealer (Decorative)</option>
+                        <option ng-repeat="Brand in Brands" value="{{Brand.value}}">{{Brand.label}} - {{Brand.number}}
+                        </option>
                      </select>
                      <span class="error" ng-show="errors.BrandDescription"> {{errors.BrandDescription}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BrandDescription}}</span>
@@ -374,7 +329,7 @@
 
                </div>
                <div class="row">
-                  <div class="col-sm-2 labelHeader">Commitment Item Descqription:
+                  <div class="col-sm-2 labelHeader">Commitment Item Description:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                      <span class="error" ng-show="errors.BrandDescription"> {{errors.BrandDescription}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.BrandDescription}}</span>
@@ -384,16 +339,9 @@
                         ng-model="FormData.CommitmentItem"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
                         <option value="">-- Select Commitment Item --</option>
-                        <option value="Con Pro_campaign Actv Cost">Con Pro_campaign Actv Cost</option>
-                        <option value="Corporate - Other">Corporate - Other</option>
-                        <option value="PTI Gift">PTI Gift</option>
-                        <option value="SC Production Cost">SC Production Cost</option>
-                        <option value="Shomporko Scheme_On Invoice">Shomporko Scheme_On Invoice</option>
-                        <option value="Mass Calender Production">Mass Calender Production</option>
-                        <option value="Exec. Diary Prod.">Exec. Diary Prod.</option>
-                        <option value="Small Diary Prod.">Small Diary Prod.</option>
-                        <option value="Shade Card Mgt">Shade Card Mgt</option>
-                        <option value="POSM Print">POSM Print</option>
+                        <option ng-repeat="ComDes in CommitmentItemDescription" value="{{ComDes.value}}">
+                           {{ComDes.label}} - {{ComDes.number}}
+                        </option>
                      </select>
                      <span class="error" ng-show="errors.CommitmentItem"> {{errors.CommitmentItem}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.CommitmentItem}}</span>
