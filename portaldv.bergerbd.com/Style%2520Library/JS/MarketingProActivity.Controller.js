@@ -496,9 +496,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                     UpdateActivityMaster($scope.FormData, NextPendingWith, ApprovalStatus.Submitted);
                     AddToLog(`MP-${RequestId}`, 'Updated', $scope.actionComment, RequestId);
                 })
-                .catch((e) => { console.log("Error getting information", e) })
-                .finally(() => {
-                });
+                .catch((e) => {
+                    console.log("Error getting information", e)
+                    $scope.IsLoading = false
+                })
             return;
         }
         if (StatusOnApprove === ApprovalStatus.Closed) {
@@ -551,11 +552,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             })
             .catch(function (message) {
                 DEV_ENV && console.log(`Error saving data: ${message}`);
+                $scope.IsLoading = false
             })
-            .finally(() => {
-                // window.location.href = RedirectOnSubmit;
-                $scope.IsLoading = false;
-            });
     }
 
     /**
@@ -610,10 +608,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 UpdateActivityMaster(data, setPendingWith, StatusOnApprove);
                 AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
             })
-            .catch((e) => { DEV_ENV && console.log(e); })
-            .finally(() => {
-                $scope.IsLoading = false;
-            });
+            .catch((e) => { $scope.IsLoading = false })
     }
 
     const UpddatePendingApproval = (data, setPendingWith) => {
@@ -657,8 +652,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 DEV_ENV && console.log(res)
                 SaveAllAttachments('general');
             })
-            .catch((e) => { DEV_ENV && console.log(e) })
-            .finally(() => $scope.IsLoading = false);
+            .catch((e) => { $scope.IsLoading = false })
     }
 
     /**
@@ -717,19 +711,18 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             return
         };
 
-        try {
-            filesToUpload.forEach(async (file) => await AddReceiptInitial(file, type));
-            $scope.IsLoading = true;
-            if ($scope.showSaveOrSubmitBtn || $scope.showCloseBtn)
-                window.location.href = RedirectOnSubmit;
-            else
-                window.location.href = RedirectOnApprove;
-            $scope.IsLoading = false;
-            return
-        }
-        catch (error) {
-            console.error('Error uploading files:', error);
-        }
+        Promise.all(filesToUpload.map((file) => AddReceiptInitial(file, type)))
+            .then(() => {
+                if ($scope.showSaveOrSubmitBtn || $scope.showCloseBtn) {
+                    window.location.href = RedirectOnSubmit;
+                } else {
+                    window.location.href = RedirectOnApprove;
+                }
+            })
+            .catch((error) => {
+                $scope.IsLoading = false;
+                console.error('Error uploading files:', error);
+            });
     };
 
     /**
@@ -741,22 +734,25 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     const AddReceiptInitial = async (file, type) => {
         const ListName = "MarketingPromotionalAttachment";
         var url = getApiEndpoint(ListName);
-        $scope.IsLoading = true;
-        /** Add a Item with `RequestId`  to `MarketingActivityAttachment` list. */
-        $http({
-            headers: API_POST_HEADERS,
-            method: "POST",
-            url: url,
-            data: {
-                'Title': `MP-${RequestId}`,
-                'MarketingActivityID': RequestId,
-                'AttachmentType': type,
-                '__metadata': { "type": "SP.Data.MarketingPromotionalAttachmentListItem" },
-            }
-        })
-            .then(async (res) => await uploadFileToSharePoint(res.data.d.ID, file, ListName))
-            .catch((e) => { DEV_ENV && console.log(e) })
-            .finally(() => $scope.IsLoading = false);
+        /** Add an Item with `RequestId` to the `MarketingActivityAttachment` list. */
+        try {
+            const response = await $http({
+                headers: API_POST_HEADERS,
+                method: "POST",
+                url: url,
+                data: {
+                    'Title': `MP-${RequestId}`,
+                    'MarketingActivityID': RequestId,
+                    'AttachmentType': type,
+                    '__metadata': { "type": "SP.Data.MarketingPromotionalAttachmentListItem" },
+                }
+            });
+            await uploadFileToSharePoint(response.data.d.ID, file, ListName);
+        } catch (error) {
+            DEV_ENV && console.log(error);
+        } finally {
+            $scope.IsLoading = false;
+        }
     }
 
     /**

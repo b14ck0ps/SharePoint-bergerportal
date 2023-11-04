@@ -537,10 +537,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             })
             .catch(function (message) {
                 DEV_ENV && console.log(`Error saving data: ${message}`);
-            })
-            .finally(() => {
                 $scope.IsLoading = false;
-            });
+            })
     }
 
     /**
@@ -596,9 +594,6 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
             })
             .catch((e) => { DEV_ENV && console.log(e); })
-            .finally(() => {
-                $scope.IsLoading = false;
-            });
     }
 
     const UpddatePendingApproval = (data, setPendingWith) => {
@@ -642,8 +637,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 DEV_ENV && console.log(res)
                 SaveAllAttachments('general');
             })
-            .catch((e) => { DEV_ENV && console.log(e) })
-            .finally(() => $scope.IsLoading = false);
+            .catch((e) => { $scope.IsLoading = false })
     }
 
     /**
@@ -701,20 +695,18 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 window.location.href = RedirectOnApprove;
             return
         };
-
-        try {
-            filesToUpload.forEach(async (file) => await AddReceiptInitial(file, type));
-            $scope.IsLoading = true;
-            if ($scope.showSaveOrSubmitBtn || $scope.showCloseBtn)
-                window.location.href = RedirectOnSubmit;
-            else
-                window.location.href = RedirectOnApprove;
-            $scope.IsLoading = false;
-            return
-        }
-        catch (error) {
-            console.error('Error uploading files:', error);
-        }
+        Promise.all(filesToUpload.map((file) => AddReceiptInitial(file, type)))
+            .then(() => {
+                if ($scope.showSaveOrSubmitBtn || $scope.showCloseBtn) {
+                    window.location.href = RedirectOnSubmit;
+                } else {
+                    window.location.href = RedirectOnApprove;
+                }
+            })
+            .catch((error) => {
+                $scope.IsLoading = false;
+                console.error('Error uploading files:', error);
+            });
     };
 
     /**
@@ -726,24 +718,26 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     const AddReceiptInitial = async (file, type) => {
         const ListName = "MarketingActivityAttachment";
         var url = getApiEndpoint(ListName);
-        $scope.IsLoading = true;
-        /** Add a Item with `RequestId`  to `MarketingActivityAttachment` list. */
-        $http({
-            headers: API_POST_HEADERS,
-            method: "POST",
-            url: url,
-            data: {
-                'Title': `MA-${RequestId}`,
-                'MarketingActivityID': RequestId,
-                'AttachmentType': type,
-                '__metadata': { "type": "SP.Data.MarketingActivityAttachmentListItem" },
-            }
-        })
-            .then(async (res) => await uploadFileToSharePoint(res.data.d.ID, file, ListName))
-            .catch((e) => { DEV_ENV && console.log(e) })
-            .finally(() => $scope.IsLoading = false);
+        /** Add an Item with `RequestId` to the `MarketingActivityAttachment` list. */
+        try {
+            const response = await $http({
+                headers: API_POST_HEADERS,
+                method: "POST",
+                url: url,
+                data: {
+                    'Title': `MA-${RequestId}`,
+                    'MarketingActivityID': RequestId,
+                    'AttachmentType': type,
+                    '__metadata': { "type": "SP.Data.MarketingActivityAttachmentListItem" },
+                }
+            });
+            await uploadFileToSharePoint(response.data.d.ID, file, ListName);
+        } catch (error) {
+            DEV_ENV && console.log(error);
+        } finally {
+            $scope.IsLoading = false;
+        }
     }
-
     /**
      * Reads a notification list template and creates a notification item.
      *
