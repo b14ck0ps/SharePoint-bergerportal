@@ -908,12 +908,12 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             isValid = false;
         }
 
-        if (activityStartDate < new Date()) {
-            $scope.errors.ActivityStartDate = 'Please Select a Future Date';
+        if (activityStartDate < new Date() && activityStartDate.toDateString() != new Date().toDateString()) {
+            $scope.errors.ActivityStartDate = 'Cannot Select a Past Date';
             isValid = false;
         }
-        if (ExpectedReceivingDate < new Date()) {
-            $scope.errors.ExpectedReceivingDate = 'Please Select a Future Date';
+        if (ExpectedReceivingDate < new Date() && ExpectedReceivingDate.toDateString() != new Date().toDateString()) {
+            $scope.errors.ExpectedReceivingDate = 'Cannot Select a Past Date';
             isValid = false;
         }
 
