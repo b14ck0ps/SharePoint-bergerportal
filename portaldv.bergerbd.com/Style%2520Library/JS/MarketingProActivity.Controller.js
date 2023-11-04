@@ -710,7 +710,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .filter((file) => file);
 
         if (filesToUpload.length === 0) {
-            if (StatusOnApprove === ApprovalStatus.Submitted || StatusOnApprove === ApprovalStatus.Closed)
+            if ($scope.showSaveOrSubmitBtn || $scope.showCloseBtn)
                 window.location.href = RedirectOnSubmit;
             else
                 window.location.href = RedirectOnApprove;
@@ -720,7 +720,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         try {
             filesToUpload.forEach(async (file) => await AddReceiptInitial(file, type));
             $scope.IsLoading = true;
-            if (StatusOnApprove === ApprovalStatus.Submitted || StatusOnApprove === ApprovalStatus.Closed)
+            if ($scope.showSaveOrSubmitBtn || $scope.showCloseBtn)
                 window.location.href = RedirectOnSubmit;
             else
                 window.location.href = RedirectOnApprove;
