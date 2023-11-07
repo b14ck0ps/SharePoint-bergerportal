@@ -38,7 +38,7 @@ const ApprovalStatus = {
     SOICApproved: "SOICApproved",
     CMOApproved: "CMOApproved",
     COOApproved: "COOApproved",
-    FinalApproved: "FinalApproved",
+    FinalApproved: "MSOApproved",
     Closed: "Closed",
     Rejected: "Rejected",
 }
@@ -166,7 +166,7 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
 const getApproverInfo = (DeptID) => {
     return new Promise((resolve, reject) => {
         const base = getApiEndpoint("Approver Info");
-        const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver4Id,BranchSalesMId,HODId,Location`;
+        const query = `$select=HODId,Approver6Id,Approver7Id,Approver8Id,BranchSalesMId,HODId,Location`;
         const filter = `$filter=DeptID eq '${DeptID}'`;
 
         $.ajax({
@@ -180,9 +180,9 @@ const getApproverInfo = (DeptID) => {
                 const OtherLocationApprovalRow = approverInfoResponse.find(item => item.Location === RequesterInfo.location);
 
                 const DefaultkeyMapping = {
-                    "Approver2Id": "CMO",
-                    "Approver3Id": "COO",
-                    "Approver4Id": "FinalApprovar",
+                    "HODId": "CMO",
+                    "Approver6Id": "COO",
+                    "Approver7Id": "FinalApprovar",
                 };
 
                 /* Default Approval Chain (OPM->COO/CMO->FinalApprover) */
@@ -201,6 +201,7 @@ const getApproverInfo = (DeptID) => {
                     ApprovalChain.SOIC = OtherLocationApprovalRow.HODId;
                 }
                 resolve(ApprovalChain);
+                console.log("this is for checking", ApprovalChain);
             },
             error: function (xhr, status, error) {
                 DEV_ENV && console.error("Error getting user information", error);
@@ -308,7 +309,8 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 DEV_ENV && console.log(ApprovalChain);
 
                                 /* -Start----------------------------------------------APPROVAL FLOW-------------------------------------------------- */
-                                if (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM || CurrentPendingWith === ApprovalChain.SOIC) { /* CMO*/
+
+                                if ((CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM) || (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.SOIC)) { /* CMO*/
                                     NextPendingWith = ApprovalChain.CMO;
                                     if (RequesterInfo.location === 'Corporate' && CurrentPendingWith === ApprovalChain.OPM) {
                                         StatusOnApprove = ApprovalStatus.OPMApproved;
@@ -530,10 +532,11 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 saveAtMyTask(Title, 'MarketingActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, ApprovalChain.SOIC ?? ApprovalChain.OPM, UniqueUrl);
 
                 AddToLog(Title, status, $scope.actionComment, MarketingActivityID);
+                SendEmail(InitiatorRequesterTemplate, CURRENT_USER_ID, [], RequesterInfo.name, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
+                SendEmail(InitiatorRequesterTemplate, ApprovalChain.SOIC ?? ApprovalChain.OPM, [], $scope.pendingWithName, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
                 SaveAllAttachments('general')
                 SaveAllAttachments('requester')
                 if ($scope.pendingWithName === undefined) $scope.pendingWithName = OPM_INFO.name;
-                SendEmail(InitiatorRequesterTemplate, CURRENT_USER_ID, [], RequesterInfo.name, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
             })
             .catch(function (message) {
                 DEV_ENV && console.log(`Error saving data: ${message}`);
@@ -592,6 +595,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 }
                 UpdateActivityMaster(data, setPendingWith, StatusOnApprove);
                 AddToLog(`MA-${RequestId}`, StatusOnApprove, $scope.actionComment, RequestId);
+                SendEmail(InitiatorRequesterTemplate, setPendingWith, [], $scope.pendingWithName, $scope.pendingWithName, Title, StatusOnApprove, UniqueUrl, "", "Marketing Activity");
             })
             .catch((e) => { DEV_ENV && console.log(e); })
     }
@@ -898,15 +902,15 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             isValid = false;
         }
 
-        if (activityStartDate > serviceReceivingDate) {
-            $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Service Receiving Date';
-            isValid = false;
-        }
+        // if (activityStartDate > serviceReceivingDate) {
+        //     $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Service Receiving Date';
+        //     isValid = false;
+        // }
 
-        if (expectedDeliveryDate > serviceReceivingDate) {
-            $scope.errors.ExpectedDeliveryDate = 'Expected Delivery Date can\'t be greater than Service Receiving Date';
-            isValid = false;
-        }
+        // if (expectedDeliveryDate > serviceReceivingDate) {
+        //     $scope.errors.ExpectedDeliveryDate = 'Expected Delivery Date can\'t be greater than Service Receiving Date';
+        //     isValid = false;
+        // }
 
         if (serviceReceivingDate === 'Invalid Date') {
             $scope.errors.ServiceReceivingDate = 'Please Select a valid Service Receiving Date';
@@ -937,6 +941,18 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             $scope.errors.TotalExpectedExpense = 'Please fill up Total Expected Expense';
             isValid = false;
         }
+
+        let fileInputs = $("#ReqAttachFilesContainer input:file");
+        const filesToUpload = Array.from(fileInputs)
+            .map((input) => input.files[0])
+            .filter((file) => file);
+
+        if (filesToUpload.length === 0) {
+            $scope.errors.ReqAttachFilesContainer = 'Please Upload Attachement';
+            isValid = false;
+        };
+
+
         isValid ? null : alert('Please fill up all the required fields');
         return isValid;
     };

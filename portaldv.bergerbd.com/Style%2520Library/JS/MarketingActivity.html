@@ -342,7 +342,7 @@
 
                <div class="row">
 
-                  <div class="col-sm-2 labelHeader">Service Receiving Date:
+                  <div class="col-sm-2 labelHeader">Service Receiving Month:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
@@ -351,7 +351,7 @@
                      <span class="error" ng-show="errors.ServiceReceivingDate"> {{errors.ServiceReceivingDate}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ServiceReceivingDate | date}}</span>
                   </div>
-                  <div class="col-sm-2 labelHeader">Service Ending Date:
+                  <div class="col-sm-2 labelHeader">Service Ending Month:
                      <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                   </div>
                   <div class="col-sm-2">
@@ -401,22 +401,23 @@
                </div>
                <div ng-hide="IsDataReadOnly" style="display: flex; flex-direction: column-reverse;">
                   <div>
-                     <div class="col-sm-2 labelHeader">
-                        <h6>Select All Attachments:</h6>
+                     <div class="col-sm-2 labelHeader">Service Specification :
+                        <label ng-hide="IsDataReadOnly && !EditMode" class='redStar'>*</label>
                      </div>
                      <div class="files col-sm-6 row" id="ReqAttachFilesContainer" ng-model="attachment1">
                         <input style=" margin-left: 115px" id="RecInfringementFiles" type="file"
                            class="multi browsebtn textBoxBGColor"
-                           title="Any attachment name including any special charecter like ' & . will not be uploded" />
+                           title="Any attachment name including any special charecter like ' & . will not be uploded"
+                           required />
+                        <span class="error" ng-show="errors.ReqAttachFilesContainer"> {{errors.ReqAttachFilesContainer}}
+                        </span>
                      </div>
                   </div>
-                  <div style="color: red; font-size: small; margin-left: 310px;"><strong>Attention:</strong> Attach
-                     additional
-                     information for multiple
-                     Brand
-                     and Commitment Items.</div>
                </div>
 
+
+            </div>
+            <div class="row">
                <div class="col-sm-2 labelHeader">Remarks: <span ng-bind-html="FormData.Reamarks"
                      ng-show="IsDataReadOnly && !EditMode"></span>
                </div>
@@ -425,9 +426,8 @@
                      ng-model="FormData.Reamarks" cols="36" rows="3"></textarea>
                </div>
             </div>
-
             <div class="row panel-body">
-               <h4 class="panel-body">Attachments/Receipts for Multiple Brand and Commitment Items:</h4>
+               <h4 class="panel-body">Service Specification Attachments</h4>
             </div>
             <div id="divAttachmentDisplayTbl" class="row" style="padding-left: 15px; overflow:hidden;"
                ng-hide='uId == ""||status==""||hideAttachmentDiv = "true"'>
@@ -443,7 +443,8 @@
                         </tr>
                      </tbody>
                      <tbody>
-                        <tr ng-repeat="(i,receiptRow) in receiptRows" ng-if="receiptRow.AttachmentType === 'requester' ">
+                        <tr ng-repeat="(i,receiptRow) in receiptRows"
+                           ng-if="receiptRow.AttachmentType === 'requester' ">
                            <td id="tdSlNo"></td>
                            <td id="tdReceipt"><a
                                  href="{{receiptRow.AttachmentFiles.results[0].ServerRelativeUrl}}">{{receiptRow.AttachmentFiles.results[0].FileName}}</a>
@@ -460,6 +461,9 @@
             <div ng-hide="IsRejectedOrCompleted">
                <div class="row panel-body">
                   <h4 class="panel-body">Attachments/Receipts:</h4>
+                  <div style="color: red; font-size: small;">
+                     <strong>Attention:</strong> Attach additional information for multiple Brand and Commitment Items.
+                  </div>
                </div>
                <div id="divChooseAttachmentFile" class="row panel-body">
                   <div class="col-sm-2 labelHeader">
