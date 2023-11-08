@@ -959,7 +959,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .map((input) => input.files[0])
             .filter((file) => file);
 
-        if (filesToUpload.length === 0) {
+        if (filesToUpload.length === 0 && PendingApprovalUniqueId === undefined) {
             $scope.errors.ReqAttachFilesContainer = 'Please Upload Attachement';
             isValid = false;
         };
