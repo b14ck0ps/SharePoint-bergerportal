@@ -411,9 +411,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      * @returns {void}
      */
     const getActivityNames = (IsCalledBySystem) => {
-
+        const SanitizeFilter = $scope.FormData.ServiceName.replace(/&/g, '%26')
         const base = getApiEndpoint("MarketingActivityMapper");
-        const filter = `$filter=ServiceName eq '${$scope.FormData.ServiceName}'`;
+        const filter = `$filter=ServiceName eq '${SanitizeFilter}'`;
         const query = `$select=ActivityName`;
         $scope.IsLoading = true;
         $http({
@@ -436,9 +436,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      * @returns {void}
      */
     const getCostHead = (IsCalledBySystem) => {
-
+        const SanitizeFilter = $scope.FormData.ActivityName.replace(/&/g, '%26')
         const base = getApiEndpoint("MarketingActivityMapper");
-        const filter = `$filter=ActivityName eq '${$scope.FormData.ActivityName}'`;
+        const filter = `$filter=ActivityName eq '${SanitizeFilter}'`;
         const query = `$select=CostHead`;
 
         $scope.IsLoading = true;
@@ -456,9 +456,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     }
 
     const GetGLCode = (IsCalledBySystem) => {
-
+        const SanitizeFilter = $scope.FormData.CostHead.replace(/&/g, '%26')
         const base = getApiEndpoint("MarketingActivityMapper");
-        const filter = `$filter=CostHead eq '${$scope.FormData.CostHead}'`;
+        const filter = `$filter=CostHead eq '${SanitizeFilter}'`;
         const query = `$select=GLCode`;
 
         $scope.IsLoading = true;
