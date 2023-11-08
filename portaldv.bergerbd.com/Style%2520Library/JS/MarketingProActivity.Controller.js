@@ -534,7 +534,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             url: url,
             data: marketingPromotionalMasterData,
         })
-            .then((response) => {
+            .then(async (response) => {
                 /**  This is the ID of the newly created item @type {number} */
                 const MarketingPromotionalID = response.data.d.ID;
                 RequestId = MarketingPromotionalID;
@@ -545,10 +545,16 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 saveAtMyTask(Title, 'MarketingPromotionalActivity', RequesterInfo.name, status, RequesterInfo.id.toString(), RequesterInfo.email, ApprovalChain.SOIC ?? ApprovalChain.OPM, UniqueUrl);
 
                 AddToLog(Title, status, $scope.actionComment, MarketingPromotionalID);
-                SaveAllAttachments('general')
-                SaveAllAttachments('requester')
                 if ($scope.pendingWithName === undefined) $scope.pendingWithName = OPM_INFO.name;
                 SendEmail(InitiatorRequesterTemplate, CURRENT_USER_ID, [], RequesterInfo.name, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
+                await SaveAllAttachments('requester')
+                $scope.uploaded = false;
+                await SaveAllAttachments('general')
+                if ($scope.showSaveOrSubmitBtn || $scope.showCloseBtn)
+                    window.location.href = RedirectOnSubmit;
+                else
+                    window.location.href = RedirectOnApprove;
+                return
             })
             .catch(function (message) {
                 DEV_ENV && console.log(`Error saving data: ${message}`);
@@ -648,9 +654,14 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 '__metadata': { "type": "SP.Data.MarketingPromotionalMasterListItem" }
             }
         })
-            .then((res) => {
+            .then(async (res) => {
                 DEV_ENV && console.log(res)
-                SaveAllAttachments('general');
+                await SaveAllAttachments('general');
+                if ($scope.showSaveOrSubmitBtn || $scope.showCloseBtn)
+                    window.location.href = RedirectOnSubmit;
+                else
+                    window.location.href = RedirectOnApprove;
+                return
             })
             .catch((e) => { $scope.IsLoading = false })
     }
@@ -703,27 +714,26 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .map((input) => input.files[0])
             .filter((file) => file);
 
-        if (filesToUpload.length === 0) {
-            if ($scope.showSaveOrSubmitBtn || $scope.showCloseBtn)
-                window.location.href = RedirectOnSubmit;
-            else
-                window.location.href = RedirectOnApprove;
-            return
-        };
+        if (type === 'general' && filesToUpload.length === 0) {
+            return Promise.resolve();
+        }
 
-        Promise.all(filesToUpload.map((file) => AddReceiptInitial(file, type)))
-            .then(() => {
-                if ($scope.showSaveOrSubmitBtn || $scope.showCloseBtn) {
-                    window.location.href = RedirectOnSubmit;
-                } else {
-                    window.location.href = RedirectOnApprove;
-                }
-            })
-            .catch((error) => {
-                $scope.IsLoading = false;
-                console.error('Error uploading files:', error);
-            });
-    };
+        return new Promise((resolve, reject) => {
+            Promise.all(filesToUpload.map((file) => AddReceiptInitial(file, type)))
+                .then(() => {
+                    if ($scope.uploaded) {
+                        resolve();
+                    } else {
+                        reject('Uploaded is false.');
+                    }
+                })
+                .catch((error) => {
+                    $scope.IsLoading = false;
+                    console.error('Error uploading files:', error);
+                    reject(error);
+                });
+        });
+    }
 
     /**
      * Adds a receipt to the MarketingActivityAttachment list and uploads a file to SharePoint.
