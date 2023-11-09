@@ -166,7 +166,7 @@ MarketingActivityModule.controller('UserController', ['$scope', '$http', functio
 const getApproverInfo = (DeptID) => {
     return new Promise((resolve, reject) => {
         const base = getApiEndpoint("Approver Info");
-        const query = `$select=Approver1Id,Approver2Id,Approver3Id,Approver5Id,BranchSalesMId,HODId,Location`;
+        const query = `$select=*`;
         const filter = `$filter=DeptID eq '${DeptID}'`;
 
         $.ajax({
@@ -180,9 +180,9 @@ const getApproverInfo = (DeptID) => {
                 const OtherLocationApprovalRow = approverInfoResponse.find(item => item.Location === RequesterInfo.location);
 
                 const DefaultkeyMapping = {
-                    "Approver2Id": "HOD",
-                    "Approver3Id": "COO",
-                    "Approver5Id": "MarketingSupport",
+                    "HODId": "HOD",
+                    "Approver6Id": "COO",
+                    "Approver8Id": "MarketingSupport",
                 };
 
                 /* Default Approval Chain (OPM->HOD->COO/MarketingSupport) */
@@ -317,7 +317,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                 DEV_ENV && console.log(ApprovalChain);
 
                                 /* -Start----------------------------------------------APPROVAL FLOW-------------------------------------------------- */
-                                if (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM || CurrentPendingWith === ApprovalChain.SOIC) { /* HOD*/
+                                if ((CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.OPM) || (CurrentStatus === ApprovalStatus.Submitted && CurrentPendingWith === ApprovalChain.SOIC)) { /* HOD*/
                                     NextPendingWith = ApprovalChain.HOD;
                                     if (RequesterInfo.location === 'Corporate' && CurrentPendingWith === ApprovalChain.OPM) {
                                         StatusOnApprove = ApprovalStatus.OPMApproved;
@@ -328,11 +328,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                     NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.MarketingSupport;
                                     StatusOnApprove = ApprovalStatus.HODApproved;
                                 } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.HODApproved && CurrentPendingWith === ApprovalChain.COO) { /* COO */
-                                    NextPendingWith = CurrentRequesterId;
+                                    NextPendingWith = ApprovalChain.MarketingSupport;
                                     StatusOnApprove = ApprovalStatus.COOApproved;
-                                    $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
                                 } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.HODApproved || CurrentStatus === ApprovalStatus.COOApproved && CurrentPendingWith === ApprovalChain.MarketingSupport) { /* Requester */
-                                    NextPendingWith = CURRENT_USER_ID;
+                                    NextPendingWith = CurrentRequesterId;
                                     StatusOnApprove = ApprovalStatus.MarketingSupportApproved;
                                     $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
                                 } else if (CurrentStatus === ApprovalStatus.MarketingSupportApproved && CurrentPendingWith === CURRENT_USER_ID) { /* Closed */
