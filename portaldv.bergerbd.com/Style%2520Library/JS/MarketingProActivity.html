@@ -208,18 +208,8 @@
                      <select ng-hide="IsDataReadOnly && !EditMode" id="activitySelect" ng-model="FormData.ActivityName"
                         ng-change="MapPromotionalItemName()"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
-                        <option value="">-- Select Activity Name --</option>
-                        <option value="Shade Card Distribution">Shade Card Distribution</option>
-                        <option value="Executive Diary Purchase">Executive Diary Purchase</option>
-                        <option value="Mass Calender Purchase">Mass Calender Purchase</option>
-                        <option value="Small diary Purchase">Small diary Purchase</option>
-                        <option value="POS materials Purchase">POS materials Purchase</option>
-                        <option value="Painters Training Institute">Painters Training Institute</option>
-                        <option value="On Invoice Painter Scheme Gift">On Invoice Painter Scheme Gift</option>
-                        <option value="Con Promo Gift">Con Promo Gift</option>
-                        <option value="Shade Card Purchase">Shade Card Purchase</option>
-                        <option value="Scratch Card Purchase">Scratch Card Purchase</option>
-                        <option value="Product Demonstrat">Product Demonstrat</option>
+                        <option ng-repeat="Activity in Activities" value="{{Activity.value}}">{{Activity.label}}
+                        </option>
                      </select>
                      <span class="error" ng-show="errors.ActivityName"> {{errors.ActivityName}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.ActivityName}}</span>
@@ -233,7 +223,7 @@
                         ng-disabled="PromotionalItemDropdownList == undefined || PromotionalItemDropdownList.length == 0"
                         class='fld_single float-label-parent float-label-select-parent textBoxBGColor' required>
                         <option value="">-- Select Promotional Item Name --</option>
-                        <option ng-repeat="Item in PromotionalItemDropdownList" value="{{Item}}">{{Item}}</option>
+                        <option ng-repeat="Item in PromotionalItemDropdownList track by $index" value="{{Item}}">{{Item}}</option>
                      </select>
                      <span class="error" ng-show="errors.PromotionalItemName"> {{errors.PromotionalItemName}} </span>
                      <span ng-show="IsDataReadOnly && !EditMode">{{FormData.PromotionalItemName}}</span>
@@ -463,7 +453,7 @@
                   <div ng-hide="IsDataReadOnly" style="display: flex; flex-direction: column-reverse;">
                      <div>
                         <div class="col-sm-2 labelHeader">
-                           <h6>Select All Attachments:</h6>
+                           <h6>Specification of Material:</h6>
                         </div>
                         <div class="files col-sm-6 row" id="ReqAttachFilesContainer" ng-model="attachment1">
                            <input style=" margin-left: 18px" id="RecInfringementFiles" type="file"
@@ -471,71 +461,70 @@
                               title="Any attachment name including any special charecter like ' & . will not be uploded" />
                         </div>
                      </div>
-                     <div style="color: red; font-size: small; margin-left: 310px;"><strong>Attention:</strong> Attach
-                        additional
-                        information for multiple
-                        Brand
-                        and Commitment Items.</div>
                   </div>
-               </div>
 
-               <div class="row">
-                  <div class="col-sm-2 labelHeader">Remarks: <span ng-bind-html="FormData.Reamarks"
-                        ng-show="IsDataReadOnly && !EditMode"></span>
+                  <div class="row">
+                     <div class="col-sm-2 labelHeader">Remarks: <span ng-bind-html="FormData.Reamarks"
+                           ng-show="IsDataReadOnly && !EditMode"></span>
+                     </div>
+                     <div class="col-sm-4">
+                        <textarea ng-hide="IsDataReadOnly && !EditMode" name="Remarks" type="text"
+                           ng-model="FormData.Reamarks" cols="36" rows="3"></textarea>
+                     </div>
                   </div>
-                  <div class="col-sm-4">
-                     <textarea ng-hide="IsDataReadOnly && !EditMode" name="Remarks" type="text"
-                        ng-model="FormData.Reamarks" cols="36" rows="3"></textarea>
-                  </div>
-               </div>
-               <div class="row panel-body">
-                  <h4 class="panel-body">Attachments/Receipts for Multiple Brand and Commitment Items:</h4>
-               </div>
-               <div id="divAttachmentDisplayTbl" class="row" style="padding-left: 15px; overflow:hidden;"
-                  ng-hide='uId == ""||status==""||hideAttachmentDiv = "true"'>
-                  <div class="table-responsive panel-body" style="overflow-x:auto;">
-                     <table id="tblReceipt" class="table css-serial">
-                        <tbody>
-                           <tr>
-                              <th id="">SL#</th>
-                              <th id="thReceipt">View Attachment</th>
-                              <th id="thAttachted">Attached By</th>
-                              <th id="thDate">Attachment Date</th>
-                              <th id="thDelete" ng-hide="readMode == 'read' || status=='Completed'"></th>
-                           </tr>
-                        </tbody>
-                        <tbody>
-                           <tr ng-repeat="(i,receiptRow) in receiptRows"
-                              ng-if="receiptRow.AttachmentType === 'requester' ">
-                              <td id="tdSlNo"></td>
-                              <td id="tdReceipt"><a
-                                    href="{{receiptRow.AttachmentFiles.results[0].ServerRelativeUrl}}">{{receiptRow.AttachmentFiles.results[0].FileName}}</a>
-                              </td>
-                              <td id="tdAttachted">{{receiptRow.Author.Title}}</td>
-                              <td id="tdDate">{{receiptRow.Created | date}}</td>
-                           </tr>
-                        </tbody>
-                     </table>
-                     <strong style="text-align: center;" ng-show="receiptRows.length === 0">No Attachment</strong>
-                  </div>
-               </div>
-
-               <div ng-hide="IsRejectedOrCompleted">
                   <div class="row panel-body">
-                     <h4 class="panel-body">Attachments/Receipts:</h4>
+                     <h4 class="panel-body">Attachments/Receipts for Multiple Brand and Commitment Items:</h4>
                   </div>
-                  <div id="divChooseAttachmentFile" class="row panel-body">
-                     <div class="col-sm-2 labelHeader">
-                        <h6>Select All Attachments:</h6>
+                  <div id="divAttachmentDisplayTbl" class="row" style="padding-left: 15px; overflow:hidden;"
+                     ng-hide='uId == ""||status==""||hideAttachmentDiv = "true"'>
+                     <div class="table-responsive panel-body" style="overflow-x:auto;">
+                        <table id="tblReceipt" class="table css-serial">
+                           <tbody>
+                              <tr>
+                                 <th id="">SL#</th>
+                                 <th id="thReceipt">View Attachment</th>
+                                 <th id="thAttachted">Attached By</th>
+                                 <th id="thDate">Attachment Date</th>
+                                 <th id="thDelete" ng-hide="readMode == 'read' || status=='Completed'"></th>
+                              </tr>
+                           </tbody>
+                           <tbody>
+                              <tr ng-repeat="(i,receiptRow) in receiptRows"
+                                 ng-if="receiptRow.AttachmentType === 'requester' ">
+                                 <td id="tdSlNo"></td>
+                                 <td id="tdReceipt"><a
+                                       href="{{receiptRow.AttachmentFiles.results[0].ServerRelativeUrl}}">{{receiptRow.AttachmentFiles.results[0].FileName}}</a>
+                                 </td>
+                                 <td id="tdAttachted">{{receiptRow.Author.Title}}</td>
+                                 <td id="tdDate">{{receiptRow.Created | date}}</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <strong style="text-align: center;" ng-show="receiptRows.length === 0">No Attachment</strong>
                      </div>
-                     <div class="files col-sm-6 row" id="attachFilesContainer" ng-model="attachment1">
-                        <input id="infringementFiles" type="file" class="multi browsebtn textBoxBGColor"
-                           title="Any attachment name including any special charecter like ' & . will not be uploded" />
+                  </div>
+
+                  <div ng-hide="IsRejectedOrCompleted">
+                     <div class="row panel-body">
+                        <h4 class="panel-body">Attachments/Receipts:</h4>
+                        <div style="color: red; font-size: small;">
+                           <strong>Attention:</strong> Attach additional information for multiple Brand and Commitment
+                           Items.
+                        </div>
                      </div>
-                     <div class="col-sm-4" ng-show='vm.uniqueId !=""'>
-                        <span class='et-right et-style-night'>N.B. Any attachment name including any special
-                           charecter
-                           e.g.<label class='redStar'>" ', . @ ` ~ " </label>will not be uploded.</span>
+                     <div id="divChooseAttachmentFile" class="row panel-body">
+                        <div class="col-sm-2 labelHeader">
+                           <h6>Select All Attachments:</h6>
+                        </div>
+                        <div class="files col-sm-6 row" id="attachFilesContainer" ng-model="attachment2">
+                           <input id="infringementFiles" type="file" class="multi browsebtn textBoxBGColor"
+                              title="Any attachment name including any special charecter like ' & . will not be uploded" />
+                        </div>
+                        <div class="col-sm-4" ng-show='vm.uniqueId !=""'>
+                           <span class='et-right et-style-night'>N.B. Any attachment name including any special
+                              charecter
+                              e.g.<label class='redStar'>" ', . @ ` ~ " </label>will not be uploded.</span>
+                        </div>
                      </div>
                   </div>
                </div>

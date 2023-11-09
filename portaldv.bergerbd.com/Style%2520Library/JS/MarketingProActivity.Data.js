@@ -56,3 +56,17 @@ const CommitmentItemDescription = [
     { value: "Shade Card Mgt", label: "Shade Card Mgt", number: "7400026S01B01A01E01R01" },
     { value: "POSM Print", label: "POSM Print", number: "7400053S01B01A02E01R02" }
 ];
+const Activities = [
+    {value: '', label: '---select Activity---'},
+    { value: 'Shade Card Distribution', label: 'Shade Card Distribution' },
+    { value: 'Executive Dairy Purchase', label: 'Executive Dairy Purchase' },
+    { value: 'Painters Training Institute', label: 'Painters Training Institute' },
+    { value: 'Shade Card Purchase', label: 'Shade Card Purchase' },
+    { value: 'Mass Calender Purchase', label: 'Mass Calendar Purchase' },
+    { value: 'Small Diary Purchase', label: 'Small Diary Purchase' },
+    { value: 'POS Materials Purchase', label: 'POS Materials Purchase' },
+    { value: 'Scratch Card Production', label: 'Scratch Card Production' },
+    { value: 'Con Promo Gift', label: 'Con Promo Gift' },
+    { value: 'On invoice Painter Scheme Gift', label: 'On invoice Painter Scheme Gift' },
+    { value: 'Product Demonstration', label: 'Product Demonstration' }
+];

@@ -216,6 +216,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     $scope.FormData = {}
     $scope.selectedOptions = []
 
+    $scope.Activities = Activities;
     $scope.Brands = Brands;
     $scope.CommitmentItemDescription = CommitmentItemDescription;
 
@@ -423,9 +424,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
      * @returns {void}
      */
     const getCostHead = (IsCalledBySystem) => {
-
+        const SanitizeFilter = $scope.FormData.PromotionalItemName.replace(/&/g, '%26');
         const base = getApiEndpoint("MarketingPromotionalMapper");
-        const filter = `$filter=PromotionalItem eq '${$scope.FormData.PromotionalItemName}'`;
+        const filter = `$filter=PromotionalItem eq '${SanitizeFilter}'`;
         const query = `$select=CostHead`;
 
         $scope.IsLoading = true;
@@ -443,9 +444,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
     }
 
     const getPromotionalItemNames = (IsCalledBySystem) => {
-
+        const SanitizeFilter = $scope.FormData.ActivityName.replace(/&/g, '%26');
         const base = getApiEndpoint("MarketingPromotionalMapper");
-        const filter = `$filter=ActivityName eq '${$scope.FormData.ActivityName}'`;
+        const filter = `$filter=ActivityName eq '${SanitizeFilter}'`;
         const query = `$select=PromotionalItem`;
         $scope.IsLoading = true;
         $http({
@@ -461,9 +462,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .finally(() => $scope.IsLoading = false);
     }
     const GetGLCode = (IsCalledBySystem) => {
-
+        const SanitizeFilter = $scope.FormData.CostHead.replace(/&/g, '%26');
         const base = getApiEndpoint("MarketingPromotionalMapper");
-        const filter = `$filter=CostHead eq '${$scope.FormData.CostHead}'`;
+        const filter = `$filter=CostHead eq '${SanitizeFilter}'`;
         const query = `$select=GLCode`;
 
         $scope.IsLoading = true;
