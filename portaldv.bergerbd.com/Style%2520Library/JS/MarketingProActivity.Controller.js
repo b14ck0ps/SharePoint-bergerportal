@@ -546,6 +546,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 AddToLog(Title, status, $scope.actionComment, MarketingPromotionalID);
                 if ($scope.pendingWithName === undefined) $scope.pendingWithName = OPM_INFO.name;
                 SendEmail(InitiatorRequesterTemplate, CURRENT_USER_ID, [], RequesterInfo.name, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
+                SendEmail(InitiatorRequesterTemplate, ApprovalChain.SOIC ?? ApprovalChain.OPM, [], $scope.pendingWithName, $scope.pendingWithName, Title, status, UniqueUrl, "", "Marketing Activity");
                 await SaveAllAttachments('requester')
                 $scope.uploaded = false;
                 await SaveAllAttachments('general')
@@ -757,6 +758,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 }
             });
             await uploadFileToSharePoint(response.data.d.ID, file, ListName);
+            $scope.uploaded = true;
         } catch (error) {
             DEV_ENV && console.log(error);
         } finally {
