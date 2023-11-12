@@ -938,15 +938,15 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             isValid = false;
         }
 
-        if (ExpenseReceivingDate < ExpectedReceivingDate) {
-            $scope.errors.ExpenseReceivingDate = 'Expense Receiving Date should be greater than Expected Receiving Date';
-            isValid = false;
-        }
+        // if (ExpenseReceivingDate < ExpectedReceivingDate) {
+        //     $scope.errors.ExpenseReceivingDate = 'Expense Receiving Date should be greater than Expected Receiving Date';
+        //     isValid = false;
+        // }
 
-        if (ConsumingDate < ExpenseReceivingDate) {
-            $scope.errors.ConsumingDate = 'Consuming Date should be greater than Expense Receiving Date';
-            isValid = false;
-        }
+        // if (ConsumingDate < ExpenseReceivingDate) {
+        //     $scope.errors.ConsumingDate = 'Consuming Date should be greater than Expense Receiving Date';
+        //     isValid = false;
+        // }
 
         if (formData.VendorNumber === undefined || formData.VendorNumber === '') {
             $scope.errors.VendorNumber = 'Please fill up Required Vendor Quotation';
@@ -967,6 +967,17 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             $scope.errors.TotalExpectedExpense = 'Please fill up Total Expected Expense';
             isValid = false;
         }
+
+        let fileInputs = $("#ReqAttachFilesContainer input:file");
+        const filesToUpload = Array.from(fileInputs)
+            .map((input) => input.files[0])
+            .filter((file) => file);
+
+        if (filesToUpload.length === 0 && PendingApprovalUniqueId === null) {
+            $scope.errors.ReqAttachFilesContainer = 'Please Upload Attachement';
+            isValid = false;
+        };
+
         isValid ? null : alert('Please fill up all the required fields');
         return isValid;
     };
