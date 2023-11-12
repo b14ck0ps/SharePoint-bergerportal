@@ -455,12 +455,25 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             headers: API_GET_HEADERS
         })
             .then((response) => {
+                var promotionalItems = response.data.d.results.map((item) => item.PromotionalItem);
+                $scope.PromotionalItemDropdownList = getUniqueItems(promotionalItems);
                 IsCalledBySystem ? null : $scope.FormData.PromotionalItemName = '';
-                $scope.PromotionalItemDropdownList = response.data.d.results.map((item) => item.PromotionalItem)
             })
             .catch((e) => DEV_ENV && console.log("Error getting user information", e))
             .finally(() => $scope.IsLoading = false);
+    };
+
+    // Function to get unique items from an array
+    function getUniqueItems(arr) {
+        var uniqueItems = [];
+        angular.forEach(arr, function (item) {
+            if (uniqueItems.indexOf(item) === -1) {
+                uniqueItems.push(item);
+            }
+        });
+        return uniqueItems;
     }
+
     const GetGLCode = (IsCalledBySystem) => {
         const SanitizeFilter = $scope.FormData.CostHead.replace(/&/g, '%26');
         const base = getApiEndpoint("MarketingPromotionalMapper");
