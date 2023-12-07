@@ -317,13 +317,13 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                     } else {
                                         StatusOnApprove = ApprovalStatus.SOICApproved;
                                     }
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved && CurrentPendingWith === ApprovalChain.CMO) { /* COO / Final */
+                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved) && CurrentPendingWith === ApprovalChain.CMO) { /* COO / Final */
                                     NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.FinalApprovar;
                                     StatusOnApprove = ApprovalStatus.CMOApproved;
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved && CurrentPendingWith === ApprovalChain.COO) { /* COO */
+                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved) && CurrentPendingWith === ApprovalChain.COO) { /* COO */
                                     NextPendingWith = ApprovalChain.FinalApprovar;
                                     StatusOnApprove = ApprovalStatus.COOApproved;
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved || CurrentStatus === ApprovalStatus.COOApproved && CurrentPendingWith === ApprovalChain.FinalApprovar) { /* Requester */
+                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved || CurrentStatus === ApprovalStatus.COOApproved) && CurrentPendingWith === ApprovalChain.FinalApprovar) { /* Requester */
                                     NextPendingWith = CurrentRequesterId;
                                     StatusOnApprove = ApprovalStatus.FinalApproved;
                                     $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
@@ -909,10 +909,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             isValid = false;
         }
 
-        if (activityStartDate > expectedDeliveryDate) {
-            $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Expected Delivery Date';
-            isValid = false;
-        }
+        // if (activityStartDate > expectedDeliveryDate) {
+        //     $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Expected Delivery Date';
+        //     isValid = false;
+        // }
 
         // if (activityStartDate > serviceReceivingDate) {
         //     $scope.errors.ActivityStartDate = 'Activity Start Date can\'t be greater than Service Receiving Date';
@@ -959,7 +959,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
             .map((input) => input.files[0])
             .filter((file) => file);
 
-        if (filesToUpload.length === 0 && PendingApprovalUniqueId === undefined) {
+        if (filesToUpload.length === 0 && PendingApprovalUniqueId === null) {
             $scope.errors.ReqAttachFilesContainer = 'Please Upload Attachement';
             isValid = false;
         };

@@ -325,13 +325,13 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                     } else {
                                         StatusOnApprove = ApprovalStatus.SOICApproved;
                                     }
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved && CurrentPendingWith === ApprovalChain.HOD) { /* COO / Final */
+                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved) && CurrentPendingWith === ApprovalChain.HOD) { /* COO / Final */
                                     NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.MarketingSupport;
                                     StatusOnApprove = ApprovalStatus.HODApproved;
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.HODApproved && CurrentPendingWith === ApprovalChain.COO) { /* COO */
+                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.HODApproved) && CurrentPendingWith === ApprovalChain.COO) { /* COO */
                                     NextPendingWith = ApprovalChain.MarketingSupport;
                                     StatusOnApprove = ApprovalStatus.COOApproved;
-                                } else if (CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.HODApproved || CurrentStatus === ApprovalStatus.COOApproved && CurrentPendingWith === ApprovalChain.MarketingSupport) { /* Requester */
+                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.HODApproved) || CurrentStatus === ApprovalStatus.COOApproved && CurrentPendingWith === ApprovalChain.MarketingSupport) { /* Requester */
                                     NextPendingWith = CurrentRequesterId;
                                     StatusOnApprove = ApprovalStatus.MarketingSupportApproved;
                                     $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
@@ -508,6 +508,7 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                     // $scope.FormData.PromotionalItemName = JSON.stringify($scope.FormData.PromotionalItemName);
                     UpdateActivityMaster($scope.FormData, NextPendingWith, ApprovalStatus.Submitted);
                     AddToLog(`MP-${RequestId}`, 'Updated', $scope.actionComment, RequestId);
+                    SendEmail(InitiatorRequesterTemplate, setPendingWith, [], $scope.pendingWithName, $scope.pendingWithName, Title, StatusOnApprove, UniqueUrl, "", "Marketing Promotional");
                 })
                 .catch((e) => {
                     console.log("Error getting information", e)
