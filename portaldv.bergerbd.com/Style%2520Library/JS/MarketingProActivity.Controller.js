@@ -34,6 +34,7 @@ const ApprovalStatus = {
     Saved: "Saved",
     Submitted: "Submitted",
     ChangeRequested: "ChangeRequested",
+    Updated: "Updated",
     OPMApproved: "OPMApproved",
     SOICApproved: "SOICApproved",
     HODApproved: "HODApproved",
@@ -310,6 +311,9 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                          * @type {number}
                          */
                         const TotalExpectedExpense = $scope.FormData.TotalExpectedExpense;
+                        let overBudget = false;
+                        if ($scope.FormData.TotalExpectedExpense > DefaultExpenseLimit)
+                            overBudget = true;
 
                         /* Getting the `ApprovalChain` based on the `DeptID`, `Location` and `Department` */
                         getApproverInfo(RequesterInfo.DeptID)
@@ -325,13 +329,13 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                     } else {
                                         StatusOnApprove = ApprovalStatus.SOICApproved;
                                     }
-                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved) && CurrentPendingWith === ApprovalChain.HOD) { /* COO / Final */
-                                    NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.MarketingSupport;
+                                } else if ((CurrentStatus === ApprovalStatus.Updated || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved) && CurrentPendingWith === ApprovalChain.HOD) { /* COO / Final */
+                                    NextPendingWith = overBudget ? ApprovalChain.COO : ApprovalChain.MarketingSupport;
                                     StatusOnApprove = ApprovalStatus.HODApproved;
-                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.HODApproved) && CurrentPendingWith === ApprovalChain.COO) { /* COO */
+                                } else if ((CurrentStatus === ApprovalStatus.Updated || CurrentStatus === ApprovalStatus.HODApproved) && CurrentPendingWith === ApprovalChain.COO && overBudget) { /* COO */
                                     NextPendingWith = ApprovalChain.MarketingSupport;
                                     StatusOnApprove = ApprovalStatus.COOApproved;
-                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.HODApproved) || CurrentStatus === ApprovalStatus.COOApproved && CurrentPendingWith === ApprovalChain.MarketingSupport) { /* Requester */
+                                } else if ((CurrentStatus === ApprovalStatus.Updated || CurrentStatus === ApprovalStatus.HODApproved) || CurrentStatus === ApprovalStatus.COOApproved && CurrentPendingWith === ApprovalChain.MarketingSupport) { /* Requester */
                                     NextPendingWith = CurrentRequesterId;
                                     StatusOnApprove = ApprovalStatus.MarketingSupportApproved;
                                     $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
@@ -502,13 +506,14 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         if (!isFormDataValid($scope.FormData)) return;
 
         if (EditMode) {
-            const data = { 'Status': ApprovalStatus.Submitted };
+            const data = { 'Status': ApprovalStatus.Updated };
             UpddatePendingApproval(data, NextPendingWith)
                 .then(() => {
+                    const Title = `MP-${RequestId}`;
                     // $scope.FormData.PromotionalItemName = JSON.stringify($scope.FormData.PromotionalItemName);
-                    UpdateActivityMaster($scope.FormData, NextPendingWith, ApprovalStatus.Submitted);
-                    AddToLog(`MP-${RequestId}`, 'Updated', $scope.actionComment, RequestId);
-                    SendEmail(InitiatorRequesterTemplate, setPendingWith, [], $scope.pendingWithName, $scope.pendingWithName, Title, StatusOnApprove, UniqueUrl, "", "Marketing Promotional");
+                    AddToLog(Title, ApprovalStatus.Updated, $scope.actionComment, RequestId);
+                    SendEmail(InitiatorRequesterTemplate, NextPendingWith, [], $scope.pendingWithName, $scope.pendingWithName, Title, StatusOnApprove, UniqueUrl, "", "Marketing Promotional");
+                    UpdateActivityMaster($scope.FormData, NextPendingWith, ApprovalStatus.Updated);
                 })
                 .catch((e) => {
                     console.log("Error getting information", e)
@@ -611,11 +616,15 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 DEV_ENV && console.log(`Invalid action: ${Action}`);
                 return;
         }
-        if (Action === "Approved" && CurrentPendingWith === ApprovalChain.MarketingSupport && $scope.FormData.PRNumber === null || $scope.FormData.PRNumber === '') {
+        let overBudget = false;
+        if ($scope.FormData.TotalExpectedExpense > DefaultExpenseLimit)
+            overBudget = true;
+
+        if (Action === "Approved" && ((overBudget && CurrentStatus === ApprovalStatus.COOApproved) || (!overBudget && CurrentStatus === ApprovalStatus.HODApproved)) && CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRNumber === null || $scope.FormData.PRNumber === '') {
             $scope.errors.PRNumber = 'Please fill up PR Number'
             return;
         }
-        if (Action === "Approved" && CurrentPendingWith === ApprovalChain.MarketingSupport && $scope.FormData.PRDate === null || $scope.FormData.PRDate === '') {
+        if (Action === "Approved" && ((overBudget && CurrentStatus === ApprovalStatus.COOApproved) || (!overBudget && CurrentStatus === ApprovalStatus.HODApproved)) && CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRDate === null || $scope.FormData.PRDate === '') {
             $scope.errors.PRDate = 'Please fill up PR Date'
             return;
         }

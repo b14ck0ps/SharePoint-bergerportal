@@ -34,6 +34,7 @@ const ApprovalStatus = {
     Saved: "Saved",
     Submitted: "Submitted",
     ChangeRequested: "ChangeRequested",
+    Updated: "Updated",
     OPMApproved: "OPMApproved",
     SOICApproved: "SOICApproved",
     CMOApproved: "CMOApproved",
@@ -302,6 +303,10 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                          */
                         const TotalExpectedExpense = $scope.FormData.TotalExpectedExpense;
 
+                        let overBudget = false;
+                        if ($scope.FormData.TotalExpectedExpense > DefaultExpenseLimit)
+                            overBudget = true;
+
                         /* Getting the `ApprovalChain` based on the `DeptID`, `Location` and `Department` */
                         getApproverInfo(RequesterInfo.DeptID)
                             .then(() => {
@@ -317,13 +322,13 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                                     } else {
                                         StatusOnApprove = ApprovalStatus.SOICApproved;
                                     }
-                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved) && CurrentPendingWith === ApprovalChain.CMO) { /* COO / Final */
-                                    NextPendingWith = TotalExpectedExpense > DefaultExpenseLimit ? ApprovalChain.COO : ApprovalChain.FinalApprovar;
+                                } else if ((CurrentStatus === ApprovalStatus.Updated || CurrentStatus === ApprovalStatus.OPMApproved || CurrentStatus === ApprovalStatus.SOICApproved) && CurrentPendingWith === ApprovalChain.CMO) { /* COO / Final */
+                                    NextPendingWith = overBudget ? ApprovalChain.COO : ApprovalChain.FinalApprovar;
                                     StatusOnApprove = ApprovalStatus.CMOApproved;
-                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved) && CurrentPendingWith === ApprovalChain.COO) { /* COO */
+                                } else if ((CurrentStatus === ApprovalStatus.Updated || CurrentStatus === ApprovalStatus.CMOApproved) && CurrentPendingWith === ApprovalChain.COO && overBudget) { /* COO */
                                     NextPendingWith = ApprovalChain.FinalApprovar;
                                     StatusOnApprove = ApprovalStatus.COOApproved;
-                                } else if ((CurrentStatus === ApprovalStatus.Submitted || CurrentStatus === ApprovalStatus.CMOApproved || CurrentStatus === ApprovalStatus.COOApproved) && CurrentPendingWith === ApprovalChain.FinalApprovar) { /* Requester */
+                                } else if ((CurrentStatus === ApprovalStatus.Updated || CurrentStatus === ApprovalStatus.CMOApproved || CurrentStatus === ApprovalStatus.COOApproved) && CurrentPendingWith === ApprovalChain.FinalApprovar) { /* Requester */
                                     NextPendingWith = CurrentRequesterId;
                                     StatusOnApprove = ApprovalStatus.FinalApproved;
                                     $scope.isFinalApprover = true /* `PRN & Remark` Input Field Config */
@@ -484,11 +489,13 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
         if (!isFormDataValid($scope.FormData)) return;
 
         if (EditMode) {
-            const data = { 'Status': ApprovalStatus.Submitted };
+            const data = { 'Status': ApprovalStatus.Updated };
             UpddatePendingApproval(data, NextPendingWith)
                 .then(() => {
-                    UpdateActivityMaster($scope.FormData, NextPendingWith, ApprovalStatus.Submitted)
-                    AddToLog(`MA-${RequestId}`, 'Updated', $scope.actionComment, RequestId);
+                    const Title = `MA-${RequestId}`;
+                    AddToLog(Title, ApprovalStatus.Updated, $scope.actionComment, RequestId);
+                    SendEmail(InitiatorRequesterTemplate, NextPendingWith, [], $scope.pendingWithName, $scope.pendingWithName, Title, StatusOnApprove, UniqueUrl, "", "Marketing Activity");
+                    UpdateActivityMaster($scope.FormData, NextPendingWith, ApprovalStatus.Updated)
                 })
                 .catch((e) => { console.log("Error getting information", e) })
             return;
@@ -584,11 +591,15 @@ MarketingActivityModule.controller('FormController', ['$scope', '$http', functio
                 DEV_ENV && console.log(`Invalid action: ${Action}`);
                 return;
         }
-        if (Action === "Approved" && CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRNumber === null || $scope.FormData.PRNumber === '') {
+        let overBudget = false;
+        if ($scope.FormData.TotalExpectedExpense > DefaultExpenseLimit)
+            overBudget = true;
+
+        if (Action === "Approved" && ((overBudget && CurrentStatus === ApprovalStatus.COOApproved) || (!overBudget && CurrentStatus === ApprovalStatus.CMOApproved)) && CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRNumber === null || $scope.FormData.PRNumber === '') {
             $scope.errors.PRNumber = 'Please fill up PR Number'
             return;
         }
-        if (Action === "Approved" && CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRDate === null || $scope.FormData.PRDate === '') {
+        if (Action === "Approved" && ((overBudget && CurrentStatus === ApprovalStatus.COOApproved) || (!overBudget && CurrentStatus === ApprovalStatus.CMOApproved)) && CurrentPendingWith === ApprovalChain.FinalApprovar && $scope.FormData.PRDate === null || $scope.FormData.PRDate === '') {
             $scope.errors.PRDate = 'Please fill up PR Date'
             return;
         }
